@@ -6,6 +6,8 @@ from typing import Any
 
 import yaml
 
+from .statistics import P_VALUE_METHODS
+
 
 @dataclass(frozen=True)
 class Source:
@@ -41,6 +43,9 @@ class ResearchConfig:
     bootstrap_replicates: int
     confidence_level: float
     fdr_alpha: float
+    fwer_alpha: float
+    p_value_method: str
+    minimum_studentized_replicate_share: float
     random_seed: int
     placebo_replicates: int
     placebo_neutral_absolute_threshold: float
@@ -131,6 +136,11 @@ def load_research_config(path: Path | None = None) -> ResearchConfig:
         bootstrap_replicates=int(raw["inference"]["bootstrap_replicates"]),
         confidence_level=float(raw["inference"]["confidence_level"]),
         fdr_alpha=float(raw["inference"]["fdr_alpha"]),
+        fwer_alpha=float(raw["inference"]["fwer_alpha"]),
+        p_value_method=str(raw["inference"]["p_value_method"]),
+        minimum_studentized_replicate_share=float(
+            raw["inference"]["minimum_studentized_replicate_share"]
+        ),
         random_seed=int(raw["inference"]["random_seed"]),
         placebo_replicates=int(placebo["replicates"]),
         placebo_neutral_absolute_threshold=float(placebo["neutral_absolute_threshold"]),
@@ -201,6 +211,12 @@ def load_research_config(path: Path | None = None) -> ResearchConfig:
         raise ValueError("confidence_level must fall between zero and one")
     if not 0 < config.fdr_alpha < 1:
         raise ValueError("fdr_alpha must fall between zero and one")
+    if not 0 < config.fwer_alpha < 1:
+        raise ValueError("fwer_alpha must fall between zero and one")
+    if config.p_value_method not in P_VALUE_METHODS:
+        raise ValueError(f"p_value_method must be one of {sorted(P_VALUE_METHODS)}")
+    if not 0 < config.minimum_studentized_replicate_share <= 1:
+        raise ValueError("minimum_studentized_replicate_share must fall in (0, 1]")
     if config.placebo_replicates < 999:
         raise ValueError("placebo replicates must be at least 999")
     if config.placebo_neutral_absolute_threshold <= 0:

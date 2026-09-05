@@ -33,6 +33,12 @@ inference:
   bootstrap_replicates: 10000
   confidence_level: 0.95
   fdr_alpha: 0.05
+  fwer_alpha: 0.05
+  # The centred percentile test is anti-conservative at this many episodes; the
+  # studentized (bootstrap-t) version divides by each replicate's own standard
+  # error and is what the gates read. Both are always reported.
+  p_value_method: studentized
+  minimum_studentized_replicate_share: 0.9
   random_seed: 20260905
 
 placebo:

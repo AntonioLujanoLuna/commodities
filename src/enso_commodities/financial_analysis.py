@@ -119,6 +119,10 @@ def run_financial_control_analysis(
                         replicates=int(settings["bootstrap_replicates"]),
                         confidence_level=float(settings["confidence_level"]),
                         seed=salted_seed(int(settings["random_seed"]), f"financial:{family}:{index_definition}:{anchor_type}:{direction}"),
+                        p_value_method=str(settings["p_value_method"]),
+                        minimum_studentized_replicate_share=float(
+                            settings["minimum_studentized_replicate_share"]
+                        ),
                     )
                     results = bootstrap.results.rename(columns={"direction": "return_direction"})
                     if family == "candidates":

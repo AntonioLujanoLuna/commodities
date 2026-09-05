@@ -1,0 +1,103 @@
+# Exploratory exposure-weighted panel design. This does NOT alter the frozen
+# primary event-study contract in commodities.yaml; it is a separate
+# identification strategy for the same question.
+#
+# Why this exists
+# ---------------
+# The event study defines an abnormal return relative to a baseline estimated
+# outside the union of every -12/+24 warm window. That baseline is a small,
+# ENSO-selected residual of history, and the precious-metal negative controls
+# reject under every control block the study has added so far. A calendar-month
+# fixed effect removes that whole class of problem by construction: whatever
+# global macro-financial regime lifts gold in a given month lifts the fixed
+# effect too, so it cannot be attributed to ENSO.
+#
+# The price is that the ENSO level is absorbed along with everything else.
+# Identification comes only from the cross-section: commodities differ in how
+# exposed they are to the ENSO signal, so the coefficient below measures the
+# differential response per unit of exposure relative to the same-month average
+# across the estimation sample. It is not a level effect, and a common shock
+# that moved every commodity identically would be invisible to it.
+#
+# Honesty note on the weights
+# ---------------------------
+# These weights encode physical distance from the ENSO signal, not any observed
+# return. They were nonetheless written after this repository's event-study
+# results were known, so they cannot claim to be outcome-blind on this dataset
+# in the way the commodity registry can. The `uniform` weighting variant exists
+# for that reason: it assigns every mechanism candidate a weight of one and
+# requires no judgement at all, reducing the design to a candidate-versus-
+# control contrast. Any conclusion that holds under `exposure` but not under
+# `uniform` is a conclusion about the weights.
+
+specification:
+  outcome_column: seasonal_adjusted_log_return
+  # Commodity and calendar-month fixed effects. The month effect is the point
+  # of the design; without it this is just a pooled event study again.
+  unit_fixed_effects: true
+  time_fixed_effects: true
+  index_definitions: [roni, oni]
+  primary_index: roni
+  primary_lag_months: 6
+  reported_lag_months: [0, 3, 6, 9, 12]
+  weighting_schemes: [exposure, uniform]
+  primary_weighting: exposure
+  minimum_observations: 2000
+  # Estimation sample: registry mechanism candidates plus negative controls.
+  # Excluded source series carry no exposure assignment and stay out.
+  roles: [mechanism_candidate, negative_control]
+
+inference:
+  # Whole calendar years are resampled with replacement, and a year drawn twice
+  # receives two separate sets of month effects, so a replicate stays one
+  # coherent alternative history in the same sense as the episode bootstrap.
+  block: calendar_year
+  bootstrap_replicates: 2000
+  confidence_level: 0.95
+  fdr_alpha: 0.05
+  random_seed: 20260905
+  demeaning_tolerance: 1.0e-9
+  demeaning_max_iterations: 400
+
+# Exposure scale
+#   1.00  production concentrated in regions with a first-order, well documented
+#         ENSO teleconnection, or where the Pacific state is itself the mechanism
+#   0.50  production in regions with a weaker or less consistent teleconnection
+#   0.25  pathway runs through other commodities (feed, fertiliser demand,
+#         heating degree days) rather than weather at the production site
+#   0.00  negative controls: no pre-specified physical pathway at all
+exposure_weights:
+  "Cocoa": 0.50
+  "Coffee, Arabica": 1.00
+  "Coffee, Robusta": 1.00
+  "Tea, avg 3 auctions": 1.00
+  "Coconut oil": 1.00
+  "Groundnut oil **": 0.50
+  "Palm oil": 1.00
+  "Rapeseed oil": 0.25
+  "Sunflower oil": 0.50
+  "Soybeans": 1.00
+  "Barley": 0.50
+  "Maize": 0.50
+  "Sorghum": 0.50
+  "Rice, Thai 5%": 1.00
+  "Wheat, US HRW": 0.50
+  "Banana, US": 1.00
+  "Orange": 1.00
+  "Sugar, world": 1.00
+  "Cotton, A Index": 0.50
+  "Rubber, RSS3": 1.00
+  "Tobacco, US import u.v.": 0.25
+  "Logs, Malaysian": 1.00
+  "Fish meal": 1.00
+  "Shrimps, Mexican": 1.00
+  "Beef **": 0.25
+  "Chicken **": 0.25
+  "Lamb **": 0.50
+  "Coal, Australian": 1.00
+  "Natural gas, Europe": 0.25
+  "Natural gas, US": 0.50
+  "DAP": 0.25
+  "Urea": 0.25
+
+negative_control_weight: 0.0

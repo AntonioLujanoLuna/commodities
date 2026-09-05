@@ -75,6 +75,10 @@ def run_endpoint_diagnostics(
                     int(config["random_seed"]),
                     f"endpoint_log:{family}:{index_definition}:{anchor_type}:{direction}",
                 ),
+                p_value_method=str(config["p_value_method"]),
+                minimum_studentized_replicate_share=float(
+                    config["minimum_studentized_replicate_share"]
+                ),
             )
             results = output.results.rename(
                 columns={

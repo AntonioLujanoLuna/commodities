@@ -149,9 +149,32 @@ sample size. The p-value uses the finite-replicate correction
 `sign_agreement` is true only when the mean, median and majority episode sign point in the same
 direction. Benjamini-Hochberg correction is confined to the frozen eligible-candidate family.
 
+Two p-values are always written. `centered_p_value` compares each replicate's centred mean
+against the observed mean on the observed scale. `studentized_p_value` divides both by their own
+standard errors, so the test adapts to the replicate's dispersion instead of assuming the observed
+scale is right; `standard_error` and `t_statistic` carry the observed quantities it uses, and
+`studentized_ci_lower`/`studentized_ci_upper` the bootstrap-t interval. `studentized_status` is
+`estimated`, `degenerate_observed_scale` when a commodity has no observed dispersion, or
+`insufficient_valid_replicates` when too few replicates produce a finite statistic.
+`bootstrap_p_value` holds whichever `research.yaml` selected through `p_value_method`, and
+`bootstrap_p_value_method` records what that resolved to per commodity, including
+`studentized_fallback_centered` where the studentized statistic does not exist. Downstream gates
+read `bootstrap_p_value`, so a degenerate commodity falls back rather than dropping out of the
+family with a missing value.
+
+Three multiplicity verdicts accompany them. `bh_q_value` is the pre-registered Benjamini-Hochberg
+gate and drives `reject_fdr`. `by_q_value` is Benjamini-Yekutieli, valid under arbitrary
+dependence, and drives `reject_fdr_arbitrary_dependence`. `westfall_young_p_value` is a step-down
+max-T adjustment computed from `studentized_statistic` in the stored replicate table: because one
+episode draw is shared across every commodity, the per-replicate maximum over the untested tail is
+the joint null of the largest statistic, giving family-wise error control under the dependence the
+resampling already preserves. It drives `reject_fwer` and is a strictly higher bar than either FDR
+rule. `westfall_young_status` is `estimated`, `insufficient_valid_replicates`, or `outside_family`.
+
 `negative_control_inference.csv` and `negative_control_bootstrap_replicates.parquet` use a
 separately salted random stream. Their q-values are diagnostic only and never enter the candidate
-family. `inference_summary.json` records the settings, gate counts, input hashes and output hashes.
+family, and carry a `diagnostic_` prefix. `inference_summary.json` records the settings, gate
+counts, input hashes and output hashes.
 These tests estimate historical association after the implemented seasonal and common-market
 adjustments; they do not establish causality. The neutral-date comparison and external-control
 robustness model are described next.
@@ -340,3 +363,38 @@ annual regressions use two, and yield models include country and linear-year con
 applied separately within each physical link. `palm_mechanism_summary.json` passes the complete
 chain only if every prespecified link contains a sign-correct FDR rejection. This is an exploratory
 pilot and does not promote or modify the frozen price-study classification.
+
+## Exposure-weighted panel
+
+`make panel` writes `panel_exposure_weights.csv`, `panel_specification_results.csv`,
+`panel_bootstrap_replicates.parquet` and `panel_summary.json`. The stage is exploratory and does
+not feed the frozen event-study contract.
+
+`panel_exposure_weights.csv` is the registry restricted to mechanism candidates and negative
+controls, with `exposure_weight` from `config/panel.yaml` (1.00 direct teleconnection, 0.50
+weaker or less consistent, 0.25 pathway mediated through other commodities, 0.00 controls),
+`uniform_weight` for the judgement-free variant, and `is_negative_control`. The build fails if the
+weights do not exactly cover the candidate registry.
+
+`panel_specification_results.csv` has one row per term per grid cell, keyed by `cell`,
+`index_definition`, `lag_months`, `weighting` and `term`. `exposure_x_enso` is the differential
+response per unit of exposure per unit of the ENSO index, relative to the same-month average
+across the estimation sample; `control_x_enso` is the negative controls' own response measured
+against the same month effects, and is a diagnostic that should not fire. Under `uniform`
+weighting only `exposure_x_enso` is fitted, because the control indicator is then one minus the
+candidate indicator and the two terms are collinear once the fixed effects are swept out.
+
+`estimate` is the two-way within OLS coefficient, obtained by alternating projections rather than
+an explicit dummy design. `naive_standard_error` treats every commodity-month as an independent
+draw and is reported only for comparison. `block_standard_error`, `ci_lower`, `ci_upper`,
+`block_bootstrap_p_value` and `studentized_p_value` come from resampling whole calendar years of
+the cross-section with replacement, relabelling a repeated year so its two copies carry separate
+month effects. `valid_replicates` counts the replicates that produced a solvable design.
+`observations`, `units`, `periods`, `within_r_squared` and `design_condition_number` describe the
+fitted cell; a rank-deficient design raises rather than being silently fitted.
+
+`bh_q_value` and `reject_fdr` are applied across the `exposure_x_enso` cells only. The control
+term stays outside the family, in line with every other stage.
+
+`panel_summary.json` records the design, the primary cell's estimate, interval and p-values, the
+control term's estimate and p-value, grid-level counts, and the input and output hashes.

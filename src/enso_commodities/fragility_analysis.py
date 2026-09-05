@@ -78,6 +78,8 @@ def run_leave_one_episode_out(
             replicates=config.bootstrap_replicates,
             confidence_level=config.confidence_level,
             seed=salted_seed(config.random_seed, f"macro_loo_candidates:{deleted_episode_id}"),
+            p_value_method=config.p_value_method,
+            minimum_studentized_replicate_share=config.minimum_studentized_replicate_share,
         ).results
         candidate_bootstrap["eligible"] = candidate_bootstrap["episodes"].ge(
             spec.minimum_valid_episodes
@@ -103,6 +105,8 @@ def run_leave_one_episode_out(
             replicates=config.bootstrap_replicates,
             confidence_level=config.confidence_level,
             seed=salted_seed(config.random_seed, f"macro_loo_controls:{deleted_episode_id}"),
+            p_value_method=config.p_value_method,
+            minimum_studentized_replicate_share=config.minimum_studentized_replicate_share,
         ).results
         control_bootstrap["stable_direction"] = control_bootstrap.apply(
             lambda row: row["direction"] == control_directions[row["commodity"]], axis=1

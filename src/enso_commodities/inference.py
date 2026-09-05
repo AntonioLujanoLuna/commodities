@@ -9,8 +9,56 @@ import pandas as pd
 from .config import load_research_config, project_root
 from .provenance import sha256_file, verify_hashes, write_json_atomic
 from .raw_events import latest_processed_snapshot
-from .statistics import benjamini_hochberg, bootstrap_episode_means, salted_seed
+from .statistics import (
+    benjamini_hochberg,
+    benjamini_yekutieli,
+    bootstrap_episode_means,
+    salted_seed,
+    studentized_null_matrix,
+    westfall_young_step_down,
+)
 from .universe import load_commodity_registry
+
+
+def _add_multiplicity_columns(
+    results: pd.DataFrame,
+    *,
+    replicates: pd.DataFrame,
+    fdr_alpha: float,
+    fwer_alpha: float,
+    minimum_valid_replicate_share: float,
+    prefix: str = "",
+) -> pd.DataFrame:
+    """Attach three multiplicity verdicts to one bootstrap family.
+
+    Benjamini-Hochberg is the pre-registered gate. Benjamini-Yekutieli repeats
+    it without assuming anything about how the commodity tests co-move.
+    Westfall-Young reuses the shared episode draws already stored in
+    ``replicates`` to build the joint null of the largest statistic, so it
+    controls the family-wise error rate under the dependence the resampling
+    scheme actually preserves -- a stricter bar than either FDR rule.
+    """
+    output = results.copy()
+    indexed = output.set_index("commodity")
+    output[f"{prefix}bh_q_value"] = benjamini_hochberg(indexed["bootstrap_p_value"]).to_numpy()
+    output[f"{prefix}by_q_value"] = benjamini_yekutieli(indexed["bootstrap_p_value"]).to_numpy()
+    westfall_young = westfall_young_step_down(
+        indexed["t_statistic"],
+        studentized_null_matrix(replicates),
+        minimum_valid_replicate_share=minimum_valid_replicate_share,
+    ).set_index("commodity")
+    output[f"{prefix}westfall_young_p_value"] = westfall_young.loc[
+        indexed.index, "westfall_young_p_value"
+    ].to_numpy()
+    output[f"{prefix}westfall_young_status"] = westfall_young.loc[
+        indexed.index, "westfall_young_status"
+    ].to_numpy()
+    output[f"{prefix}reject_fdr"] = output[f"{prefix}bh_q_value"].le(fdr_alpha)
+    output[f"{prefix}reject_fdr_arbitrary_dependence"] = output[f"{prefix}by_q_value"].le(fdr_alpha)
+    output[f"{prefix}reject_fwer"] = (
+        output[f"{prefix}westfall_young_p_value"].le(fwer_alpha).fillna(False)
+    )
+    return output
 
 
 def run_primary_inference(
@@ -48,6 +96,8 @@ def run_primary_inference(
         replicates=config.bootstrap_replicates,
         confidence_level=config.confidence_level,
         seed=salted_seed(config.random_seed, "primary_candidates"),
+        p_value_method=config.p_value_method,
+        minimum_studentized_replicate_share=config.minimum_studentized_replicate_share,
     )
     primary_results = primary_bootstrap.results.merge(
         primary.loc[:, ["commodity", "group"]].drop_duplicates(),
@@ -55,8 +105,13 @@ def run_primary_inference(
         how="left",
         validate="one_to_one",
     )
-    primary_results["bh_q_value"] = benjamini_hochberg(primary_results["bootstrap_p_value"])
-    primary_results["reject_fdr"] = primary_results["bh_q_value"].le(config.fdr_alpha)
+    primary_results = _add_multiplicity_columns(
+        primary_results,
+        replicates=primary_bootstrap.replicates,
+        fdr_alpha=config.fdr_alpha,
+        fwer_alpha=config.fwer_alpha,
+        minimum_valid_replicate_share=config.minimum_studentized_replicate_share,
+    )
 
     control_bootstrap = bootstrap_episode_means(
         controls,
@@ -64,6 +119,8 @@ def run_primary_inference(
         replicates=config.bootstrap_replicates,
         confidence_level=config.confidence_level,
         seed=salted_seed(config.random_seed, "negative_controls"),
+        p_value_method=config.p_value_method,
+        minimum_studentized_replicate_share=config.minimum_studentized_replicate_share,
     )
     control_results = control_bootstrap.results.merge(
         controls.loc[:, ["commodity", "group"]].drop_duplicates(),
@@ -71,8 +128,13 @@ def run_primary_inference(
         how="left",
         validate="one_to_one",
     )
-    control_results["diagnostic_bh_q_value"] = benjamini_hochberg(
-        control_results["bootstrap_p_value"]
+    control_results = _add_multiplicity_columns(
+        control_results,
+        replicates=control_bootstrap.replicates,
+        fdr_alpha=config.fdr_alpha,
+        fwer_alpha=config.fwer_alpha,
+        minimum_valid_replicate_share=config.minimum_studentized_replicate_share,
+        prefix="diagnostic_",
     )
 
     primary_results_path = output_dir / "primary_inference_results.csv"
@@ -92,6 +154,15 @@ def run_primary_inference(
             "confidence_level": config.confidence_level,
             "fdr_alpha": config.fdr_alpha,
             "fdr_family_size": len(primary_results),
+            "fwer_alpha": config.fwer_alpha,
+            "p_value_method": config.p_value_method,
+            "primary_fwer_rejections": int(primary_results["reject_fwer"].sum()),
+            "primary_rejections_arbitrary_dependence": int(
+                primary_results["reject_fdr_arbitrary_dependence"].sum()
+            ),
+            "negative_controls_rejecting_fwer": int(
+                control_results["diagnostic_reject_fwer"].sum()
+            ),
             "negative_controls_with_raw_p_below_0_05": int(
                 control_results["bootstrap_p_value"].lt(0.05).sum()
             ),
