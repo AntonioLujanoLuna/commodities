@@ -163,6 +163,8 @@ def run_macro_control_analysis(
         replicates=config.bootstrap_replicates,
         confidence_level=config.confidence_level,
         seed=salted_seed(config.random_seed, "macro_primary_candidates"),
+        p_value_method=config.p_value_method,
+        minimum_studentized_replicate_share=config.minimum_studentized_replicate_share,
     )
     control_bootstrap = bootstrap_episode_means(
         controls,
@@ -170,6 +172,8 @@ def run_macro_control_analysis(
         replicates=config.bootstrap_replicates,
         confidence_level=config.confidence_level,
         seed=salted_seed(config.random_seed, "macro_negative_controls"),
+        p_value_method=config.p_value_method,
+        minimum_studentized_replicate_share=config.minimum_studentized_replicate_share,
     )
     candidate_inference = candidate_bootstrap.results.merge(
         candidate_metadata, on="commodity", how="left", validate="one_to_one"

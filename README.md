@@ -10,6 +10,14 @@
 > leave-one-episode-out and alternate-index/onset gates are implemented too. The prespecified
 > negative-control gate still fails, so the numerical associations below are not ENSO-specific
 > findings. An exploratory warm-versus-cold falsification diagnostic is also implemented.
+>
+> **Two changes supersede parts of what follows.** First, the bootstrap test was recalibrated:
+> the centred percentile test is anti-conservative at this many episodes, and the studentized
+> version is now what the gates read. Every count quoted below was produced under the old test
+> and has to be regenerated. Second, an exploratory exposure-weighted panel with commodity and
+> calendar-month fixed effects has been added as a second identification strategy, because the
+> negative-control failure looks like a property of the event-study baseline rather than an
+> omitted control.
 
 Most El Niño commodity analyses stop at *El Niño dates → average commodity return*. That
 calculation is easy and almost always misleading: there have only ever been a couple of dozen
@@ -73,6 +81,7 @@ uv run python scripts/run_financial_analysis.py
 uv run python scripts/download_palm_oil_data.py
 uv run python scripts/build_palm_oil_dataset.py
 uv run python scripts/run_palm_oil_mechanism.py
+uv run python scripts/run_panel_analysis.py
 ```
 
 The downloader creates an immutable, dated snapshot under `data/raw/YYYY-MM-DD/`. Each input has
@@ -138,6 +147,8 @@ real-rate, credit-spread and financial-conditions controls                    [i
         ↓
 palm-oil physical-mechanism pilot                                             [implemented]
         ↓
+exposure-weighted panel with commodity and month fixed effects                [implemented]
+        ↓
 other mechanisms, forecasting, tradability, scorecard, figures and report     [planned]
 ```
 
@@ -154,6 +165,21 @@ receipts rather than a prose report.
   outside every real onset's frozen -12/+24 window. Each replicate samples without replacement.
 - **q-values are what get interpreted.** Benjamini-Hochberg is applied only to the 30 eligible
   mechanism candidates; controls are reported separately as diagnostics.
+- **The bootstrap test is studentized.** Each replicate mean is divided by that replicate's own
+  standard error rather than being compared on the observed scale. At seventeen episodes with
+  heavy-tailed returns this matters: under a complete null with a shared factor across
+  commodities, the centred percentile test plus Benjamini-Hochberg produces at least one false
+  rejection in 13% of synthetic draws against a nominal 5%, while the studentized version
+  produces one in 2%. Both p-values are always written out, and `p_value_method` in
+  `research.yaml` records which one the gates read.
+- **Multiplicity is reported three ways.** Benjamini-Hochberg is the pre-registered gate.
+  Benjamini-Yekutieli repeats it without assuming anything about how the commodity tests
+  co-move. Westfall-Young step-down max-T reuses the stored shared-draw replicates to build the
+  joint null of the largest statistic, controlling the family-wise error rate under the
+  dependence the resampling scheme already preserves. The bootstrap deliberately shares one
+  episode draw across every commodity; applying only a marginal correction afterwards throws
+  that information away. Westfall-Young is a strictly higher bar than either FDR rule and is
+  reported as such, not as a replacement.
 - **Forecasting is strictly recursive** and labelled *pseudo*-out-of-sample, because the
   published ENSO indices are retrospectively revised.
 
@@ -238,12 +264,63 @@ with the prespecified signs. Aggregate palm-oil production growth, however, does
 palm-oil price growth at either the contemporaneous or one-year lag. The complete physical chain
 therefore fails at the supply-to-price link, and palm oil remains interesting but unproven.
 
+### The exposure-weighted panel
+
+Every control block added so far has narrowed the precious-metal problem without removing it.
+That pattern is what a specification error looks like rather than a missing regressor. The event
+study defines an abnormal return against a baseline fitted outside the union of all -12/+24 warm
+windows, and with seventeen episodes those windows cover most of the sample, so the baseline is a
+small residual of history that is itself selected on the ENSO state. Adding a control only helps
+if the confound is a variable someone thought of.
+
+The panel stage removes that whole class of problem by construction:
+
+```
+y[c,t] = a[c] + d[t] + b1 * (w[c] * ENSO[t-L]) + b2 * (control[c] * ENSO[t-L]) + e[c,t]
+```
+
+A fixed effect on every calendar month absorbs whatever global regime moves gold in that month,
+named or not. The price is that the ENSO level goes with it: identification comes only from the
+cross-section, so `b1` is the differential response per unit of physical exposure relative to the
+same-month average, not a level effect, and a shock that moved every commodity identically would
+be invisible. The negative controls carry zero exposure, so `b2` is their own ENSO response
+measured against the same month effects, and a design that is working reports it as
+indistinguishable from zero. That makes the negative-control test structural rather than
+empirical.
+
+Exposure weights are per commodity on a documented four-level scale, in `config/panel.yaml`, and
+the build refuses to run if they do not exactly cover the frozen candidate registry. They encode
+physical distance from the ENSO signal rather than any observed return, but they were written
+after this repository's event-study results were known and so cannot claim the outcome-blindness
+the commodity registry can. The `uniform` variant exists for that reason: it gives every
+candidate a weight of one, requires no judgement, and reduces the design to a candidate-versus-
+control contrast. Under uniform weights the two interactions are collinear once the fixed effects
+are swept out -- the exposure coefficient already is the contrast -- so only that term is fitted,
+and the estimator refuses a rank-deficient design rather than reporting one.
+
+Inference resamples whole calendar years of the cross-section with replacement, since ENSO is a
+single time series and months are not independent draws. A year drawn twice receives two separate
+sets of month effects, keeping a replicate one coherent alternative history in the same sense as
+the episode bootstrap. The grid covers RONI and ONI, lags of 0 to 12 months, and both weighting
+schemes; the exposure term across cells is one FDR family and the control term stays outside it.
+
+Two limitations are worth stating plainly. Two-way fixed effects absorb *additive* common shocks,
+not heterogeneous loadings on them, so a control series that loads three times as heavily on a
+global factor still contributes extra noise to `b2` -- measurably more variance, but no bias, in
+the synthetic tests. And because the month effects are estimated from the same thirty-five
+series, a genuinely broad ENSO effect is partly absorbed into them; the design trades level
+identification for immunity to unmodelled global regimes.
+
+This stage is exploratory. It does not promote or demote any commodity in the frozen event-study
+contract.
+
 ---
 
 ## Current repository layout
 
 ```
-config/            official sources, research settings and frozen commodity registry
+config/            official sources, research settings, frozen commodity registry
+                   and the panel exposure weights
 data/raw/          immutable date-stamped downloads + .meta.json provenance sidecars
 data/processed/    tidy real-data tables and the joined monthly panel
 data/macro/        separate immutable raw and processed external-control snapshots
@@ -279,9 +356,13 @@ src/enso_commodities/
   financial_analysis.py exploratory financial-control inference and receipt
   palm_oil_data.py NASA POWER and FAOSTAT parsing and validation
   palm_oil_mechanism.py weather, yield, production and price link tests
+  panel.py         exposure weights, two-way within estimator, year-block bootstrap
+  panel_analysis.py exposure-weighted panel grid and hash-linked receipt
+  synthetic.py     fixture generators for recovery and calibration tests only
   provenance.py    file hashing and atomic JSON receipts
 scripts/           command-line entry scripts for downloading and building
-tests/             ingestion, episode, adjustment, integrity and universe tests
+tests/             ingestion, episode, adjustment, integrity, universe, panel,
+                   and synthetic recovery/calibration tests
 reports/           data dictionary; statistical reports are planned
 ```
 
@@ -331,6 +412,15 @@ uv run python -m pytest
 Validation is explicit and directly tested. Fatal format, history-length, key-integrity and hash
 failures stop the build. Recoverable source-data problems remain visible through raw-value and
 quality-flag columns rather than being silently repaired.
+
+Two of the tests check the study rather than a function. `test_pipeline_recovers_a_planted_effect`
+plants a known cumulative abnormal return in synthetic prices and asserts the analytical path
+returns it, with the market model recovering the loadings it was given and the untouched series
+staying flat. `test_gates_hold_their_nominal_size_under_the_complete_null` draws repeated panels
+with no effect and a shared factor across commodities, and measures how often each gate fires --
+which is the direct measurement of the false-positive rate the negative-control gate is failing
+on. Synthetic fixtures live in `src/enso_commodities/synthetic.py` and are never labelled
+`data_provenance: real`, so no stage will accept them as input.
 
 ## Licence
 

@@ -70,6 +70,10 @@ def _family_results(
             int(config["random_seed"]),
             f"specificity_cold:{family}:{index_definition}:{anchor_type}",
         ),
+        p_value_method=str(config["p_value_method"]),
+        minimum_studentized_replicate_share=float(
+            config["minimum_studentized_replicate_share"]
+        ),
     ).results.rename(
         columns={
             "mean_return": "cold_bootstrap_mean_return",
