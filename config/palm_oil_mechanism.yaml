@@ -1,0 +1,33 @@
+# Frozen before outcome inspection. Points are transparent regional proxies, not crop-area weights.
+commodity: Palm oil
+countries: [Indonesia, Malaysia]
+production_items: [Oil palm fruit, Palm oil]
+primary_production_endpoint: Oil palm fruit yield
+production_elements: [Production, Yield, Area harvested]
+weather_start_year: 1981
+weather_end_year: 2024
+weather_baseline_years: [1991, 2020]
+weather_parameters: [PRECTOTCORR, T2M]
+weather_points:
+  - {name: riau, country: Indonesia, latitude: 0.5, longitude: 101.5}
+  - {name: north_sumatra, country: Indonesia, latitude: 3.0, longitude: 99.0}
+  - {name: central_kalimantan, country: Indonesia, latitude: -2.0, longitude: 113.5}
+  - {name: east_kalimantan, country: Indonesia, latitude: 0.5, longitude: 117.0}
+  - {name: sabah, country: Malaysia, latitude: 5.5, longitude: 117.0}
+  - {name: sarawak, country: Malaysia, latitude: 2.5, longitude: 113.5}
+  - {name: johor, country: Malaysia, latitude: 2.0, longitude: 103.5}
+weather_aggregation: equal_weight_points_within_country_then_lagged_production_share_across_countries
+enso_index: roni
+enso_annual_exposure: calendar_year_mean
+weather_lags_months: [0, 6, 12, 18, 24]
+production_response_lags_years: [0, 1, 2]
+price_response_lags_years: [0, 1]
+expected_signs:
+  enso_to_precipitation: negative
+  enso_to_temperature: positive
+  precipitation_to_yield: positive
+  temperature_to_yield: negative
+  production_to_price: negative
+minimum_country_year_observations: 25
+fdr_alpha: 0.05
+scope: exploratory_mechanism_pilot_not_primary_design

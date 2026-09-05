@@ -1,0 +1,338 @@
+# El Niño Is Back: Which Commodities Actually Care?
+
+**A reproducible 65-year ENSO event-study project on commodity prices.**
+
+> **Implementation status:** real-data ingestion, ENSO episode construction, monthly returns and
+> raw, seasonal-adjusted and common-market-adjusted event paths are working and validated.
+> The outcome-blind commodity registry and primary endpoint are frozen, and whole-episode
+> bootstrap inference, candidate-family FDR and calendar-matched neutral-date placebos are
+> implemented. External dollar, CPI and global-activity controls are also implemented. The
+> leave-one-episode-out and alternate-index/onset gates are implemented too. The prespecified
+> negative-control gate still fails, so the numerical associations below are not ENSO-specific
+> findings. An exploratory warm-versus-cold falsification diagnostic is also implemented.
+
+Most El Niño commodity analyses stop at *El Niño dates → average commodity return*. That
+calculation is easy and almost always misleading: there have only ever been a couple of dozen
+episodes, commodity prices are seasonal, they share a macro cycle, and testing thirty-five
+commodities across twenty-four horizons produces "significant" results by construction.
+
+This project asks a harder question:
+
+> When ENSO strengthens, which commodity prices show **statistically robust** abnormal returns,
+> **when** do those returns occur, and can each one be traced to an **identifiable physical
+> supply mechanism**?
+
+Four levels of evidence, in increasing order of strength: historical association → statistical
+robustness → physical transmission mechanism → out-of-sample usefulness. A commodity is only
+described as having a strong ENSO relationship if it survives all four.
+
+---
+
+## The evidence ladder
+
+Every commodity passes through eight gates, evaluated at a horizon fixed in advance:
+
+| Gate | Question |
+|---:|---|
+| 1 | Is the effect economically meaningful at the pre-specified horizon? |
+| 2 | Do the median, the mean and the share of positive episodes agree? |
+| 3 | Is it unusual relative to random dates drawn from ENSO-neutral periods? |
+| 4 | Does it survive Benjamini-Hochberg correction across every test the study ran? |
+| 5 | Does it survive deleting any single historical episode? |
+| 6 | Does it hold under RONI and ONI, and under alternative onset definitions? |
+| 7 | Is there a weather-to-supply pathway with the right sign? |
+| 8 | Does it improve an out-of-sample forecast or survive implementation costs? |
+
+Commodities land in one of four buckets: **HIGH CONFIDENCE**, **INTERESTING BUT UNPROVEN**,
+**FRAGILE**, **NO MATERIAL ENSO EFFECT**. Negative results are published with the same
+prominence as positive ones — a study that finds an effect everywhere has found a bug.
+
+---
+
+## Quick start
+
+```bash
+uv sync --extra dev
+uv run python scripts/download_data.py
+uv run python scripts/build_dataset.py
+uv run python scripts/build_raw_events.py
+uv run python scripts/build_adjusted_events.py
+uv run python scripts/build_universe.py
+uv run python scripts/run_inference.py
+uv run python scripts/run_placebo.py
+uv run python scripts/download_macro_data.py
+uv run python scripts/build_macro_dataset.py
+uv run python scripts/run_macro_analysis.py
+uv run python scripts/run_fragility.py
+uv run python scripts/run_robustness.py
+uv run python scripts/run_specificity.py
+uv run python scripts/run_endpoint_diagnostics.py
+uv run python scripts/download_financial_data.py
+uv run python scripts/build_financial_dataset.py
+uv run python scripts/run_financial_analysis.py
+uv run python scripts/download_palm_oil_data.py
+uv run python scripts/build_palm_oil_dataset.py
+uv run python scripts/run_palm_oil_mechanism.py
+```
+
+The downloader creates an immutable, dated snapshot under `data/raw/YYYY-MM-DD/`. Each input has
+a JSON provenance sidecar containing its source URL, retrieval time, response metadata, byte
+count and SHA-256 hash. The build refuses non-real manifests and verifies every raw hash before
+parsing.
+
+Processed outputs land under `data/processed/YYYY-MM-DD/`:
+
+- `enso_monthly.csv`: RONI and ONI keyed to the centre month of each three-month season.
+- `world_bank_indices_monthly.csv`: the World Bank Total Index used as the common-market factor.
+- `commodity_prices_monthly.parquet`: all source cells, analytical values and quality flags.
+- `monthly_panel.parquet`: the overlapping ENSO and price history in tidy long form.
+- `summary.json`: coverage, missingness and source-workbook diagnostics.
+
+Synthetic fixtures may be added later for unit and recovery tests, but the production downloader
+and processed research panel accept only `data_provenance: real`.
+
+Raw event outputs land under `tables/YYYY-MM-DD/`. They include derived RONI episodes, gap-safe
+monthly returns, event paths from month -12 through +24, the pre-specified horizon subset,
+coverage diagnostics and a run summary with input and configuration hashes.
+
+The adjustment stage adds monthly and event-level seasonal-adjusted returns, a World Bank Total
+Index factor, per-commodity factor models, adjusted horizon tables and their coverage diagnostics.
+The universe stage classifies every source series and writes the frozen primary candidate family
+and separate negative-control sample. The inference stage writes candidate and control estimates,
+whole-episode bootstrap replicates, confidence intervals, p-values and candidate-family q-values.
+
+Macro inputs use a separate immutable snapshot under `data/macro/raw/YYYY-MM-DD/`, with the same
+sidecar and SHA-256 receipt rules. The macro analysis refits each commodity outside event windows,
+then reruns the bootstrap and neutral-date placebo on the macro-adjusted endpoint.
+
+---
+
+## What the pipeline does
+
+```
+scripts/download_data.py     immutable, dated, sha256-verified raw store       [implemented]
+        ↓
+scripts/build_dataset.py     tidy RONI, ONI and commodity-price panel          [implemented]
+        ↓
+episodes, monthly returns and raw event-relative paths                         [implemented]
+        ↓
+seasonal and common commodity-market adjustment                               [implemented]
+        ↓
+outcome-blind universe, primary endpoint and control freeze                    [implemented]
+        ↓
+whole-episode bootstrap, sign agreement and candidate-family FDR               [implemented]
+        ↓
+calendar-matched neutral-date placebo                                           [implemented]
+        ↓
+external dollar, CPI and global-activity controls                              [implemented]
+        ↓
+leave-one-episode-out bootstrap/FDR fragility                                  [implemented]
+        ↓
+alternate-index and onset-definition robustness                               [implemented]
+        ↓
+warm-versus-cold phase-specificity falsification                              [implemented]
+        ↓
+endpoint convexity, time-drift and observed-regime diagnostics                [implemented]
+        ↓
+real-rate, credit-spread and financial-conditions controls                    [implemented]
+        ↓
+palm-oil physical-mechanism pilot                                             [implemented]
+        ↓
+other mechanisms, forecasting, tradability, scorecard, figures and report     [planned]
+```
+
+Planned narrative reports will land in `reports/`; this slice emits auditable tables and run
+receipts rather than a prose report.
+
+### Analysis decisions
+
+- **The macro benchmark is estimated outside event windows**, so it is not fitted on the
+  episodes it is later asked to price.
+- **The bootstrap resamples whole episodes**, not months, and shares one draw across all cells,
+  so a replicate is one coherent alternative history.
+- **Placebo dates preserve the onset calendar-month distribution**, have `|RONI| < 0.5`, and sit
+  outside every real onset's frozen -12/+24 window. Each replicate samples without replacement.
+- **q-values are what get interpreted.** Benjamini-Hochberg is applied only to the 30 eligible
+  mechanism candidates; controls are reported separately as diagnostics.
+- **Forecasting is strictly recursive** and labelled *pseudo*-out-of-sample, because the
+  published ENSO indices are retrospectively revised.
+
+Two timing decisions are already implemented. Episodes are derived from the configured threshold
+and persistence rule rather than transcribed. Event paths are built around both retrospective
+onset and an observable date: the fifth qualifying season plus two months for the centered window
+and publication timing. The observable date is a conservative historical timing convention, not
+a reconstruction of archived release vintages.
+
+Four return measures now travel together: raw, seasonally adjusted, common-market adjusted and
+external-macro adjusted.
+Seasonality is estimated by commodity and calendar month outside qualifying warm-episode months.
+Each commodity's loading on the World Bank Total Index is estimated only outside the union of all
+configured -12/+24 event windows. This removes a transparent common commodity-market component.
+The external robustness model adds BIS dollar appreciation, BLS CPI inflation and the first
+difference of the Dallas Fed/Kilian global real-activity index; it is fitted outside the same
+event-window union.
+
+The primary inferential contract is frozen in `config/commodities.yaml`: retrospective onset,
+month +12, market-adjusted cumulative return, a two-sided alternative and at least 10 valid
+episodes. The registry contains 32 mechanism candidates and three precious-metal negative
+controls. Controls are diagnostics outside the candidate FDR family. Every one of the 71 source
+series is classified; an unclassified future source column stops the build.
+
+For the 2026-09-05 real-data snapshot, 13 of 30 candidates reject at candidate-family bootstrap
+FDR 5%, and 26 of 30 have agreeing mean, median and sign share. Eleven pass those gates and the
+neutral-date placebo: Australian coal, cocoa, coconut oil, Robusta coffee, DAP, Malaysian logs,
+European natural gas, palm oil, Thai 5% rice, RSS3 rubber and urea. Fish meal lacks the frozen 90%
+valid-placebo-replicate coverage and is conservatively assigned placebo p=1.
+
+The external-control specification has 17 macro-covered episodes and successfully estimates all
+71 commodity models. Twelve candidates pass its bootstrap, sign and placebo gates: the same 11
+listed above plus barley. This does not repair the specificity failure. Gold, Platinum and Silver
+remain significant under both macro-adjusted bootstrap and placebo inference. None of the 12 is
+therefore promoted to a validated El Niño mechanism.
+
+Leave-one-episode-out inference removes each of the 17 macro-covered episodes in turn and reruns
+10,000 bootstrap draws plus candidate-family FDR. Eleven candidates survive all 17 deletions;
+barley rejects in only 11 scenarios and is classified as fragile. Gold, Platinum and Silver remain
+positive and significant after every deletion. The unexplained precious-metal pattern is therefore
+broad across episodes rather than an artifact of one exceptional event.
+
+The timing/index grid independently rebuilds macro-adjusted paths for RONI and ONI, anchored at
+both retrospective and conservative observable dates. Six candidates pass bootstrap FDR,
+calendar-matched placebo FDR and direction/sign gates in all four cells and also pass the
+leave-one-episode-out gate: coconut oil, DAP, Malaysian logs, palm oil, Thai 5% rice and RSS3
+rubber. Their mean +12 returns remain positive across the grid. Gold and Silver also reject in all
+four diagnostic cells, while Platinum rejects under bootstrap in three of four and under placebo
+in all four. The six associations are therefore robust to timing and index choice but still fail
+the study's specificity requirement; they are not validated ENSO mechanisms.
+
+An exploratory falsification stage then compares warm episodes directly with persistently cold
+ENSO episodes using shared-label randomization. None of the 12 precious-metal specification cells
+distinguishes warm from cold at raw 5%; gold and silver are frequently positive after cold episodes
+as well. Among the six timing/index survivors, only coconut oil in two observable-date cells and
+palm oil in one observable-date cell reject the warm-minus-cold contrast after candidate-family
+FDR. The dominant pattern is therefore phase-nonspecific. This diagnostic is reported separately
+and does not rewrite the frozen primary design.
+
+Endpoint diagnostics rule out simple-return convexity as the main explanation. All six prior
+survivors remain significant in cumulative log-return space in every warm cell, while 17 of 24
+precious-metal warm/cold cells also reject in log space. Jensen gaps are present but too small to
+create the result. Only two control cells show raw time trends, both RONI-observable warm returns
+for Gold and Silver. Nine of 96 control/factor correlations reject at unadjusted 5%, led by
+Silver's relationship with dollar changes; none is family-adjusted because controls remain
+diagnostics. These findings narrow the problem toward missing financial-regime structure and the
+non-specific timing of ENSO extremes, rather than arithmetic compounding alone.
+
+The exploratory extended-control model adds a CPI-deflated three-month Treasury rate, the monthly
+Moody's Baa-minus-10-year-Treasury spread and the monthly mean Chicago Fed NFCI. These reduce
+precious-metal bootstrap rejections from 17 to 7 of 24 warm/cold cells: Platinum no longer rejects,
+Silver rejects once, but Gold still rejects in all four warm cells and two cold cells. No control
+distinguishes warm from cold. Coconut oil, palm oil and rubber retain warm bootstrap FDR in all
+four cells, but none consistently passes the direct phase contrast. Financial controls narrow the
+failure without establishing ENSO specificity.
+
+The palm-oil mechanism pilot uses seven transparent NASA POWER weather points across Indonesian
+and Malaysian producing regions and FAOSTAT oil-palm fruit and palm-oil observations. RONI
+significantly predicts contemporaneous drying and warming. Rainfall one year earlier predicts
+higher fruit yield, while contemporaneous heat predicts lower yield; both survive within-link FDR
+with the prespecified signs. Aggregate palm-oil production growth, however, does not predict annual
+palm-oil price growth at either the contemporaneous or one-year lag. The complete physical chain
+therefore fails at the supply-to-price link, and palm oil remains interesting but unproven.
+
+---
+
+## Current repository layout
+
+```
+config/            official sources, research settings and frozen commodity registry
+data/raw/          immutable date-stamped downloads + .meta.json provenance sidecars
+data/processed/    tidy real-data tables and the joined monthly panel
+data/macro/        separate immutable raw and processed external-control snapshots
+data/financial/    immutable real-rate, credit-spread and NFCI snapshots
+data/mechanisms/   immutable weather and production snapshots for physical pilots
+src/enso_commodities/
+  download.py      streamed downloads, format checks and immutable snapshots
+  parsers.py       NOAA ASCII and Pink Sheet workbook parsers
+  dataset.py       hash verification and monthly panel construction
+  enso.py          threshold-and-persistence episode construction
+  returns.py       gap-safe monthly and event-relative raw returns
+  raw_events.py    real-data raw-event output stage and run receipt
+  adjustments.py   seasonal estimates, market models and strict adjusted paths
+  adjusted_events.py adjusted-event output stage and run receipt
+  universe.py      registry validation and primary-family construction
+  statistics.py    shared episode bootstrap and Benjamini-Hochberg correction
+  inference.py     primary/control inference outputs and hash-linked receipt
+  placebo.py       neutral anchors, strict endpoints, matched draws and empirical tests
+  placebo_analysis.py real-data placebo outputs and hash-linked receipt
+  macro_data.py    BIS, BLS/FRED and Dallas Fed parsing and transformations
+  macro_adjustments.py out-of-event multivariate commodity regressions
+  macro_analysis.py macro-adjusted bootstrap/placebo outputs and receipt
+  fragility.py     leave-one-out candidate and control summaries
+  fragility_analysis.py deletion-specific bootstrap/FDR stage and receipt
+  robustness.py    four-cell gate aggregation and specificity diagnostics
+  robustness_analysis.py RONI/ONI and timing-grid reconstruction and inference
+  specificity.py warm/cold randomization and episode-influence diagnostics
+  specificity_analysis.py exploratory real-data falsification stage and receipt
+  endpoint_diagnostics.py endpoint shape, time trend and regime correlations
+  endpoint_analysis.py exploratory endpoint diagnostic stage and receipt
+  financial_data.py verified financial-control parsing and transformations
+  financial_adjustments.py extended out-of-event OLS residuals
+  financial_analysis.py exploratory financial-control inference and receipt
+  palm_oil_data.py NASA POWER and FAOSTAT parsing and validation
+  palm_oil_mechanism.py weather, yield, production and price link tests
+  provenance.py    file hashing and atomic JSON receipts
+scripts/           command-line entry scripts for downloading and building
+tests/             ingestion, episode, adjustment, integrity and universe tests
+reports/           data dictionary; statistical reports are planned
+```
+
+## Reproducibility
+
+The implemented downloader records the retrieval timestamp, source URL, HTTP metadata, byte count
+and SHA-256 of each raw file. The dataset builder verifies those hashes and records the source
+manifest hash. The raw-event stage also records hashes for its processed inputs and research
+configuration. Git hashes, package-version manifests and figure metadata remain planned.
+
+The bootstrap and placebo use a recorded seed, stable independent salts for candidates and
+controls, and store every replicate and placebo draw. Leave-one-out scenarios use a stable seed
+salt for each deleted episode and retain all scenario-level estimates, p-values and q-values.
+The timing/index grid stores every reconstructed episode, model, event path, bootstrap replicate,
+placebo draw and placebo replicate, with a hash-linked run receipt.
+
+## Data sources
+
+| Layer | Source | Status |
+|---|---|---|
+| ENSO (primary) | NOAA CPC Relative Oceanic Niño Index (RONI) | implemented |
+| ENSO (robustness) | NOAA CPC Oceanic Niño Index (ONI) | implemented |
+| Prices and broad market factor | World Bank Pink Sheet, monthly | implemented |
+| Dollar | BIS US narrow nominal effective exchange rate, monthly | implemented |
+| Inflation | BLS CPI-U, seasonally adjusted, via FRED | implemented |
+| Global activity | Dallas Fed/Kilian global real economic activity index | implemented |
+| Short rate | Federal Reserve 3-month Treasury bill rate via FRED | implemented |
+| Credit stress | Moody's Baa yield relative to 10-year Treasury via FRED | implemented |
+| Financial conditions | Chicago Fed NFCI via FRED | implemented |
+| Palm weather | NASA POWER MERRA-2 monthly precipitation and temperature | implemented pilot |
+| Palm production | FAOSTAT oil-palm fruit and palm-oil annual series | implemented pilot |
+| Weather | ERA5, CHIRPS, or a pre-aggregated regional CSV | planned |
+| Production | FAOSTAT, USDA PSD | planned |
+| Futures | vendor-licensed contract data (not redistributed) | planned |
+
+Optional-source handling and licensed futures-data interfaces will be implemented in later stages.
+Licensed data will not be redistributed.
+
+## Development
+
+```bash
+uv run ruff check src tests scripts
+uv run mypy src
+uv run python -m pytest
+```
+
+Validation is explicit and directly tested. Fatal format, history-length, key-integrity and hash
+failures stop the build. Recoverable source-data problems remain visible through raw-value and
+quality-flag columns rather than being silently repaired.
+
+## Licence
+
+MIT (see `LICENSE`). Source data carry their own terms; see `config/sources.yaml` and
+`config/macro_sources.yaml`.

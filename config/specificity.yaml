@@ -1,0 +1,13 @@
+# Exploratory falsification contract. This does not alter the frozen primary design.
+index_definitions: [roni, oni]
+anchor_types: [retrospective, observable]
+cold_threshold: -0.5
+minimum_duration_months: 5
+observable_delay_after_center_months: 2
+horizon_months: 12
+randomization_replicates: 10000
+confidence_level: 0.95
+fdr_alpha: 0.05
+random_seed: 20260905
+comparison: warm_minus_cold
+fdr_family: mechanism_candidates_only

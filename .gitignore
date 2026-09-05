@@ -1,0 +1,38 @@
+# Raw data is downloaded, never committed: it is large, sometimes licensed, and
+# always reconstructible from config/sources.yaml plus the run manifest hashes.
+data/raw/*
+!data/raw/.gitkeep
+!data/raw/SYNTHETIC_DATA.md
+data/interim/*
+!data/interim/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# Same policy for the domain-specific data directories.
+data/financial/
+data/macro/
+data/mechanisms/
+
+# Generated outputs. Rebuild with `make all`.
+figures/
+tables/
+logs/
+reports/methodology.md
+reports/results.md
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# OS
+.DS_Store

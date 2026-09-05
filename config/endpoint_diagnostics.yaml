@@ -1,0 +1,12 @@
+# Exploratory endpoint diagnostics; separate from the frozen primary contract.
+bootstrap_replicates: 10000
+confidence_level: 0.95
+fdr_alpha: 0.05
+random_seed: 20260905
+horizon_months: 12
+factor_columns:
+  - market_seasonal_adjusted_log_return
+  - us_neer_log_change
+  - us_cpi_log_change
+  - global_real_activity_change
+fdr_family: mechanism_candidates_only

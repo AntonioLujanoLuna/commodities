@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+title: "ENSO and Commodity Markets: a reproducible 65-year event study"
+message: "If you use this software or its results, please cite it as below."
+type: software
+authors:
+  - family-names: "Lujano Luna"
+    given-names: "Antonio"
+repository-code: "https://github.com/AntonioLujanoLuna/commodities"
+license: MIT
+version: 0.1.0
+date-released: "2026-09-05"
+keywords:
+  - ENSO
+  - El Nino
+  - commodity prices
+  - event study
+  - multiple testing

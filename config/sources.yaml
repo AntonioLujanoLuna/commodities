@@ -1,0 +1,22 @@
+sources:
+  roni:
+    label: NOAA CPC Relative Oceanic Nino Index (RONI), ERSSTv6
+    url: https://www.cpc.ncep.noaa.gov/data/indices/RONI.ascii.txt
+    landing_page: https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso/roni/
+    filename: RONI.ascii.txt
+    format: noaa_ascii
+    minimum_bytes: 10000
+  oni:
+    label: NOAA CPC Oceanic Nino Index (ONI), ERSSTv6
+    url: https://www.cpc.ncep.noaa.gov/data/indices/oni.ascii.txt
+    landing_page: https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso/oni/v6/
+    filename: oni.ascii.txt
+    format: noaa_ascii
+    minimum_bytes: 15000
+  world_bank_pink_sheet:
+    label: World Bank Commodity Price Data, historical monthly Pink Sheet
+    url: https://thedocs.worldbank.org/en/doc/74e8be41ceb20fa0da750cda2f6b9e4e-0050012026/related/CMO-Historical-Data-Monthly.xlsx
+    landing_page: https://thedocs.worldbank.org/en/doc/74e8be41ceb20fa0da750cda2f6b9e4e-0050012026/world-bank-commodities-price-data-the-pink-sheet
+    filename: CMO-Historical-Data-Monthly.xlsx
+    format: xlsx
+    minimum_bytes: 300000

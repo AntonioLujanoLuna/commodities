@@ -1,0 +1,61 @@
+episodes:
+  primary_index: roni
+  warm_threshold: 0.5
+  minimum_duration_months: 5
+  # A centered three-month season ending at t+1 is normally published in t+2.
+  observable_delay_after_center_months: 2
+
+raw_event_returns:
+  base_relative_month: -1
+  first_relative_month: -12
+  last_relative_month: 24
+  reported_horizons: [0, 3, 6, 9, 12, 18, 24]
+  anchor_types: [retrospective, observable]
+
+adjustments:
+  seasonal_estimation_excludes: qualifying_episode_months
+  market_estimation_exclusion_window: [-12, 24]
+  minimum_seasonal_observations: 8
+  minimum_market_model_observations: 60
+  market_factor: world_bank_total_index
+
+macro_adjustments:
+  controls:
+    - market_seasonal_adjusted_log_return
+    - us_neer_log_change
+    - us_cpi_log_change
+    - global_real_activity_change
+  estimation_exclusion_window: [-12, 24]
+  minimum_model_observations: 60
+  estimator: ordinary_least_squares_with_intercept
+
+inference:
+  bootstrap_replicates: 10000
+  confidence_level: 0.95
+  fdr_alpha: 0.05
+  random_seed: 20260905
+
+placebo:
+  replicates: 10000
+  neutral_absolute_threshold: 0.5
+  actual_event_exclusion_window: [-12, 24]
+  match_anchor_calendar_month: true
+  sample_without_replacement: true
+  minimum_valid_replicate_share: 0.9
+
+fragility:
+  method: leave_one_episode_out
+  inference_gate: bootstrap_fdr
+  require_sign_agreement: true
+  require_stable_direction: true
+  fdr_family: mechanism_candidates_only
+
+robustness:
+  index_definitions: [roni, oni]
+  anchor_types: [retrospective, observable]
+  require_direction_stability: true
+  require_sign_agreement: true
+  require_bootstrap_fdr: true
+  require_placebo_fdr: true
+  require_primary_fragility_pass: true
+  placebo_sample_without_replacement: false

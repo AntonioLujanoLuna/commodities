@@ -1,0 +1,94 @@
+registry_version: 1
+selection_date: 2026-09-05
+selection_basis: source identity, physical ENSO pathway, benchmark duplication, and price-history coverage; no event-return estimates
+
+inference:
+  primary_anchor: retrospective
+  primary_horizon_months: 12
+  primary_return: market_adjusted_cumulative_return
+  alternative: two_sided
+  minimum_valid_episodes: 10
+  fdr_family: mechanism_candidates_only
+
+expected_counts:
+  mechanism_candidates: 32
+  negative_controls: 3
+  excluded: 36
+  source_total: 71
+
+mechanism_candidates:
+  - {name: "Cocoa", group: beverages, pathway: tropical rainfall and heat affect yields}
+  - {name: "Coffee, Arabica", group: beverages, pathway: tropical rainfall and temperature affect yields}
+  - {name: "Coffee, Robusta", group: beverages, pathway: tropical rainfall and temperature affect yields}
+  - {name: "Tea, avg 3 auctions", group: beverages, pathway: rainfall and temperature affect harvests}
+  - {name: "Coconut oil", group: oils, pathway: tropical rainfall and storms affect coconut supply}
+  - {name: "Groundnut oil **", group: oils, pathway: rainfall affects groundnut yields}
+  - {name: "Palm oil", group: oils, pathway: Southeast Asian rainfall affects palm yields}
+  - {name: "Rapeseed oil", group: oils, pathway: growing-season weather affects oilseed yields}
+  - {name: "Sunflower oil", group: oils, pathway: drought and heat affect oilseed yields}
+  - {name: "Soybeans", group: oils, pathway: rainfall and heat affect soybean yields}
+  - {name: "Barley", group: grains, pathway: drought and heat affect grain yields}
+  - {name: "Maize", group: grains, pathway: rainfall and heat affect grain yields}
+  - {name: "Sorghum", group: grains, pathway: drought affects grain yields}
+  - {name: "Rice, Thai 5%", group: grains, pathway: monsoon rainfall affects rice yields}
+  - {name: "Wheat, US HRW", group: grains, pathway: drought and temperature affect wheat yields}
+  - {name: "Banana, US", group: horticulture, pathway: tropical rainfall and storms affect supply}
+  - {name: "Orange", group: horticulture, pathway: rainfall and temperature affect citrus yields}
+  - {name: "Sugar, world", group: horticulture, pathway: rainfall affects cane and beet supply}
+  - {name: "Cotton, A Index", group: raw_materials, pathway: rainfall and heat affect cotton yields}
+  - {name: "Rubber, RSS3", group: raw_materials, pathway: tropical rainfall affects tapping and yields}
+  - {name: "Tobacco, US import u.v.", group: raw_materials, pathway: rainfall affects leaf yields}
+  - {name: "Logs, Malaysian", group: raw_materials, pathway: tropical rainfall affects harvest access}
+  - {name: "Fish meal", group: marine, pathway: Pacific ocean conditions affect anchovy supply}
+  - {name: "Shrimps, Mexican", group: marine, pathway: coastal temperature and rainfall affect supply}
+  - {name: "Beef **", group: livestock, pathway: pasture and feed conditions affect supply}
+  - {name: "Chicken **", group: livestock, pathway: feed costs and heat affect supply}
+  - {name: "Lamb **", group: livestock, pathway: pasture conditions affect supply}
+  - {name: "Coal, Australian", group: energy, pathway: rainfall affects mining and export logistics}
+  - {name: "Natural gas, Europe", group: energy, pathway: temperature affects heating demand}
+  - {name: "Natural gas, US", group: energy, pathway: temperature affects heating and cooling demand}
+  - {name: "DAP", group: fertilizers, pathway: crop conditions affect fertilizer demand}
+  - {name: "Urea", group: fertilizers, pathway: crop conditions affect fertilizer demand}
+
+negative_controls:
+  - {name: "Gold", group: precious_metals, rationale: no pre-specified agricultural supply pathway}
+  - {name: "Platinum", group: precious_metals, rationale: no pre-specified agricultural supply pathway}
+  - {name: "Silver", group: precious_metals, rationale: no pre-specified agricultural supply pathway}
+
+excluded:
+  - {name: "Aluminum", reason: no_pre_specified_enso_pathway}
+  - {name: "Banana, Europe", reason: shorter_duplicate_of_banana_us}
+  - {name: "Coal, South African **", reason: shorter_duplicate_energy_benchmark}
+  - {name: "Copper", reason: no_pre_specified_enso_pathway}
+  - {name: "Crude oil, Brent", reason: no_pre_specified_enso_pathway}
+  - {name: "Crude oil, Dubai", reason: duplicate_crude_benchmark}
+  - {name: "Crude oil, WTI", reason: shorter_duplicate_crude_benchmark}
+  - {name: "Crude oil, average", reason: composite_index}
+  - {name: "Groundnuts", reason: shorter_duplicate_of_groundnut_oil}
+  - {name: "Iron ore, cfr spot", reason: no_pre_specified_enso_pathway}
+  - {name: "Lead", reason: no_pre_specified_enso_pathway}
+  - {name: "Liquefied natural gas, Japan", reason: shorter_duplicate_energy_benchmark}
+  - {name: "Logs, Cameroon", reason: shorter_duplicate_timber_benchmark}
+  - {name: "Natural gas index", reason: composite_index}
+  - {name: "Nickel", reason: no_pre_specified_enso_pathway}
+  - {name: "Palm kernel oil", reason: shorter_coproduct_of_palm_oil}
+  - {name: "Phosphate rock", reason: represented_by_processed_fertilizers}
+  - {name: "Plywood", reason: processed_duplicate_timber_product}
+  - {name: "Potassium chloride **", reason: represented_by_processed_fertilizers}
+  - {name: "Rice, Thai 25%", reason: duplicate_rice_grade}
+  - {name: "Rice, Thai A.1", reason: duplicate_rice_grade}
+  - {name: "Rice, Viet Namese 5%", reason: shorter_duplicate_rice_benchmark}
+  - {name: "Rubber, TSR20 **", reason: shorter_duplicate_rubber_grade}
+  - {name: "Sawnwood, Cameroon", reason: processed_duplicate_timber_product}
+  - {name: "Sawnwood, Malaysian", reason: processed_duplicate_timber_product}
+  - {name: "Soybean meal", reason: coproduct_of_selected_soybeans}
+  - {name: "Soybean oil", reason: coproduct_of_selected_soybeans}
+  - {name: "Sugar, EU", reason: regional_policy_price_duplicate}
+  - {name: "Sugar, US", reason: regional_policy_price_duplicate}
+  - {name: "TSP", reason: duplicate_phosphate_fertilizer}
+  - {name: "Tea, Colombo", reason: component_of_selected_tea_average}
+  - {name: "Tea, Kolkata", reason: component_of_selected_tea_average}
+  - {name: "Tea, Mombasa", reason: component_of_selected_tea_average}
+  - {name: "Tin", reason: no_pre_specified_enso_pathway}
+  - {name: "Wheat, US SRW", reason: shorter_duplicate_wheat_grade}
+  - {name: "Zinc", reason: no_pre_specified_enso_pathway}

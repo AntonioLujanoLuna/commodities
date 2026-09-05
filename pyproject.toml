@@ -1,0 +1,79 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "enso-commodities"
+version = "0.1.0"
+description = "ENSO and commodity markets: a reproducible 65-year event study with robustness, mechanism and out-of-sample layers."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+authors = [{ name = "Antonio Lujano Luna" }]
+keywords = ["enso", "el-nino", "commodities", "event-study", "econometrics"]
+
+dependencies = [
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "scipy>=1.10",
+    "statsmodels>=0.14",
+    "matplotlib>=3.7",
+    "pyyaml>=6.0",
+    "pydantic>=2.5",
+    "requests>=2.31",
+    "openpyxl>=3.1",
+    "xlrd>=2.0",
+    "pyarrow>=14.0",
+    "tabulate>=0.9",
+    "lxml>=5.0",
+]
+
+[project.optional-dependencies]
+spatial = ["xarray>=2023.1", "netCDF4>=1.6", "geopandas>=0.14", "shapely>=2.0", "rasterio>=1.3"]
+econ = ["linearmodels>=6.0", "arch>=6.2"]
+dev = ["pytest>=7.4", "pytest-cov>=4.1", "ruff>=0.5", "mypy>=1.8", "pre-commit>=3.6"]
+
+[project.urls]
+Homepage = "https://github.com/AntonioLujanoLuna/commodities"
+
+[project.scripts]
+enso-download = "enso_commodities.cli:download"
+enso-build = "enso_commodities.cli:build"
+enso-analyse = "enso_commodities.cli:analyse"
+enso-macro-build = "enso_commodities.cli:macro_build"
+enso-macro-analyse = "enso_commodities.cli:macro_analyse"
+enso-fragility = "enso_commodities.cli:fragility"
+enso-robustness = "enso_commodities.cli:robustness"
+enso-specificity = "enso_commodities.cli:specificity"
+enso-endpoint-diagnostics = "enso_commodities.cli:endpoint_diagnostics"
+enso-financial-download = "enso_commodities.cli:financial_download"
+enso-financial-build = "enso_commodities.cli:financial_build"
+enso-financial-analyse = "enso_commodities.cli:financial_analyse"
+enso-palm-download = "enso_commodities.cli:palm_download"
+enso-palm-build = "enso_commodities.cli:palm_build"
+enso-palm-analyse = "enso_commodities.cli:palm_analyse"
+enso-figures = "enso_commodities.cli:figures"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/enso_commodities"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["ignore::DeprecationWarning", "ignore::FutureWarning"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests", "scripts"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM", "RUF"]
+ignore = ["E501", "B008", "RUF005"]
+
+[tool.mypy]
+python_version = "3.10"
+plugins = ["pydantic.mypy"]
+ignore_missing_imports = true
+warn_unused_ignores = false
+disallow_untyped_defs = false

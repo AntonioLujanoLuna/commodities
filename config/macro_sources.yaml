@@ -1,0 +1,22 @@
+sources:
+  bis_us_neer_narrow:
+    label: BIS US nominal effective exchange rate, narrow basket, monthly
+    url: https://stats.bis.org/api/v2/data/dataflow/BIS/WS_EER/1.0/M.N.N.US?format=csvfile
+    landing_page: https://data.bis.org/topics/EER/BIS%2CWS_EER%2C1.0/M.N.N.US
+    filename: bis_us_neer_narrow.csv
+    format: csv
+    minimum_bytes: 50000
+  us_cpi:
+    label: BLS CPI-U all items, seasonally adjusted, via FRED
+    url: https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCSL
+    landing_page: https://fred.stlouisfed.org/series/CPIAUCSL
+    filename: fred_cpiaucsl.csv
+    format: csv
+    minimum_bytes: 10000
+  dallas_fed_global_activity:
+    label: Dallas Fed index of global real economic activity in industrial commodity markets
+    url: https://www.dallasfed.org/-/media/Documents/research/igrea/igrea.xlsx
+    landing_page: https://www.dallasfed.org/research/igrea
+    filename: dallas_fed_igrea.xlsx
+    format: xlsx
+    minimum_bytes: 20000

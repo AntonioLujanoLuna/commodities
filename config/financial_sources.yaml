@@ -1,0 +1,22 @@
+sources:
+  us_tbill_3m:
+    label: Federal Reserve 3-month Treasury bill secondary-market rate, monthly, via FRED
+    url: https://fred.stlouisfed.org/graph/fredgraph.csv?id=TB3MS
+    landing_page: https://fred.stlouisfed.org/series/TB3MS
+    filename: fred_tb3ms.csv
+    format: csv
+    minimum_bytes: 10000
+  us_baa_treasury_spread:
+    label: Moody's Baa corporate yield relative to 10-year Treasury, monthly, via FRED
+    url: https://fred.stlouisfed.org/graph/fredgraph.csv?id=BAA10YM
+    landing_page: https://fred.stlouisfed.org/series/BAA10YM
+    filename: fred_baa10ym.csv
+    format: csv
+    minimum_bytes: 10000
+  chicago_fed_nfci:
+    label: Chicago Fed National Financial Conditions Index, weekly, via FRED
+    url: https://fred.stlouisfed.org/graph/fredgraph.csv?id=NFCI
+    landing_page: https://fred.stlouisfed.org/series/NFCI
+    filename: fred_nfci.csv
+    format: csv
+    minimum_bytes: 20000

@@ -1,0 +1,19 @@
+# Exploratory financial-regime control specification; not part of the frozen primary design.
+controls:
+  - market_seasonal_adjusted_log_return
+  - us_neer_log_change
+  - us_cpi_log_change
+  - global_real_activity_change
+  - us_ex_post_real_short_rate_percent
+  - us_baa_treasury_spread_percent
+  - chicago_fed_nfci
+estimation_exclusion_window: [-12, 24]
+minimum_model_observations: 120
+index_definitions: [roni, oni]
+anchor_types: [retrospective, observable]
+horizon_months: 12
+bootstrap_replicates: 10000
+confidence_level: 0.95
+fdr_alpha: 0.05
+random_seed: 20260905
+fdr_family: mechanism_candidates_only

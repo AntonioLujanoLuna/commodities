@@ -1,0 +1,57 @@
+sources:
+  faostat_crops_livestock:
+    label: FAOSTAT Crops and Livestock Products, normalized bulk data
+    url: https://bulks-faostat.fao.org/production/Production_Crops_Livestock_E_All_Data_(Normalized).zip
+    landing_page: https://www.fao.org/faostat/en/#data/QCL
+    filename: faostat_crops_livestock_normalized.zip
+    format: zip
+    minimum_bytes: 30000000
+  power_riau:
+    label: NASA POWER monthly weather at Riau production-region proxy
+    url: https://power.larc.nasa.gov/api/temporal/monthly/point?parameters=PRECTOTCORR%2CT2M&community=AG&longitude=101.5&latitude=0.5&start=1981&end=2024&format=CSV
+    landing_page: https://power.larc.nasa.gov/docs/services/api/temporal/monthly/
+    filename: power_riau.csv
+    format: csv
+    minimum_bytes: 7000
+  power_north_sumatra:
+    label: NASA POWER monthly weather at North Sumatra production-region proxy
+    url: https://power.larc.nasa.gov/api/temporal/monthly/point?parameters=PRECTOTCORR%2CT2M&community=AG&longitude=99.0&latitude=3.0&start=1981&end=2024&format=CSV
+    landing_page: https://power.larc.nasa.gov/docs/services/api/temporal/monthly/
+    filename: power_north_sumatra.csv
+    format: csv
+    minimum_bytes: 7000
+  power_central_kalimantan:
+    label: NASA POWER monthly weather at Central Kalimantan production-region proxy
+    url: https://power.larc.nasa.gov/api/temporal/monthly/point?parameters=PRECTOTCORR%2CT2M&community=AG&longitude=113.5&latitude=-2.0&start=1981&end=2024&format=CSV
+    landing_page: https://power.larc.nasa.gov/docs/services/api/temporal/monthly/
+    filename: power_central_kalimantan.csv
+    format: csv
+    minimum_bytes: 7000
+  power_east_kalimantan:
+    label: NASA POWER monthly weather at East Kalimantan production-region proxy
+    url: https://power.larc.nasa.gov/api/temporal/monthly/point?parameters=PRECTOTCORR%2CT2M&community=AG&longitude=117.0&latitude=0.5&start=1981&end=2024&format=CSV
+    landing_page: https://power.larc.nasa.gov/docs/services/api/temporal/monthly/
+    filename: power_east_kalimantan.csv
+    format: csv
+    minimum_bytes: 7000
+  power_sabah:
+    label: NASA POWER monthly weather at Sabah production-region proxy
+    url: https://power.larc.nasa.gov/api/temporal/monthly/point?parameters=PRECTOTCORR%2CT2M&community=AG&longitude=117.0&latitude=5.5&start=1981&end=2024&format=CSV
+    landing_page: https://power.larc.nasa.gov/docs/services/api/temporal/monthly/
+    filename: power_sabah.csv
+    format: csv
+    minimum_bytes: 7000
+  power_sarawak:
+    label: NASA POWER monthly weather at Sarawak production-region proxy
+    url: https://power.larc.nasa.gov/api/temporal/monthly/point?parameters=PRECTOTCORR%2CT2M&community=AG&longitude=113.5&latitude=2.5&start=1981&end=2024&format=CSV
+    landing_page: https://power.larc.nasa.gov/docs/services/api/temporal/monthly/
+    filename: power_sarawak.csv
+    format: csv
+    minimum_bytes: 7000
+  power_johor:
+    label: NASA POWER monthly weather at Johor production-region proxy
+    url: https://power.larc.nasa.gov/api/temporal/monthly/point?parameters=PRECTOTCORR%2CT2M&community=AG&longitude=103.5&latitude=2.0&start=1981&end=2024&format=CSV
+    landing_page: https://power.larc.nasa.gov/docs/services/api/temporal/monthly/
+    filename: power_johor.csv
+    format: csv
+    minimum_bytes: 7000
