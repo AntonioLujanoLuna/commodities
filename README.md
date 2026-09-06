@@ -11,14 +11,24 @@
 > negative-control gate still fails, so the numerical associations below are not ENSO-specific
 > findings. An exploratory warm-versus-cold falsification diagnostic is also implemented.
 >
+> Three diagnostics have since been added and are implemented but not yet run against a real-data
+> snapshot: a minimum-detectable-effect stage, so a null result can be told apart from an
+> underpowered one; an era-balance check on the neutral-date placebo, which tests whether the
+> placebo samples the same part of history as the events; and a resampling-block sensitivity for
+> the panel, because a calendar year is shorter than an ENSO episode. The numbers below predate
+> all three.
+>
 > The bootstrap test has been recalibrated: the centred percentile test is anti-conservative at
-> this many episodes, and the studentized version is now what the gates read. The results below
-> were regenerated under that method on 2026-09-06. An exploratory exposure-weighted panel with
-> commodity and calendar-month fixed effects is also implemented and reported as a separate
-> identification strategy. Neither design currently establishes an ENSO-specific price effect.
+> this many episodes, and the studentized version is now what the gates read. An exploratory
+> exposure-weighted panel with commodity and calendar-month fixed effects is also implemented and
+> reported as a separate identification strategy. Neither design currently establishes an
+> ENSO-specific price effect. This file carries no run numbers; they live in
+> [`reports/current_results.md`](reports/current_results.md), generated from the run receipts.
 
 The compact, hash-grounded interpretation of the latest completed run is in
-[`reports/current_results.md`](reports/current_results.md).
+[`reports/current_results.md`](reports/current_results.md), which is overwritten on
+every run. The append-only record of decisions, findings and retired
+specifications is in [`reports/log/`](reports/log/README.md).
 
 Most El Niño commodity analyses stop at *El Niño dates → average commodity return*. That
 calculation is easy and almost always misleading: there have only ever been a couple of dozen
@@ -69,6 +79,7 @@ uv run python scripts/build_adjusted_events.py
 uv run python scripts/build_universe.py
 uv run python scripts/run_inference.py
 uv run python scripts/run_placebo.py
+uv run python scripts/run_power.py
 uv run python scripts/download_macro_data.py
 uv run python scripts/build_macro_dataset.py
 uv run python scripts/run_macro_analysis.py
@@ -132,7 +143,9 @@ outcome-blind universe, primary endpoint and control freeze                    [
         ↓
 whole-episode bootstrap, sign agreement and candidate-family FDR               [implemented]
         ↓
-calendar-matched neutral-date placebo                                           [implemented]
+calendar-matched neutral-date placebo, with an era-balance diagnostic          [implemented]
+        ↓
+minimum detectable effect at the frozen endpoint                               [implemented]
         ↓
 external dollar, CPI and global-activity controls                              [implemented]
         ↓
@@ -148,7 +161,8 @@ real-rate, credit-spread and financial-conditions controls                    [i
         ↓
 palm-oil physical-mechanism pilot                                             [implemented]
         ↓
-exposure-weighted panel with commodity and month fixed effects                [implemented]
+exposure-weighted panel with commodity and month fixed effects, and its
+resampling-block sensitivity                                                  [implemented]
         ↓
 other mechanisms, forecasting, tradability, scorecard, figures and report     [planned]
 ```
@@ -181,6 +195,23 @@ receipts rather than a prose report.
   episode draw across every commodity; applying only a marginal correction afterwards throws
   that information away. Westfall-Young is a strictly higher bar than either FDR rule and is
   reported as such, not as a replacement.
+- **Every null is reported with what could have been detected.** The minimum-detectable-effect
+  stage inverts the studentized bootstrap that the gates read: an additive shift on the endpoint
+  moves the sample mean by its own size and leaves the standard error alone, so the stored null
+  replicates already are the reference distribution and no new resampling is needed. A commodity
+  whose estimate falls below its own minimum detectable effect is uninformative rather than null,
+  and does not belong in the NO MATERIAL ENSO EFFECT bucket.
+- **The placebo is checked for era balance.** Anchors are matched on calendar month, but they must
+  also be neutral and outside every event window, so the eligible pool is whatever quiet stretches
+  survive both filters. If those stretches sit in a different part of history than the onsets, the
+  specificity gate is partly comparing macro-financial regimes rather than ENSO phases -- which is
+  a candidate explanation for the precious-metal failure that no additional regressor can remove.
+  The diagnostic tests that against the placebo's own draw distribution and changes no gate.
+- **The panel's resampling block is reported at several lengths.** A calendar year is shorter than
+  an ENSO episode and its price response, and ENSO peaks in November-January, so a January boundary
+  splits nearly every event. Blocks shorter than the dependence understate the standard error, so
+  the frozen calendar-year interval is the optimistic one; May-aligned one-, two- and three-year
+  blocks are reported alongside it.
 - **Forecasting is strictly recursive** and labelled *pseudo*-out-of-sample, because the
   published ENSO indices are retrospectively revised.
 
@@ -205,69 +236,67 @@ episodes. The registry contains 32 mechanism candidates and three precious-metal
 controls. Controls are diagnostics outside the candidate FDR family. Every one of the 71 source
 series is classified; an unclassified future source column stops the build.
 
-For the 2026-09-05 real-data snapshot, regenerated with studentized inference on 2026-09-06, 10
-of 30 candidates reject at candidate-family bootstrap BH FDR 5%, six survive the more conservative
-BY adjustment and five survive Westfall-Young FWER. Twenty-six have agreeing mean, median and sign
-share. Eight pass the bootstrap, sign and neutral-date placebo gates: Australian coal, coconut oil,
-Robusta coffee, Malaysian logs, European natural gas, palm oil, Thai 5% rice and RSS3 rubber. Fish
-meal lacks the frozen 90% valid-placebo-replicate coverage and is conservatively assigned placebo
-p=1.
+## What each stage found
 
-The external-control specification has 17 macro-covered episodes and successfully estimates all
-71 commodity models. Nine candidates pass its bootstrap, sign and placebo gates: Australian coal,
-coconut oil, Robusta coffee, Malaysian logs, European natural gas, palm oil, Thai 5% rice, RSS3
-rubber and urea. This does not repair the specificity failure. Gold, Platinum and Silver still
-reject under both macro-adjusted bootstrap and placebo inference. None of the nine is therefore
-promoted to a validated El Niño mechanism.
+Numbers live in [`reports/current_results.md`](reports/current_results.md), where they are
+generated from the run receipts rather than typed, and are regenerated whenever the pipeline is
+rerun. This section describes what each stage does and what it concluded; it deliberately carries
+no counts, so it cannot drift away from the artifacts.
 
-Leave-one-episode-out inference removes each of the 17 macro-covered episodes in turn and reruns
-10,000 bootstrap draws plus candidate-family FDR. Seven candidates survive all 17 deletions:
-Australian coal, coconut oil, Robusta coffee, European natural gas, palm oil, RSS3 rubber and urea.
-Gold, Platinum and Silver remain positive and significant after every deletion. The unexplained
-precious-metal pattern is therefore broad across episodes rather than an artifact of one
-exceptional event.
+**Primary event study.** A minority of the 30 candidates reject at candidate-family BH FDR;
+fewer survive the more conservative BY adjustment, and fewer still survive Westfall-Young FWER.
+Most candidates have agreeing mean, median and sign share. A handful pass the bootstrap, sign and
+neutral-date placebo gates together. Fish meal lacks the frozen 90% valid-placebo-replicate
+coverage and is conservatively assigned placebo p=1.
 
-The timing/index grid independently rebuilds macro-adjusted paths for RONI and ONI, anchored at
-both retrospective and conservative observable dates. Three candidates pass bootstrap FDR,
-calendar-matched placebo FDR and direction/sign gates in all four cells and also pass the
-leave-one-episode-out gate: coconut oil, palm oil and RSS3 rubber. Their mean +12 returns remain
-positive across the grid. Gold rejects in all four diagnostic bootstrap cells and Gold and Silver
-still fail the placebo specificity diagnostic throughout the grid. The three associations are
-therefore robust to timing and index choice but still fail the study's specificity requirement;
-they are not validated ENSO mechanisms.
+**External macro controls.** The specification estimates a model for every commodity and leaves
+roughly the same set of candidates passing its bootstrap, sign and placebo gates. It does not
+repair the specificity failure: Gold, Platinum and Silver still reject under both macro-adjusted
+bootstrap and placebo inference, so none of the survivors is promoted to a validated El Niño
+mechanism.
 
-An exploratory falsification stage then compares warm episodes directly with persistently cold
-ENSO episodes using shared-label randomization. None of the 12 precious-metal specification cells
-distinguishes warm from cold at raw 5%; gold and silver are frequently positive after cold episodes
-as well. Among the three timing/index survivors, coconut oil rejects the warm-minus-cold contrast
-in both observable-date cells and palm oil rejects it only in the ONI-observable cell after
-candidate-family FDR; RSS3 rubber rejects in none. The dominant pattern is therefore
-phase-nonspecific. This diagnostic is reported separately and does not rewrite the frozen primary
-design.
+**Leave one episode out.** Each macro-covered episode is removed in turn and the bootstrap and
+candidate-family FDR are rerun. Most of the passing candidates survive every deletion, and the
+precious metals remain positive and significant after every one. The unexplained control pattern
+is therefore broad across episodes rather than an artifact of one exceptional event.
 
-Endpoint diagnostics rule out simple-return convexity as the main explanation. The three prior
-survivors remain significant in cumulative log-return space in every warm cell, while 13 of 24
-precious-metal warm/cold cells also reject in log space. Jensen gaps are present but too small to
-create the result. Only two control cells show raw time trends, both RONI-observable warm returns
-for Gold and Silver. Nine of 96 control/factor correlations reject at unadjusted 5%, led by
-Silver's relationship with dollar changes; none is family-adjusted because controls remain
-diagnostics. These findings narrow the problem toward missing financial-regime structure and the
-non-specific timing of ENSO extremes, rather than arithmetic compounding alone.
+**Timing and index grid.** Macro-adjusted paths are independently rebuilt for RONI and ONI at
+both retrospective and conservative observable anchors. Three candidates pass bootstrap FDR,
+calendar-matched placebo FDR and the direction and sign gates in all four cells and also pass the
+leave-one-episode-out gate: coconut oil, palm oil and RSS3 rubber, with positive mean +12 returns
+throughout. Gold rejects in every diagnostic bootstrap cell, and Gold and Silver keep failing the
+placebo specificity diagnostic across the grid. Those three associations are robust to timing and
+index choice and still fail the study's specificity requirement.
 
-The exploratory extended-control model adds a CPI-deflated three-month Treasury rate, the monthly
-Moody's Baa-minus-10-year-Treasury spread and the monthly mean Chicago Fed NFCI. These reduce
-precious-metal bootstrap rejections from 13 to three of 24 warm/cold cells: Platinum and Silver no
-longer reject, while Gold rejects in three warm cells. No control distinguishes warm from cold.
-Coconut oil, palm oil and rubber retain positive warm estimates, but none consistently passes the
-direct phase contrast. Financial controls narrow the failure without establishing ENSO
-specificity.
+**Warm versus cold.** An exploratory falsification stage compares warm episodes directly with
+persistently cold ones using shared-label randomization. No precious-metal cell distinguishes warm
+from cold at raw 5%; gold and silver are frequently positive after cold episodes too. Among the
+three grid survivors only coconut oil rejects the warm-minus-cold contrast consistently, and
+palm oil in a single cell. The dominant pattern is phase-nonspecific. This is reported separately
+and does not rewrite the frozen primary design.
 
-The palm-oil mechanism pilot uses seven transparent NASA POWER weather points across Indonesian
-and Malaysian producing regions and FAOSTAT oil-palm fruit and palm-oil observations. RONI
-significantly predicts contemporaneous drying and warming. Rainfall one year earlier predicts
-higher fruit yield, while contemporaneous heat predicts lower yield; both survive within-link FDR
-with the prespecified signs. Aggregate palm-oil production growth, however, does not predict annual
-palm-oil price growth at either the contemporaneous or one-year lag. The complete physical chain
+**Endpoint diagnostics.** Simple-return convexity is ruled out as the main explanation: the three
+survivors stay significant in cumulative log-return space in every warm cell, and about half the
+precious-metal warm/cold cells reject in log space as well. Jensen gaps are present but too small
+to create the result. Two control cells show raw time trends, and a handful of control/factor
+correlations reject at unadjusted 5%, led by Silver's relationship with dollar changes; none is
+family-adjusted, because controls remain diagnostics. This narrows the problem toward missing
+financial-regime structure and the non-specific timing of ENSO extremes rather than arithmetic
+compounding.
+
+**Financial controls.** An exploratory extended-control model adds a CPI-deflated three-month
+Treasury rate, the Moody's Baa-minus-10-year-Treasury spread and the monthly mean Chicago Fed
+NFCI. These remove most of the precious-metal bootstrap rejections -- Platinum and Silver stop
+rejecting, Gold does not -- and no control distinguishes warm from cold. Coconut oil, palm oil and
+rubber keep positive warm estimates without consistently passing the direct phase contrast.
+Financial controls narrow the failure without establishing ENSO specificity.
+
+**Palm-oil mechanism pilot.** Seven transparent NASA POWER weather points across Indonesian and
+Malaysian producing regions are combined with FAOSTAT oil-palm fruit and palm-oil series. RONI
+significantly predicts contemporaneous drying and warming; rainfall one year earlier predicts
+higher fruit yield and contemporaneous heat predicts lower yield, both surviving within-link FDR
+with the prespecified signs. Aggregate palm-oil production growth does not predict annual
+palm-oil price growth at either the contemporaneous or the one-year lag. The physical chain
 therefore fails at the supply-to-price link, and palm oil remains interesting but unproven.
 
 ### The exposure-weighted panel
@@ -310,15 +339,15 @@ sets of month effects, keeping a replicate one coherent alternative history in t
 the episode bootstrap. The grid covers RONI and ONI, lags of 0 to 12 months, and both weighting
 schemes; the exposure term across cells is one FDR family and the control term stays outside it.
 
-On the 2026-09-05 snapshot, the primary RONI lag-six exposure estimate is 0.00624 per unit of
-exposure (studentized p=0.013; 95% year-block interval 0.00097 to 0.01110). Its control interaction
-does not reject (p=0.127). The named exposure assignment sits at the 98.3rd percentile of 2,000
-shuffles of the same weights across candidate commodities (two-sided permutation p=0.035), so its
-mapping carries more signal than an arbitrary assignment. However, none of the 20 exposure cells
-survives FDR across the grid, the uniform candidate-versus-control specification is null at every
-lag and index, and two control cells reject at raw 5%. The panel therefore offers a suggestive
-cross-sectional pattern, not a successful independent identification result; the permutation does
-not make its post-outcome weights prospective.
+The primary RONI lag-six exposure estimate is positive and its studentized year-block interval
+excludes zero, while its control interaction does not reject. The named exposure assignment sits
+far into the upper tail of shuffles of the same weights across candidate commodities, so its
+mapping carries more signal than an arbitrary assignment would. None of that generalises: no
+exposure cell survives FDR across the grid, the uniform candidate-versus-control specification is
+null at every lag and index, and two control cells reject at raw 5%. The panel therefore offers a
+suggestive cross-sectional pattern, not a successful independent identification result, and the
+permutation does not make its post-outcome weights prospective. The estimates and intervals are
+in [`reports/current_results.md`](reports/current_results.md).
 
 Two limitations are worth stating plainly. Two-way fixed effects absorb *additive* common shocks,
 not heterogeneous loadings on them, so a control series that loads three times as heavily on a
@@ -356,6 +385,9 @@ src/enso_commodities/
   inference.py     primary/control inference outputs and hash-linked receipt
   placebo.py       neutral anchors, strict endpoints, matched draws and empirical tests
   placebo_analysis.py real-data placebo outputs and hash-linked receipt
+  exchangeability.py whether the placebo samples the same era as the events
+  power.py         minimum detectable effect from the stored bootstrap replicates
+  power_analysis.py minimum-detectable-effect stage and hash-linked receipt
   macro_data.py    BIS, BLS/FRED and Dallas Fed parsing and transformations
   macro_adjustments.py out-of-event multivariate commodity regressions
   macro_analysis.py macro-adjusted bootstrap/placebo outputs and receipt
@@ -379,7 +411,8 @@ src/enso_commodities/
 scripts/           command-line entry scripts for downloading and building
 tests/             ingestion, episode, adjustment, integrity, universe, panel,
                    and synthetic recovery/calibration tests
-reports/           data dictionary; statistical reports are planned
+reports/           data dictionary and the latest-run interpretation
+reports/log/       append-only research log: decisions, findings, negative results
 ```
 
 ## Reproducibility

@@ -36,6 +36,7 @@ ALLOWED_WEIGHTINGS = ("exposure", "uniform")
 EXPOSURE_TERM = "exposure_x_enso"
 CONTROL_TERM = "control_x_enso"
 REGRESSORS = (EXPOSURE_TERM, CONTROL_TERM)
+PRIMARY_BLOCK_COLUMN = "calendar_year"
 
 
 def panel_regressors(weighting: str) -> tuple[str, ...]:
@@ -52,6 +53,33 @@ def panel_regressors(weighting: str) -> tuple[str, ...]:
     if weighting not in ALLOWED_WEIGHTINGS:
         raise ValueError(f"weighting must be one of {sorted(ALLOWED_WEIGHTINGS)}")
     return REGRESSORS if weighting == "exposure" else (EXPOSURE_TERM,)
+
+
+@dataclass(frozen=True)
+class BlockDefinition:
+    """One alternative resampling block for the year-block bootstrap.
+
+    A block bootstrap only preserves dependence that fits inside a block. The
+    object this design has to keep intact is an ENSO episode and its price
+    response: episodes run at least five months and are read at lags of up to
+    twelve, so a run of elevated regressor comfortably exceeds twelve months and
+    therefore always straddles a January boundary. ENSO is also phase-locked to
+    the annual cycle and peaks in NDJ, so that boundary cuts the peak of very
+    nearly every event rather than falling at a random point.
+
+    ``start_month`` moves the boundary -- May starts the conventional ENSO year
+    and keeps each NDJ peak whole -- and ``length_years`` makes the block longer
+    than the episode it contains. Blocks shorter than the dependence understate
+    the standard error, so these variants can only widen the interval.
+    """
+
+    name: str
+    start_month: int
+    length_years: int
+
+    @property
+    def column(self) -> str:
+        return f"block_{self.name}"
 
 
 @dataclass(frozen=True)
@@ -73,6 +101,7 @@ class PanelSpec:
     minimum_observations: int
     roles: tuple[str, ...]
     block: str
+    block_sensitivity: tuple[BlockDefinition, ...]
     bootstrap_replicates: int
     weight_permutation_replicates: int
     confidence_level: float
@@ -132,6 +161,14 @@ def load_panel_config(path: Path | None = None) -> PanelSpec:
         minimum_observations=int(specification["minimum_observations"]),
         roles=tuple(str(value) for value in specification["roles"]),
         block=str(inference["block"]),
+        block_sensitivity=tuple(
+            BlockDefinition(
+                name=str(entry["name"]),
+                start_month=int(entry["start_month"]),
+                length_years=int(entry["length_years"]),
+            )
+            for entry in inference.get("block_sensitivity") or ()
+        ),
         bootstrap_replicates=int(inference["bootstrap_replicates"]),
         weight_permutation_replicates=int(inference["weight_permutation_replicates"]),
         confidence_level=float(inference["confidence_level"]),
@@ -174,7 +211,17 @@ def _validate_panel_spec(spec: PanelSpec) -> None:
     if spec.roles != ("mechanism_candidate", "negative_control"):
         raise ValueError("The panel estimation sample must be candidates plus negative controls")
     if spec.block != "calendar_year":
-        raise ValueError("Only calendar-year block resampling is supported")
+        raise ValueError("The primary resampling block is frozen as calendar_year")
+    names = [definition.name for definition in spec.block_sensitivity]
+    if len(set(names)) != len(names):
+        raise ValueError("Block-sensitivity names must be unique")
+    if spec.block in names:
+        raise ValueError("A block-sensitivity variant cannot reuse the primary block name")
+    for definition in spec.block_sensitivity:
+        if not 1 <= definition.start_month <= 12:
+            raise ValueError(f"Block {definition.name!r} has an out-of-range start_month")
+        if definition.length_years < 1:
+            raise ValueError(f"Block {definition.name!r} must span at least one year")
     if spec.bootstrap_replicates < 999:
         raise ValueError("bootstrap_replicates must be at least 999")
     if spec.weight_permutation_replicates < 999:
@@ -213,6 +260,39 @@ def build_exposure_table(registry: CommodityRegistry, spec: PanelSpec) -> pd.Dat
     sample["exposure_outcome_blind"] = spec.exposure_outcome_blind
     sample["exposure_inference_scope"] = spec.exposure_inference_scope
     return sample.sort_values("commodity", ignore_index=True)
+
+
+def assign_resampling_blocks(
+    dates: pd.Series, *, start_month: int, length_years: int
+) -> pd.Series:
+    """Group months into consecutive resampling blocks of a given length.
+
+    Blocks are cut on an absolute month index, so ``start_month=5`` and
+    ``length_years=1`` reproduce the conventional May-April ENSO year, and
+    longer blocks simply merge consecutive ones. The label is the block's index,
+    which is all the bootstrap needs.
+    """
+    if not 1 <= start_month <= 12:
+        raise ValueError("start_month must fall between one and twelve")
+    if length_years < 1:
+        raise ValueError("length_years must be positive")
+    stamps = pd.to_datetime(dates)
+    months = stamps.dt.year * 12 + (stamps.dt.month - 1) - (start_month - 1)
+    return (months // (12 * length_years)).astype("int64")
+
+
+def attach_resampling_blocks(
+    panel: pd.DataFrame, definitions: tuple[BlockDefinition, ...]
+) -> pd.DataFrame:
+    """Add one block-label column per alternative block definition."""
+    result = panel.copy()
+    for definition in definitions:
+        result[definition.column] = assign_resampling_blocks(
+            result["date"],
+            start_month=definition.start_month,
+            length_years=definition.length_years,
+        )
+    return result
 
 
 def build_panel(
@@ -376,23 +456,30 @@ def year_block_bootstrap(
     tolerance: float,
     max_iterations: int,
     regressors: tuple[str, ...] = REGRESSORS,
+    block_column: str = PRIMARY_BLOCK_COLUMN,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Resample whole calendar years of the cross-section with replacement.
+    """Resample whole blocks of the cross-section with replacement.
 
     ENSO is one time series, so months are not independent draws and clustering
     on the cross-section would understate the uncertainty badly. Resampling
-    whole years keeps each year's cross-sectional correlation and its own
-    within-year serial correlation intact. A year drawn twice is relabelled so
+    whole blocks keeps each block's cross-sectional correlation and its own
+    within-block serial correlation intact. A block drawn twice is relabelled so
     the two copies carry separate month effects, which keeps the replicate a
     coherent alternative history rather than a panel with duplicate periods.
+
+    ``block_column`` selects which grouping to resample. The frozen primary is
+    the calendar year; ``BlockDefinition`` explains why the alternatives exist
+    and why they can only widen the interval.
     """
     if replicates < 1:
         raise ValueError("replicates must be positive")
     if not 0 < confidence_level < 1:
         raise ValueError("confidence_level must fall between zero and one")
+    if block_column not in panel.columns:
+        raise ValueError(f"Panel is missing the resampling-block column {block_column!r}")
 
-    years = np.sort(panel["calendar_year"].unique())
-    rows_by_year = [np.flatnonzero(panel["calendar_year"].to_numpy() == year) for year in years]
+    years = np.sort(panel[block_column].unique())
+    rows_by_year = [np.flatnonzero(panel[block_column].to_numpy() == year) for year in years]
     unit_codes_all = pd.factorize(panel["commodity"], sort=True)[0]
     time_codes_all = pd.factorize(panel["date"], sort=True)[0]
     period_count = int(time_codes_all.max()) + 1

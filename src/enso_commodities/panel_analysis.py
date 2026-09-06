@@ -18,7 +18,10 @@ from .config import project_root
 from .panel import (
     CONTROL_TERM,
     EXPOSURE_TERM,
+    PRIMARY_BLOCK_COLUMN,
+    PanelFit,
     PanelSpec,
+    attach_resampling_blocks,
     build_exposure_table,
     build_panel,
     fit_exposure_panel,
@@ -96,15 +99,18 @@ def run_panel_analysis(
         tolerance=spec.demeaning_tolerance,
         max_iterations=spec.demeaning_max_iterations,
     )
+    block_sensitivity = _run_block_sensitivity(primary_panel, primary_fit, spec)
 
     exposure_path = output_dir / "panel_exposure_weights.csv"
     results_path = output_dir / "panel_specification_results.csv"
     replicates_path = output_dir / "panel_bootstrap_replicates.parquet"
     permutation_path = output_dir / "panel_exposure_weight_permutations.parquet"
+    block_sensitivity_path = output_dir / "panel_block_sensitivity.csv"
     exposure.to_csv(exposure_path, index=False)
     results.to_csv(results_path, index=False)
     replicates.to_parquet(replicates_path, index=False)
     permutation.replicates.to_parquet(permutation_path, index=False)
+    block_sensitivity.to_csv(block_sensitivity_path, index=False)
 
     primary = results.loc[
         results["index_definition"].eq(spec.primary_index)
@@ -132,6 +138,14 @@ def run_panel_analysis(
             "primary_lag_months": spec.primary_lag_months,
             "primary_weighting": spec.primary_weighting,
             "resampling_block": spec.block,
+            "resampling_block_sensitivity": [
+                {
+                    "name": definition.name,
+                    "start_month": definition.start_month,
+                    "length_years": definition.length_years,
+                }
+                for definition in spec.block_sensitivity
+            ],
             "bootstrap_replicates": spec.bootstrap_replicates,
             "weight_permutation_replicates": spec.weight_permutation_replicates,
             "random_seed": spec.random_seed,
@@ -147,6 +161,7 @@ def run_panel_analysis(
             "panel.yaml": sha256_file(config_path),
         },
         "output_hashes": {
+            block_sensitivity_path.name: sha256_file(block_sensitivity_path),
             exposure_path.name: sha256_file(exposure_path),
             permutation_path.name: sha256_file(permutation_path),
             replicates_path.name: sha256_file(replicates_path),
@@ -174,11 +189,74 @@ def run_panel_analysis(
             "primary_exposure_weight_permutation_valid_replicates": (
                 permutation.valid_replicates
             ),
+            # The frozen block is shorter than an ENSO episode, so it can only
+            # have understated the interval. These say by how much.
+            "primary_exposure_block_sensitivity": _block_sensitivity_digest(block_sensitivity),
         },
         "snapshot": snapshot.name,
     }
     write_json_atomic(output_dir / "panel_summary.json", summary)
     return output_dir
+
+
+def _run_block_sensitivity(
+    primary_panel: pd.DataFrame, primary_fit: PanelFit, spec: PanelSpec
+) -> pd.DataFrame:
+    """Rerun the primary cell's bootstrap under each alternative block.
+
+    Only the resampling changes: the point estimate, the sample and the fixed
+    effects are the frozen primary fit, so any movement here is uncertainty that
+    the calendar-year block was not capturing.
+    """
+    panel = attach_resampling_blocks(primary_panel, spec.block_sensitivity)
+    regressors = panel_regressors(spec.primary_weighting)
+    frames: list[pd.DataFrame] = []
+    definitions = [(spec.block, PRIMARY_BLOCK_COLUMN, 1, 12)] + [
+        (definition.name, definition.column, definition.length_years, definition.start_month)
+        for definition in spec.block_sensitivity
+    ]
+    for name, column, length_years, start_month in definitions:
+        results, _ = year_block_bootstrap(
+            panel,
+            primary_fit,
+            replicates=spec.bootstrap_replicates,
+            confidence_level=spec.confidence_level,
+            seed=salted_seed(spec.random_seed, f"panel:block:{name}"),
+            tolerance=spec.demeaning_tolerance,
+            max_iterations=spec.demeaning_max_iterations,
+            regressors=regressors,
+            block_column=column,
+        )
+        results.insert(0, "block", name)
+        results.insert(1, "block_length_years", length_years)
+        results.insert(2, "block_start_month", start_month)
+        results.insert(3, "blocks", int(panel[column].nunique()))
+        results["is_primary_block"] = name == spec.block
+        frames.append(results)
+    return pd.concat(frames, ignore_index=True)
+
+
+def _block_sensitivity_digest(sensitivity: pd.DataFrame) -> dict[str, Any]:
+    exposure_rows = sensitivity.loc[sensitivity["term"].eq(EXPOSURE_TERM)]
+    return {
+        str(row["block"]): {
+            "blocks": int(row["blocks"]),
+            "ci_lower": _finite(row["ci_lower"]),
+            "ci_upper": _finite(row["ci_upper"]),
+            "interval_excludes_zero": (
+                bool(row["ci_lower"] > 0 or row["ci_upper"] < 0)
+                if pd.notna(row["ci_lower"]) and pd.notna(row["ci_upper"])
+                else None
+            ),
+            "studentized_p_value": _finite(row["studentized_p_value"]),
+        }
+        for row in exposure_rows.to_dict("records")
+    }
+
+
+def _finite(value: Any) -> float | None:
+    number = float(value)
+    return None if pd.isna(number) else number
 
 
 def _scalar(frame: pd.DataFrame, column: str) -> float | None:

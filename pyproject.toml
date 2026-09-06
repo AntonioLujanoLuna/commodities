@@ -52,6 +52,8 @@ enso-financial-analyse = "enso_commodities.cli:financial_analyse"
 enso-palm-download = "enso_commodities.cli:palm_download"
 enso-palm-build = "enso_commodities.cli:palm_build"
 enso-palm-analyse = "enso_commodities.cli:palm_analyse"
+enso-power = "enso_commodities.cli:power"
+enso-report = "enso_commodities.cli:report"
 enso-panel = "enso_commodities.cli:panel"
 enso-figures = "enso_commodities.cli:figures"
 

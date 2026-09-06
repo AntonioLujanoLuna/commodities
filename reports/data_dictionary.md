@@ -206,6 +206,58 @@ replicates; an insufficient candidate receives p=1 and remains in the 30-candida
 input hashes and output hashes. Neutral-date significance is evidence of unusual historical timing,
 not causality; the external-control model and fragility gates remain necessary.
 
+### Era-balance diagnostic
+
+`placebo_era_statistics.csv` and `placebo_era_composition.csv` ask whether the placebo samples
+the same part of history as the events. The reference distribution is the placebo's own
+calendar-month-matched draw table, so each replicate contributes an anchor set with the same size
+and calendar-month composition as the real onsets; the statistic is where that set sits in time.
+
+`placebo_era_statistics.csv` reports `mean_year`, `median_year` and `year_dispersion` for the real
+onsets against that distribution, with a two-sided empirical p-value.
+`placebo_era_composition.csv` breaks the same comparison down by era block, whose length is
+`era_diagnostic_length_years` in `config/research.yaml`, giving onset counts and shares, eligible
+anchor counts and shares, and the mean number of anchors a replicate draws from each era.
+
+Anchors are matched on calendar month alone, but they must also be neutral and sit outside every
+event window, so the eligible pool is whatever quiet stretches survive both filters. A small
+`mean_year` p-value says those stretches sit in a systematically different era than the onsets,
+which would mean the specificity gate is partly comparing macro-financial regimes rather than ENSO
+phases. That is a candidate explanation for negative controls that reject, and it is one no
+additional regressor can remove. The diagnostic changes no gate and no result; it is reported so
+the specificity failure can be attributed rather than only observed.
+
+## Minimum detectable effect
+
+`make power` writes `primary_minimum_detectable_effect.csv`,
+`negative_control_minimum_detectable_effect.csv`, `primary_power_curves.csv`,
+`negative_control_power_curves.csv` and `power_summary.json`. The stage runs no new resampling: it
+reads the inference stage's stored studentized replicates after verifying their hashes.
+
+The alternative is an additive shift on the frozen endpoint. Such a shift moves the sample mean by
+exactly its own size and leaves the sample variance untouched, so the observed statistic under the
+alternative is the stored null statistic plus `effect / standard_error`, and the stored replicates
+are a valid reference distribution for it.
+
+`minimum_detectable_effect_marginal` is the smallest cumulative abnormal return the two-sided
+studentized bootstrap would reject with probability `target_power` at `fdr_alpha`, for a commodity
+tested on its own. `minimum_detectable_effect_family` uses `fdr_alpha` divided by the
+candidate-family size, the level Benjamini-Hochberg demands when exactly one family member
+rejects; the level the FDR gate actually applies sits between the two. Negative controls are
+diagnostics outside the family, so they carry `family_size` of one and the two figures coincide.
+
+`observed_effect_below_marginal_mde` marks a commodity whose estimate is smaller than anything the
+design could have resolved. Such a commodity is uninformative, not null, and belongs in neither
+the NO MATERIAL ENSO EFFECT bucket nor any other conclusion about its ENSO response.
+`minimum_detectable_effect_*_status` records `estimated`, `unreachable_within_maximum_effect`,
+`no_valid_replicates` or `degenerate_standard_error`; an unreachable value is reported as a
+ceiling rather than extrapolated.
+
+`primary_power_curves.csv` gives the rejection probability at each configured reference effect
+under both thresholds. Read all of these as orders of magnitude: they are functions of one
+observed standard error, which at seventeen episodes carries roughly a fifth of its own size in
+sampling noise.
+
 ## External macro-control robustness model
 
 Macro data use a separate immutable snapshot under `data/macro/raw/YYYY-MM-DD/`. Each downloaded
@@ -405,5 +457,42 @@ remain fixed at zero. The two-sided permutation p-value asks whether the named c
 assignment is unusually informative among arbitrary assignments of exactly the same weights. It
 does not make the post-outcome weights prospectively specified.
 
+`panel_block_sensitivity.csv` reruns the primary cell's bootstrap under each alternative
+resampling block in `config/panel.yaml`, keyed by `block`, `block_length_years`,
+`block_start_month`, `blocks` and `term`, with `is_primary_block` marking the frozen calendar-year
+row. Only the resampling changes: the sample, the fixed effects and the point estimate are the
+frozen primary fit, so any movement in `block_standard_error`, `ci_lower`, `ci_upper` or
+`studentized_p_value` is uncertainty the calendar year was not capturing.
+
+The variants exist because a calendar year is shorter than the object being resampled. An episode
+runs at least five months and the panel reads it at lags of up to twelve, so a run of elevated
+regressor exceeds twelve months and always straddles a January boundary; ENSO peaks in
+November-January, so that boundary cuts the peak of nearly every event rather than falling at a
+random point. A block shorter than the dependence understates the standard error, which is the
+direction that flatters the result, so these variants can only widen the interval. May starts the
+conventional ENSO year and keeps each peak whole; the two- and three-year blocks test whether one
+year is long enough at all.
+
 `panel_summary.json` records the design, the primary cell's estimate, interval and p-values, the
-control term's estimate and p-value, grid-level counts, and the input and output hashes.
+control term's estimate and p-value, grid-level counts, the block-sensitivity digest, and the
+input and output hashes.
+
+## Generated report blocks
+
+`make report` renders the blocks between `<!-- generated:... -->` markers in
+`reports/current_results.md` from the stage receipts under `tables/<snapshot>/`; `make
+report-check` re-renders and fails if the file no longer matches. Everything outside the markers
+is hand-written interpretation and is never rewritten.
+
+Three blocks are generated. `run-identity` lists the snapshot, which stage receipts are present,
+which stages did not run, and the SHA-256 of every configuration file the receipts recorded --
+raising if two stages disagree about one, since that means they were not run against the same
+configuration. `evidence-summary` gives one row per stage with the metrics declared in
+`src/enso_commodities/reporting.py`. `receipts` lists each stage's summary file and its digest.
+
+Two properties make the output auditable. Every output hash each receipt recorded is re-verified
+against the file on disk before anything is quoted, so a receipt describing artifacts that have
+since changed cannot be turned into a report at all. And the render is a pure function of the
+receipts -- no timestamps, no environment capture -- which is what lets `report-check` treat a
+stale report as a build failure. A receipt missing a declared metric raises rather than rendering
+a gap, so the report specification and the stages that feed it cannot drift apart silently.

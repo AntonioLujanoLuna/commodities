@@ -4,13 +4,29 @@ This note records the latest locally validated analysis state. It is a compact i
 the hash-linked tables, not a substitute for the detailed data dictionary or a claim of causal
 identification.
 
+It is **overwritten on every run** and describes only the snapshot named below. The dated,
+append-only record of decisions, findings and retired specifications lives in
+[`reports/log/`](log/README.md); open [the 2026-09-06 design
+review](log/2026-09-06-design-review.md) for known limitations of the numbers on this page.
+
+The blocks between `generated:` markers are produced by `make report` from the stage receipts
+under `tables/<snapshot>/`, so their numbers cannot drift from the run they describe; the
+generator refuses to quote a receipt whose artifacts have since changed, and `make report-check`
+fails if this file no longer matches them. Everything outside those markers is hand-written
+interpretation.
+
 ## Run identity
 
-- Data snapshot: `2026-09-05`
+<!-- generated:run-identity start -->
+
+_Not yet generated. Run `make report` against a completed snapshot._
+
+<!-- generated:run-identity end -->
+
+Hand-recorded, because no receipt carries it yet:
+
 - Regenerated: `2026-09-06`
 - Git commit: `4b27862`
-- Research configuration SHA-256:
-  `22c62895e9d30858c6d45ba159626b972e72817fe9d60ea5e7bd922d9bb35c5a`
 - Runtime: Python 3.13.1, NumPy 2.5.2, pandas 3.0.5, SciPy 1.18.1,
   statsmodels 0.15.0
 - Primary bootstrap: 10,000 whole-episode draws, studentized two-sided test
@@ -20,19 +36,47 @@ Every stage from raw-event construction through the panel completed against the 
 snapshots, and each stage accepted its upstream hashes. The generated artifacts remain under
 `tables/2026-09-05/` and are intentionally excluded from version control.
 
+**Three diagnostics postdate this run and have not been applied to it**: the
+minimum-detectable-effect stage (`make power`), the placebo era-balance check, and the panel's
+resampling-block sensitivity. All three can change how the numbers below should be read -- the
+first by separating null results from underpowered ones, the second by explaining the
+negative-control failure, the third by widening the panel interval -- and none of them has been
+run. See [the design review](log/2026-09-06-design-review.md) for what each is expected to
+show.
+
 ## Evidence summary
 
-| Stage | Current result | Interpretation |
-|---|---|---|
-| Primary event study | 10/30 BH FDR; 6/30 BY FDR; 5/30 Westfall-Young FWER | Several non-null associations remain under stricter inference. |
-| Neutral-date placebo | 8 candidates pass bootstrap, sign and placebo gates | Fewer than under the superseded centred test. |
-| External macro controls | 9 candidates pass the macro gates | Dollar, CPI and activity controls do not remove the broad pattern. |
-| Leave one episode out | 7 candidates survive every deletion | The strongest associations are not driven by one episode. |
-| Timing/index grid | Coconut oil, palm oil and RSS3 rubber pass all four cells | These are the remaining robust event-study candidates. |
-| Warm versus cold | Only three survivor/cell contrasts pass FDR | Most of the apparent response is not reliably warm-phase-specific. |
-| Financial controls | 3/24 precious-metal cells reject, all Gold | Controls narrow but do not fully explain the falsification failure. |
-| Palm-oil mechanism | Weather and yield links pass; production to price fails | The physical chain remains incomplete. |
-| Exposure panel | Primary p=0.013; mapping permutation p=0.035; 0/20 cells pass grid FDR | The mapping is informative, but there is no family-wide panel result. |
+<!-- generated:evidence-summary start -->
+
+_Not yet generated. Run `make report` against a completed snapshot._
+
+<!-- generated:evidence-summary end -->
+
+### What those numbers mean
+
+Hand-written; one line per stage. The numbers behind each line are in the generated table above
+and in the prose below.
+
+| Stage | Interpretation |
+|---|---|
+| Primary event study | Several non-null associations remain under stricter inference. |
+| Neutral-date placebo | Fewer survivors than under the superseded centred test. |
+| Minimum detectable effect | Not yet run; until it is, no commodity can be called a null. |
+| External macro controls | Dollar, CPI and activity controls do not remove the broad pattern. |
+| Leave one episode out | The strongest associations are not driven by one episode. |
+| Timing/index grid | Coconut oil, palm oil and RSS3 rubber are the remaining robust candidates. |
+| Warm versus cold | Most of the apparent response is not reliably warm-phase-specific. |
+| Financial controls | Controls narrow but do not fully explain the falsification failure. |
+| Palm-oil mechanism | The physical chain remains incomplete. |
+| Exposure panel | The mapping is informative, but there is no family-wide panel result. |
+
+## Stage receipts
+
+<!-- generated:receipts start -->
+
+_Not yet generated. Run `make report` against a completed snapshot._
+
+<!-- generated:receipts end -->
 
 ## Surviving associations
 

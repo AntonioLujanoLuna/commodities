@@ -12,6 +12,7 @@
 #   make macro-data  download a dated real-data macro snapshot
 #   make macro-dataset build the monthly external-control panel
 #   make macro-analysis run macro-adjusted bootstrap and placebo inference
+#   make power       estimate the minimum detectable effect at the frozen endpoint
 #   make fragility   run leave-one-episode-out bootstrap/FDR checks
 #   make robustness  run RONI/ONI and retrospective/observable robustness
 #   make specificity run exploratory warm-versus-cold falsification diagnostics
@@ -23,6 +24,8 @@
 #   make palm-dataset build the palm production/weather panel
 #   make palm-analysis test the exploratory physical mechanism chain
 #   make panel      run the exposure-weighted two-way fixed-effects panel
+#   make report     regenerate the current-results note from the run receipts
+#   make report-check verify the note still matches the receipts
 #   make real-data  run every implemented real-data stage
 #   make test       run the test suite
 #   make check      lint, type-check and test
@@ -31,7 +34,7 @@
 UV ?= uv
 PY ?= $(UV) run python
 
-.PHONY: setup data dataset raw-events adjustments universe inference placebo macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis panel real-data test lint format typecheck check help
+.PHONY: setup data dataset raw-events adjustments universe inference placebo power macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis panel report report-check real-data test lint format typecheck check help
 
 help:
 	@grep -E '^#   ' Makefile | sed 's/^#   //'
@@ -60,6 +63,9 @@ inference:
 
 placebo:
 	$(PY) scripts/run_placebo.py
+
+power:
+	$(PY) scripts/run_power.py
 
 macro-data:
 	$(PY) scripts/download_macro_data.py
@@ -103,7 +109,13 @@ palm-analysis:
 panel:
 	$(PY) scripts/run_panel_analysis.py
 
-real-data: data dataset raw-events adjustments universe inference placebo macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis panel
+report:
+	$(PY) scripts/build_report.py
+
+report-check:
+	$(PY) scripts/build_report.py --check
+
+real-data: data dataset raw-events adjustments universe inference placebo power macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis panel report
 
 test:
 	$(PY) -m pytest
