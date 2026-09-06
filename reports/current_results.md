@@ -4,6 +4,11 @@ This note records the latest locally validated analysis state. It is a compact i
 the hash-linked tables, not a substitute for the detailed data dictionary or a claim of causal
 identification.
 
+It is **overwritten on every run** and describes only the snapshot named below. The dated,
+append-only record of decisions, findings and retired specifications lives in
+[`reports/log/`](log/README.md); open [the 2026-09-06 design
+review](log/2026-09-06-design-review.md) for known limitations of the numbers on this page.
+
 ## Run identity
 
 - Data snapshot: `2026-09-05`

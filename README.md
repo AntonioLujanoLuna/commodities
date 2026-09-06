@@ -18,7 +18,9 @@
 > identification strategy. Neither design currently establishes an ENSO-specific price effect.
 
 The compact, hash-grounded interpretation of the latest completed run is in
-[`reports/current_results.md`](reports/current_results.md).
+[`reports/current_results.md`](reports/current_results.md), which is overwritten on
+every run. The append-only record of decisions, findings and retired
+specifications is in [`reports/log/`](reports/log/README.md).
 
 Most El Niño commodity analyses stop at *El Niño dates → average commodity return*. That
 calculation is easy and almost always misleading: there have only ever been a couple of dozen
@@ -379,7 +381,8 @@ src/enso_commodities/
 scripts/           command-line entry scripts for downloading and building
 tests/             ingestion, episode, adjustment, integrity, universe, panel,
                    and synthetic recovery/calibration tests
-reports/           data dictionary; statistical reports are planned
+reports/           data dictionary and the latest-run interpretation
+reports/log/       append-only research log: decisions, findings, negative results
 ```
 
 ## Reproducibility
