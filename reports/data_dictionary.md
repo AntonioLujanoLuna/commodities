@@ -476,3 +476,23 @@ year is long enough at all.
 `panel_summary.json` records the design, the primary cell's estimate, interval and p-values, the
 control term's estimate and p-value, grid-level counts, the block-sensitivity digest, and the
 input and output hashes.
+
+## Generated report blocks
+
+`make report` renders the blocks between `<!-- generated:... -->` markers in
+`reports/current_results.md` from the stage receipts under `tables/<snapshot>/`; `make
+report-check` re-renders and fails if the file no longer matches. Everything outside the markers
+is hand-written interpretation and is never rewritten.
+
+Three blocks are generated. `run-identity` lists the snapshot, which stage receipts are present,
+which stages did not run, and the SHA-256 of every configuration file the receipts recorded --
+raising if two stages disagree about one, since that means they were not run against the same
+configuration. `evidence-summary` gives one row per stage with the metrics declared in
+`src/enso_commodities/reporting.py`. `receipts` lists each stage's summary file and its digest.
+
+Two properties make the output auditable. Every output hash each receipt recorded is re-verified
+against the file on disk before anything is quoted, so a receipt describing artifacts that have
+since changed cannot be turned into a report at all. And the render is a pure function of the
+receipts -- no timestamps, no environment capture -- which is what lets `report-check` treat a
+stale report as a build failure. A receipt missing a declared metric raises rather than rendering
+a gap, so the report specification and the stages that feed it cannot drift apart silently.

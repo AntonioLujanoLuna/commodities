@@ -20,6 +20,7 @@ from .panel_analysis import run_panel_analysis
 from .placebo_analysis import run_neutral_date_placebo
 from .power_analysis import run_power_analysis
 from .raw_events import build_raw_event_tables
+from .reporting import build_current_results
 from .robustness_analysis import run_timing_index_robustness
 from .specificity_analysis import run_specificity_diagnostics
 from .universe import build_inference_universe
@@ -240,6 +241,28 @@ def palm_analyse() -> None:
         args.palm_snapshot,
         tables_root=args.tables_root,
         mechanism_config_path=args.config,
+    )
+    print(output)
+
+
+def report() -> None:
+    parser = argparse.ArgumentParser(
+        description="Render the generated blocks of the current-results note from run receipts."
+    )
+    parser.add_argument("--processed-snapshot", type=Path)
+    parser.add_argument("--tables-root", type=Path)
+    parser.add_argument("--report", type=Path)
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Fail if the note does not already match the receipts, instead of rewriting it.",
+    )
+    args = parser.parse_args()
+    output = build_current_results(
+        processed_snapshot=args.processed_snapshot,
+        tables_root=args.tables_root,
+        report_path=args.report,
+        check=args.check,
     )
     print(output)
 

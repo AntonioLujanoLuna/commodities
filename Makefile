@@ -24,6 +24,8 @@
 #   make palm-dataset build the palm production/weather panel
 #   make palm-analysis test the exploratory physical mechanism chain
 #   make panel      run the exposure-weighted two-way fixed-effects panel
+#   make report     regenerate the current-results note from the run receipts
+#   make report-check verify the note still matches the receipts
 #   make real-data  run every implemented real-data stage
 #   make test       run the test suite
 #   make check      lint, type-check and test
@@ -32,7 +34,7 @@
 UV ?= uv
 PY ?= $(UV) run python
 
-.PHONY: setup data dataset raw-events adjustments universe inference placebo power macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis panel real-data test lint format typecheck check help
+.PHONY: setup data dataset raw-events adjustments universe inference placebo power macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis panel report report-check real-data test lint format typecheck check help
 
 help:
 	@grep -E '^#   ' Makefile | sed 's/^#   //'
@@ -107,7 +109,13 @@ palm-analysis:
 panel:
 	$(PY) scripts/run_panel_analysis.py
 
-real-data: data dataset raw-events adjustments universe inference placebo power macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis panel
+report:
+	$(PY) scripts/build_report.py
+
+report-check:
+	$(PY) scripts/build_report.py --check
+
+real-data: data dataset raw-events adjustments universe inference placebo power macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis panel report
 
 test:
 	$(PY) -m pytest
