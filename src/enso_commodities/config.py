@@ -53,6 +53,10 @@ class ResearchConfig:
     placebo_match_anchor_calendar_month: bool
     placebo_sample_without_replacement: bool
     placebo_minimum_valid_replicate_share: float
+    placebo_era_diagnostic_length_years: int
+    power_target_power: float
+    power_reference_effects: tuple[float, ...]
+    power_maximum_effect: float
     fragility_method: str
     fragility_inference_gate: str
     fragility_require_sign_agreement: bool
@@ -105,6 +109,7 @@ def load_research_config(path: Path | None = None) -> ResearchConfig:
     )
     if len(placebo_exclusion_values) != 2:
         raise ValueError("actual_event_exclusion_window must have two endpoints")
+    power = raw["power"]
     macro = raw["macro_adjustments"]
     macro_exclusion_values = tuple(int(value) for value in macro["estimation_exclusion_window"])
     if len(macro_exclusion_values) != 2:
@@ -151,6 +156,10 @@ def load_research_config(path: Path | None = None) -> ResearchConfig:
         placebo_match_anchor_calendar_month=bool(placebo["match_anchor_calendar_month"]),
         placebo_sample_without_replacement=bool(placebo["sample_without_replacement"]),
         placebo_minimum_valid_replicate_share=float(placebo["minimum_valid_replicate_share"]),
+        placebo_era_diagnostic_length_years=int(placebo["era_diagnostic_length_years"]),
+        power_target_power=float(power["target_power"]),
+        power_reference_effects=tuple(float(value) for value in power["reference_effects"]),
+        power_maximum_effect=float(power["maximum_effect"]),
         fragility_method=str(raw["fragility"]["method"]),
         fragility_inference_gate=str(raw["fragility"]["inference_gate"]),
         fragility_require_sign_agreement=bool(raw["fragility"]["require_sign_agreement"]),
@@ -232,6 +241,16 @@ def load_research_config(path: Path | None = None) -> ResearchConfig:
         raise ValueError("placebo anchors must be sampled without replacement within a replicate")
     if not 0 < config.placebo_minimum_valid_replicate_share <= 1:
         raise ValueError("placebo minimum_valid_replicate_share must fall in (0, 1]")
+    if config.placebo_era_diagnostic_length_years < 1:
+        raise ValueError("era_diagnostic_length_years must be positive")
+    if not 0 < config.power_target_power < 1:
+        raise ValueError("power target_power must fall between zero and one")
+    if not config.power_reference_effects:
+        raise ValueError("At least one power reference effect is required")
+    if any(effect <= 0 for effect in config.power_reference_effects):
+        raise ValueError("power reference_effects must be positive")
+    if config.power_maximum_effect <= max(config.power_reference_effects):
+        raise ValueError("power maximum_effect must exceed every reference effect")
     if config.fragility_method != "leave_one_episode_out":
         raise ValueError("Unsupported fragility method")
     if config.fragility_inference_gate != "bootstrap_fdr":

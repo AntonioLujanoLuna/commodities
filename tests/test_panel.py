@@ -15,6 +15,9 @@ from enso_commodities.config import project_root
 from enso_commodities.panel import (
     CONTROL_TERM,
     EXPOSURE_TERM,
+    BlockDefinition,
+    assign_resampling_blocks,
+    attach_resampling_blocks,
     build_exposure_table,
     build_panel,
     fit_exposure_panel,
@@ -40,6 +43,7 @@ def _config_with(tmp_path: Path, mutate: Callable[[dict], None]) -> Path:
     with SHIPPED_CONFIG.open(encoding="utf-8") as handle:
         raw = yaml.safe_load(handle)
     mutate(raw)
+    tmp_path.mkdir(parents=True, exist_ok=True)
     path = tmp_path / "panel.yaml"
     path.write_text(yaml.safe_dump(raw), encoding="utf-8")
     return path
@@ -324,6 +328,153 @@ def test_collinear_interactions_are_refused_rather_than_silently_fitted() -> Non
         fit_exposure_panel(panel, tolerance=TOLERANCE, max_iterations=MAX_ITERATIONS)
 
 
+def test_an_enso_year_block_keeps_a_warm_peak_whole() -> None:
+    """The reason the alternative blocks exist.
+
+    ENSO peaks in November-January, so a calendar-year boundary cuts through
+    the middle of an event. A May-April block keeps the peak of the 1997-98
+    event inside one resampling unit.
+    """
+    dates = pd.Series(pd.date_range("1997-05-01", "1998-05-01", freq="MS"))
+    enso_year = assign_resampling_blocks(dates, start_month=5, length_years=1)
+    calendar = assign_resampling_blocks(dates, start_month=1, length_years=1)
+    assert enso_year.iloc[:-1].nunique() == 1
+    assert enso_year.iloc[-1] != enso_year.iloc[0]
+    # The calendar year splits the same span at the December/January boundary.
+    assert calendar.nunique() == 2
+    assert calendar[dates.dt.year.eq(1997)].nunique() == 1
+
+
+def test_longer_blocks_merge_consecutive_ones() -> None:
+    dates = pd.Series(pd.date_range("1960-05-01", "1972-04-01", freq="MS"))
+    single = assign_resampling_blocks(dates, start_month=5, length_years=1)
+    triple = assign_resampling_blocks(dates, start_month=5, length_years=3)
+    assert single.nunique() == 12
+    # Longer blocks are cut on the same absolute month index, so a span of
+    # twelve one-year blocks covers four or five three-year ones depending on
+    # where it starts; what matters is that the shorter blocks nest inside.
+    assert triple.nunique() in {4, 5}
+    assert single.groupby(triple).nunique().le(3).all()
+
+
+def test_assign_resampling_blocks_refuses_impossible_definitions() -> None:
+    dates = pd.Series(pd.date_range("1990-01-01", periods=12, freq="MS"))
+    with pytest.raises(ValueError, match="start_month"):
+        assign_resampling_blocks(dates, start_month=13, length_years=1)
+    with pytest.raises(ValueError, match="length_years"):
+        assign_resampling_blocks(dates, start_month=1, length_years=0)
+
+
+def _dependent_panel(*, seed: int, years: int = 36, span_months: int = 60) -> pd.DataFrame:
+    """A panel whose residual dependence spans five years, not one.
+
+    Two-way fixed effects absorb a shock that hits every commodity equally, so
+    the shock here has a commodity-specific loading and survives the transform.
+    There is no true ENSO response; all that is left for a block bootstrap to
+    measure is the dependence in the residual.
+    """
+    generator = np.random.default_rng(seed)
+    dates = pd.date_range("1960-01-01", periods=years * 12, freq="MS")
+    shock_block = np.arange(len(dates)) // span_months
+    shocks = generator.standard_normal(shock_block.max() + 1)
+    index = generator.standard_normal(len(dates)).cumsum() * 0.05
+    rows = []
+    for position in range(8):
+        control = position >= 6
+        weight = 0.0 if control else float([0.25, 0.5, 1.0][position % 3])
+        loading = float(generator.uniform(0.5, 2.0))
+        outcome = loading * shocks[shock_block] + generator.standard_normal(len(dates)) * 0.05
+        rows.append(
+            pd.DataFrame(
+                {
+                    "date": dates,
+                    "commodity": f"C{position:02d}",
+                    "outcome": outcome,
+                    EXPOSURE_TERM: weight * index,
+                    CONTROL_TERM: float(control) * index,
+                    "calendar_year": dates.year,
+                }
+            )
+        )
+    return pd.concat(rows, ignore_index=True)
+
+
+def test_a_block_shorter_than_the_dependence_understates_the_standard_error() -> None:
+    """Why the frozen calendar-year interval is the optimistic one.
+
+    A block bootstrap only preserves dependence that fits inside a block. When
+    the residual dependence runs five years and the block runs one, each
+    replicate treats five correlated stretches as independent draws and the
+    interval comes out too narrow. Moving the boundary alone does not help;
+    only a longer block does.
+    """
+    panel = attach_resampling_blocks(
+        _dependent_panel(seed=5),
+        (
+            BlockDefinition(name="enso_year", start_month=5, length_years=1),
+            BlockDefinition(name="enso_three_year", start_month=5, length_years=3),
+        ),
+    )
+    fit = fit_exposure_panel(panel, tolerance=TOLERANCE, max_iterations=MAX_ITERATIONS)
+    errors = {}
+    for column in ("calendar_year", "block_enso_year", "block_enso_three_year"):
+        results, _ = year_block_bootstrap(
+            panel,
+            fit,
+            replicates=200,
+            confidence_level=0.95,
+            seed=99,
+            tolerance=TOLERANCE,
+            max_iterations=MAX_ITERATIONS,
+            block_column=column,
+        )
+        row = results.loc[results["term"].eq(EXPOSURE_TERM)].iloc[0]
+        errors[column] = float(row["block_standard_error"])
+    assert errors["block_enso_three_year"] > 1.25 * errors["calendar_year"]
+    assert errors["block_enso_three_year"] > 1.25 * errors["block_enso_year"]
+
+
+def test_the_bootstrap_refuses_a_block_column_the_panel_does_not_have() -> None:
+    panel = _dependent_panel(seed=6)
+    fit = fit_exposure_panel(panel, tolerance=TOLERANCE, max_iterations=MAX_ITERATIONS)
+    with pytest.raises(ValueError, match="resampling-block column"):
+        year_block_bootstrap(
+            panel,
+            fit,
+            replicates=10,
+            confidence_level=0.95,
+            seed=1,
+            tolerance=TOLERANCE,
+            max_iterations=MAX_ITERATIONS,
+            block_column="block_missing",
+        )
+
+
+def test_config_refuses_a_malformed_block_sensitivity(tmp_path: Path) -> None:
+    def bad_month(raw: dict) -> None:
+        raw["inference"]["block_sensitivity"] = [
+            {"name": "bad", "start_month": 0, "length_years": 1}
+        ]
+
+    def duplicate(raw: dict) -> None:
+        raw["inference"]["block_sensitivity"] = [
+            {"name": "same", "start_month": 5, "length_years": 1},
+            {"name": "same", "start_month": 5, "length_years": 2},
+        ]
+
+    def shadows_primary(raw: dict) -> None:
+        raw["inference"]["block_sensitivity"] = [
+            {"name": "calendar_year", "start_month": 5, "length_years": 1}
+        ]
+
+    with pytest.raises(ValueError, match="start_month"):
+        load_panel_config(_config_with(tmp_path / "a", bad_month))
+    with pytest.raises(ValueError, match="unique"):
+        load_panel_config(_config_with(tmp_path / "b", duplicate))
+    with pytest.raises(ValueError, match="primary block name"):
+        load_panel_config(_config_with(tmp_path / "c", shadows_primary))
+
+
 def _write_stage_fixture(tmp_path: Path) -> tuple[Path, Path, Path, Path]:
     """Lay out the snapshot, tables and config a stage run expects."""
     fixture = synthetic_exposure_panel(seed=21, candidates=6, controls=2)
@@ -427,6 +578,15 @@ def test_stage_run_verifies_hashes_and_writes_a_receipt(tmp_path: Path) -> None:
     assert results.loc[results["term"].eq(CONTROL_TERM), "bh_q_value"].isna().all()
     permutations = pd.read_parquet(output_dir / "panel_exposure_weight_permutations.parquet")
     assert len(permutations) == 999
+
+    sensitivity = pd.read_csv(output_dir / "panel_block_sensitivity.csv")
+    assert sensitivity["is_primary_block"].sum() == len(sensitivity["term"].unique())
+    exposure_rows = sensitivity.loc[sensitivity["term"].eq(EXPOSURE_TERM)].set_index("block")
+    assert "calendar_year" in exposure_rows.index
+    # The point estimate is the frozen fit; only the resampling changes.
+    assert exposure_rows["estimate"].nunique() == 1
+    # Longer blocks mean fewer of them.
+    assert exposure_rows.loc["enso_three_year", "blocks"] < exposure_rows.loc["enso_year", "blocks"]
 
 
 def test_stage_run_refuses_a_tampered_input(tmp_path: Path) -> None:

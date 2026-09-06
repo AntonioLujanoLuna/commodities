@@ -11,6 +11,13 @@
 > negative-control gate still fails, so the numerical associations below are not ENSO-specific
 > findings. An exploratory warm-versus-cold falsification diagnostic is also implemented.
 >
+> Three diagnostics have since been added and are implemented but not yet run against a real-data
+> snapshot: a minimum-detectable-effect stage, so a null result can be told apart from an
+> underpowered one; an era-balance check on the neutral-date placebo, which tests whether the
+> placebo samples the same part of history as the events; and a resampling-block sensitivity for
+> the panel, because a calendar year is shorter than an ENSO episode. The numbers below predate
+> all three.
+>
 > The bootstrap test has been recalibrated: the centred percentile test is anti-conservative at
 > this many episodes, and the studentized version is now what the gates read. The results below
 > were regenerated under that method on 2026-09-06. An exploratory exposure-weighted panel with
@@ -71,6 +78,7 @@ uv run python scripts/build_adjusted_events.py
 uv run python scripts/build_universe.py
 uv run python scripts/run_inference.py
 uv run python scripts/run_placebo.py
+uv run python scripts/run_power.py
 uv run python scripts/download_macro_data.py
 uv run python scripts/build_macro_dataset.py
 uv run python scripts/run_macro_analysis.py
@@ -134,7 +142,9 @@ outcome-blind universe, primary endpoint and control freeze                    [
         ↓
 whole-episode bootstrap, sign agreement and candidate-family FDR               [implemented]
         ↓
-calendar-matched neutral-date placebo                                           [implemented]
+calendar-matched neutral-date placebo, with an era-balance diagnostic          [implemented]
+        ↓
+minimum detectable effect at the frozen endpoint                               [implemented]
         ↓
 external dollar, CPI and global-activity controls                              [implemented]
         ↓
@@ -150,7 +160,8 @@ real-rate, credit-spread and financial-conditions controls                    [i
         ↓
 palm-oil physical-mechanism pilot                                             [implemented]
         ↓
-exposure-weighted panel with commodity and month fixed effects                [implemented]
+exposure-weighted panel with commodity and month fixed effects, and its
+resampling-block sensitivity                                                  [implemented]
         ↓
 other mechanisms, forecasting, tradability, scorecard, figures and report     [planned]
 ```
@@ -183,6 +194,23 @@ receipts rather than a prose report.
   episode draw across every commodity; applying only a marginal correction afterwards throws
   that information away. Westfall-Young is a strictly higher bar than either FDR rule and is
   reported as such, not as a replacement.
+- **Every null is reported with what could have been detected.** The minimum-detectable-effect
+  stage inverts the studentized bootstrap that the gates read: an additive shift on the endpoint
+  moves the sample mean by its own size and leaves the standard error alone, so the stored null
+  replicates already are the reference distribution and no new resampling is needed. A commodity
+  whose estimate falls below its own minimum detectable effect is uninformative rather than null,
+  and does not belong in the NO MATERIAL ENSO EFFECT bucket.
+- **The placebo is checked for era balance.** Anchors are matched on calendar month, but they must
+  also be neutral and outside every event window, so the eligible pool is whatever quiet stretches
+  survive both filters. If those stretches sit in a different part of history than the onsets, the
+  specificity gate is partly comparing macro-financial regimes rather than ENSO phases -- which is
+  a candidate explanation for the precious-metal failure that no additional regressor can remove.
+  The diagnostic tests that against the placebo's own draw distribution and changes no gate.
+- **The panel's resampling block is reported at several lengths.** A calendar year is shorter than
+  an ENSO episode and its price response, and ENSO peaks in November-January, so a January boundary
+  splits nearly every event. Blocks shorter than the dependence understate the standard error, so
+  the frozen calendar-year interval is the optimistic one; May-aligned one-, two- and three-year
+  blocks are reported alongside it.
 - **Forecasting is strictly recursive** and labelled *pseudo*-out-of-sample, because the
   published ENSO indices are retrospectively revised.
 
@@ -358,6 +386,9 @@ src/enso_commodities/
   inference.py     primary/control inference outputs and hash-linked receipt
   placebo.py       neutral anchors, strict endpoints, matched draws and empirical tests
   placebo_analysis.py real-data placebo outputs and hash-linked receipt
+  exchangeability.py whether the placebo samples the same era as the events
+  power.py         minimum detectable effect from the stored bootstrap replicates
+  power_analysis.py minimum-detectable-effect stage and hash-linked receipt
   macro_data.py    BIS, BLS/FRED and Dallas Fed parsing and transformations
   macro_adjustments.py out-of-event multivariate commodity regressions
   macro_analysis.py macro-adjusted bootstrap/placebo outputs and receipt

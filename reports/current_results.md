@@ -25,6 +25,14 @@ Every stage from raw-event construction through the panel completed against the 
 snapshots, and each stage accepted its upstream hashes. The generated artifacts remain under
 `tables/2026-09-05/` and are intentionally excluded from version control.
 
+**Three diagnostics postdate this run and have not been applied to it**: the
+minimum-detectable-effect stage (`make power`), the placebo era-balance check, and the panel's
+resampling-block sensitivity. All three can change how the numbers below should be read -- the
+first by separating null results from underpowered ones, the second by explaining the
+negative-control failure, the third by widening the panel interval -- and none of them has been
+run. See [the design review](log/2026-09-06-design-review.md) for what each is expected to
+show.
+
 ## Evidence summary
 
 | Stage | Current result | Interpretation |

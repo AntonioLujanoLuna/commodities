@@ -7,6 +7,7 @@ from typing import Any
 import pandas as pd
 
 from .config import load_research_config, project_root
+from .exchangeability import era_balance
 from .placebo import (
     build_placebo_endpoints,
     draw_calendar_matched_anchors,
@@ -49,6 +50,26 @@ def _verify_endpoint_reconstruction(
     if maximum > 1e-12:
         raise ValueError(f"Observed endpoint reconstruction differs by {maximum}")
     return maximum
+
+
+def _era_digest(statistics: pd.DataFrame) -> dict[str, Any]:
+    """Where the real onsets sit in history against the placebo's own draws.
+
+    A small p-value here does not say the study is wrong. It says the
+    specificity gate is comparing anchor sets drawn from different parts of the
+    sample, so part of what it measures is era rather than ENSO phase -- which
+    is a candidate explanation for negative controls that reject.
+    """
+    return {
+        str(row["statistic"]): {
+            "observed": float(row["observed"]),
+            "placebo_mean": float(row["placebo_mean"]),
+            "placebo_interval_lower": float(row["placebo_interval_lower"]),
+            "placebo_interval_upper": float(row["placebo_interval_upper"]),
+            "p_value": float(row["p_value"]),
+        }
+        for row in statistics.to_dict("records")
+    }
 
 
 def run_neutral_date_placebo(
@@ -164,6 +185,16 @@ def run_neutral_date_placebo(
         replicates=config.placebo_replicates,
         seed=salted_seed(config.random_seed, "negative_control_neutral_date_placebo"),
     )
+    # Diagnostic only: does the placebo sample the same era as the events?
+    # Nothing downstream reads it, and no gate changes on its result.
+    era = era_balance(
+        real_episodes["onset_date"],
+        eligible,
+        primary_draws,
+        era_length_years=config.placebo_era_diagnostic_length_years,
+        confidence_level=config.confidence_level,
+    )
+
     primary_placebo = evaluate_placebo_means(
         endpoints.loc[endpoints["commodity"].isin(primary_observed["commodity"])],
         primary_draws,
@@ -218,6 +249,8 @@ def run_neutral_date_placebo(
         "control_replicates": output_dir / "negative_control_placebo_replicates.parquet",
         "primary_results": output_dir / "primary_placebo_results.csv",
         "control_results": output_dir / "negative_control_placebo_results.csv",
+        "era_statistics": output_dir / "placebo_era_statistics.csv",
+        "era_composition": output_dir / "placebo_era_composition.csv",
     }
     eligible.to_csv(paths["eligible"], index=False, date_format="%Y-%m-%d")
     endpoints.to_parquet(paths["endpoints"], index=False)
@@ -227,6 +260,8 @@ def run_neutral_date_placebo(
     control_placebo.replicates.to_parquet(paths["control_replicates"], index=False)
     primary_results.sort_values("commodity").to_csv(paths["primary_results"], index=False)
     control_results.sort_values("commodity").to_csv(paths["control_results"], index=False)
+    era.statistics.to_csv(paths["era_statistics"], index=False)
+    era.eras.to_csv(paths["era_composition"], index=False)
 
     summary: dict[str, Any] = {
         "data_provenance": "real",
@@ -244,6 +279,8 @@ def run_neutral_date_placebo(
         },
         "diagnostics": {
             "eligible_neutral_anchors": len(eligible),
+            "era_balance": _era_digest(era.statistics),
+            "era_diagnostic_length_years": config.placebo_era_diagnostic_length_years,
             "endpoint_reconstruction_max_abs_difference": reconstruction_difference,
             "negative_controls_rejecting_raw_placebo": int(
                 control_results["reject_placebo_raw"].sum()

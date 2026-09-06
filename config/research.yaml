@@ -48,6 +48,22 @@ placebo:
   match_anchor_calendar_month: true
   sample_without_replacement: true
   minimum_valid_replicate_share: 0.9
+  # Diagnostic only, and it changes no gate. Anchors are matched on calendar
+  # month alone, but they must also be neutral and sit outside every event
+  # window, so the eligible pool is whatever quiet stretches of history survive
+  # both filters. If those stretches sit in a different era than the onsets, the
+  # specificity gate is partly comparing macro-financial regimes rather than
+  # ENSO phases, and the precious-metal controls would reject for that reason.
+  era_diagnostic_length_years: 10
+
+power:
+  # What effect could this design have detected? Without it, a commodity in the
+  # NO MATERIAL ENSO EFFECT bucket may simply be one the study never had the
+  # episodes to see. Reference effects are cumulative abnormal returns at the
+  # frozen horizon, on the same scale as mean_return.
+  target_power: 0.8
+  reference_effects: [0.05, 0.10, 0.20, 0.30, 0.50]
+  maximum_effect: 5.0
 
 fragility:
   method: leave_one_episode_out

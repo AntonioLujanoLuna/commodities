@@ -59,6 +59,24 @@ inference:
   # receives two separate sets of month effects, so a replicate stays one
   # coherent alternative history in the same sense as the episode bootstrap.
   block: calendar_year
+  # Sensitivity only; the primary block above stays frozen. A calendar year is
+  # shorter than the object being resampled -- an episode runs at least five
+  # months and is read at lags of up to twelve, so a run of elevated regressor
+  # exceeds twelve months and always straddles a January boundary. ENSO peaks in
+  # NDJ, so that boundary cuts the peak of nearly every event. A block shorter
+  # than the dependence understates the standard error, which is the direction
+  # that flatters the result, so these variants can only widen the interval.
+  # May starts the conventional ENSO year and keeps each NDJ peak whole.
+  block_sensitivity:
+    - name: enso_year
+      start_month: 5
+      length_years: 1
+    - name: enso_two_year
+      start_month: 5
+      length_years: 2
+    - name: enso_three_year
+      start_month: 5
+      length_years: 3
   bootstrap_replicates: 2000
   # Shuffle the same weights across candidate commodities in the primary cell.
   # Controls stay fixed at zero. This tests the mapping, not the weight scale.

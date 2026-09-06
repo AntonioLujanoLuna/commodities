@@ -37,7 +37,9 @@ jobs:
         run: uv run python -m pytest
 
       - name: Smoke-test installed CLI
-        run: uv run enso-panel --help
+        run: |
+          uv run enso-panel --help
+          uv run enso-power --help
 
       - name: Run lint
         if: matrix.python-version == '3.13'

@@ -18,6 +18,7 @@ from .palm_oil_data import build_palm_oil_dataset
 from .palm_oil_mechanism import run_palm_oil_mechanism
 from .panel_analysis import run_panel_analysis
 from .placebo_analysis import run_neutral_date_placebo
+from .power_analysis import run_power_analysis
 from .raw_events import build_raw_event_tables
 from .robustness_analysis import run_timing_index_robustness
 from .specificity_analysis import run_specificity_diagnostics
@@ -239,6 +240,22 @@ def palm_analyse() -> None:
         args.palm_snapshot,
         tables_root=args.tables_root,
         mechanism_config_path=args.config,
+    )
+    print(output)
+
+
+def power() -> None:
+    parser = argparse.ArgumentParser(
+        description="Estimate the minimum detectable effect at the frozen endpoint."
+    )
+    parser.add_argument("--processed-snapshot", type=Path)
+    parser.add_argument("--tables-root", type=Path)
+    parser.add_argument("--research-config", type=Path)
+    args = parser.parse_args()
+    output = run_power_analysis(
+        processed_snapshot=args.processed_snapshot,
+        tables_root=args.tables_root,
+        research_config_path=args.research_config,
     )
     print(output)
 
