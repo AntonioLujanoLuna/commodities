@@ -367,14 +367,17 @@ pilot and does not promote or modify the frozen price-study classification.
 ## Exposure-weighted panel
 
 `make panel` writes `panel_exposure_weights.csv`, `panel_specification_results.csv`,
-`panel_bootstrap_replicates.parquet` and `panel_summary.json`. The stage is exploratory and does
-not feed the frozen event-study contract.
+`panel_bootstrap_replicates.parquet`, `panel_exposure_weight_permutations.parquet` and
+`panel_summary.json`. The stage is exploratory and does not feed the frozen event-study contract.
 
 `panel_exposure_weights.csv` is the registry restricted to mechanism candidates and negative
 controls, with `exposure_weight` from `config/panel.yaml` (1.00 direct teleconnection, 0.50
 weaker or less consistent, 0.25 pathway mediated through other commodities, 0.00 controls),
 `uniform_weight` for the judgement-free variant, and `is_negative_control`. The build fails if the
-weights do not exactly cover the candidate registry.
+weights do not exactly cover the candidate registry. The same table carries the exposure version,
+method, authorship date, outcome-blind flag and allowed inference scope. Configuration validation
+prevents the current post-outcome expert-judgment weights from being labelled outcome-blind or
+confirmatory.
 
 `panel_specification_results.csv` has one row per term per grid cell, keyed by `cell`,
 `index_definition`, `lag_months`, `weighting` and `term`. `exposure_x_enso` is the differential
@@ -395,6 +398,12 @@ fitted cell; a rank-deficient design raises rather than being silently fitted.
 
 `bh_q_value` and `reject_fdr` are applied across the `exposure_x_enso` cells only. The control
 term stays outside the family, in line with every other stage.
+
+`panel_exposure_weight_permutations.parquet` holds the falsification draws for the primary panel
+cell. Each draw shuffles the observed exposure weights across mechanism candidates while controls
+remain fixed at zero. The two-sided permutation p-value asks whether the named commodity-to-weight
+assignment is unusually informative among arbitrary assignments of exactly the same weights. It
+does not make the post-outcome weights prospectively specified.
 
 `panel_summary.json` records the design, the primary cell's estimate, interval and p-values, the
 control term's estimate and p-value, grid-level counts, and the input and output hashes.

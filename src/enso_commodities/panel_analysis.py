@@ -24,6 +24,7 @@ from .panel import (
     fit_exposure_panel,
     load_panel_config,
     panel_regressors,
+    permute_candidate_exposure_weights,
     year_block_bootstrap,
 )
 from .provenance import sha256_file, verify_hashes, write_json_atomic
@@ -72,13 +73,38 @@ def run_panel_analysis(
     exposure = build_exposure_table(registry, spec)
 
     results, replicates = _run_specification_grid(monthly, enso, exposure, spec)
+    primary_panel = build_panel(
+        monthly,
+        enso,
+        exposure,
+        index_name=spec.primary_index,
+        lag_months=spec.primary_lag_months,
+        outcome_column=spec.outcome_column,
+        weighting=spec.primary_weighting,
+    )
+    primary_fit = fit_exposure_panel(
+        primary_panel,
+        tolerance=spec.demeaning_tolerance,
+        max_iterations=spec.demeaning_max_iterations,
+        regressors=panel_regressors(spec.primary_weighting),
+    )
+    permutation = permute_candidate_exposure_weights(
+        primary_panel,
+        primary_fit,
+        replicates=spec.weight_permutation_replicates,
+        seed=salted_seed(spec.random_seed, "panel:exposure_weight_permutation"),
+        tolerance=spec.demeaning_tolerance,
+        max_iterations=spec.demeaning_max_iterations,
+    )
 
     exposure_path = output_dir / "panel_exposure_weights.csv"
     results_path = output_dir / "panel_specification_results.csv"
     replicates_path = output_dir / "panel_bootstrap_replicates.parquet"
+    permutation_path = output_dir / "panel_exposure_weight_permutations.parquet"
     exposure.to_csv(exposure_path, index=False)
     results.to_csv(results_path, index=False)
     replicates.to_parquet(replicates_path, index=False)
+    permutation.replicates.to_parquet(permutation_path, index=False)
 
     primary = results.loc[
         results["index_definition"].eq(spec.primary_index)
@@ -97,13 +123,19 @@ def run_panel_analysis(
             "identification": "cross-sectional exposure interacted with the ENSO index, "
             "with commodity and calendar-month fixed effects",
             "outcome_column": spec.outcome_column,
+            "exposure_version": spec.exposure_version,
+            "exposure_method": spec.exposure_method,
+            "exposure_authored_on": spec.exposure_authored_on.isoformat(),
+            "exposure_outcome_blind": spec.exposure_outcome_blind,
+            "exposure_inference_scope": spec.exposure_inference_scope,
             "primary_index": spec.primary_index,
             "primary_lag_months": spec.primary_lag_months,
             "primary_weighting": spec.primary_weighting,
             "resampling_block": spec.block,
             "bootstrap_replicates": spec.bootstrap_replicates,
+            "weight_permutation_replicates": spec.weight_permutation_replicates,
             "random_seed": spec.random_seed,
-            "status": "exploratory",
+            "status": spec.exposure_inference_scope.removesuffix("_only"),
         },
         "input_hashes": {
             adjusted_summary_path.name: sha256_file(adjusted_summary_path),
@@ -116,6 +148,7 @@ def run_panel_analysis(
         },
         "output_hashes": {
             exposure_path.name: sha256_file(exposure_path),
+            permutation_path.name: sha256_file(permutation_path),
             replicates_path.name: sha256_file(replicates_path),
             results_path.name: sha256_file(results_path),
         },
@@ -133,6 +166,13 @@ def run_panel_analysis(
             "primary_exposure_estimate": _scalar(primary_exposure, "estimate"),
             "primary_exposure_studentized_p_value": _scalar(
                 primary_exposure, "studentized_p_value"
+            ),
+            "primary_exposure_weight_mapping_percentile": permutation.mapping_percentile,
+            "primary_exposure_weight_permutation_mean": permutation.permutation_mean,
+            "primary_exposure_weight_permutation_median": permutation.permutation_median,
+            "primary_exposure_weight_permutation_p_value": permutation.p_value,
+            "primary_exposure_weight_permutation_valid_replicates": (
+                permutation.valid_replicates
             ),
         },
         "snapshot": snapshot.name,

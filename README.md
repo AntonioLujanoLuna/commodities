@@ -11,13 +11,14 @@
 > negative-control gate still fails, so the numerical associations below are not ENSO-specific
 > findings. An exploratory warm-versus-cold falsification diagnostic is also implemented.
 >
-> **Two changes supersede parts of what follows.** First, the bootstrap test was recalibrated:
-> the centred percentile test is anti-conservative at this many episodes, and the studentized
-> version is now what the gates read. Every count quoted below was produced under the old test
-> and has to be regenerated. Second, an exploratory exposure-weighted panel with commodity and
-> calendar-month fixed effects has been added as a second identification strategy, because the
-> negative-control failure looks like a property of the event-study baseline rather than an
-> omitted control.
+> The bootstrap test has been recalibrated: the centred percentile test is anti-conservative at
+> this many episodes, and the studentized version is now what the gates read. The results below
+> were regenerated under that method on 2026-09-06. An exploratory exposure-weighted panel with
+> commodity and calendar-month fixed effects is also implemented and reported as a separate
+> identification strategy. Neither design currently establishes an ENSO-specific price effect.
+
+The compact, hash-grounded interpretation of the latest completed run is in
+[`reports/current_results.md`](reports/current_results.md).
 
 Most El Niño commodity analyses stop at *El Niño dates → average commodity return*. That
 calculation is easy and almost always misleading: there have only ever been a couple of dozen
@@ -204,43 +205,48 @@ episodes. The registry contains 32 mechanism candidates and three precious-metal
 controls. Controls are diagnostics outside the candidate FDR family. Every one of the 71 source
 series is classified; an unclassified future source column stops the build.
 
-For the 2026-09-05 real-data snapshot, 13 of 30 candidates reject at candidate-family bootstrap
-FDR 5%, and 26 of 30 have agreeing mean, median and sign share. Eleven pass those gates and the
-neutral-date placebo: Australian coal, cocoa, coconut oil, Robusta coffee, DAP, Malaysian logs,
-European natural gas, palm oil, Thai 5% rice, RSS3 rubber and urea. Fish meal lacks the frozen 90%
-valid-placebo-replicate coverage and is conservatively assigned placebo p=1.
+For the 2026-09-05 real-data snapshot, regenerated with studentized inference on 2026-09-06, 10
+of 30 candidates reject at candidate-family bootstrap BH FDR 5%, six survive the more conservative
+BY adjustment and five survive Westfall-Young FWER. Twenty-six have agreeing mean, median and sign
+share. Eight pass the bootstrap, sign and neutral-date placebo gates: Australian coal, coconut oil,
+Robusta coffee, Malaysian logs, European natural gas, palm oil, Thai 5% rice and RSS3 rubber. Fish
+meal lacks the frozen 90% valid-placebo-replicate coverage and is conservatively assigned placebo
+p=1.
 
 The external-control specification has 17 macro-covered episodes and successfully estimates all
-71 commodity models. Twelve candidates pass its bootstrap, sign and placebo gates: the same 11
-listed above plus barley. This does not repair the specificity failure. Gold, Platinum and Silver
-remain significant under both macro-adjusted bootstrap and placebo inference. None of the 12 is
-therefore promoted to a validated El Niño mechanism.
+71 commodity models. Nine candidates pass its bootstrap, sign and placebo gates: Australian coal,
+coconut oil, Robusta coffee, Malaysian logs, European natural gas, palm oil, Thai 5% rice, RSS3
+rubber and urea. This does not repair the specificity failure. Gold, Platinum and Silver still
+reject under both macro-adjusted bootstrap and placebo inference. None of the nine is therefore
+promoted to a validated El Niño mechanism.
 
 Leave-one-episode-out inference removes each of the 17 macro-covered episodes in turn and reruns
-10,000 bootstrap draws plus candidate-family FDR. Eleven candidates survive all 17 deletions;
-barley rejects in only 11 scenarios and is classified as fragile. Gold, Platinum and Silver remain
-positive and significant after every deletion. The unexplained precious-metal pattern is therefore
-broad across episodes rather than an artifact of one exceptional event.
+10,000 bootstrap draws plus candidate-family FDR. Seven candidates survive all 17 deletions:
+Australian coal, coconut oil, Robusta coffee, European natural gas, palm oil, RSS3 rubber and urea.
+Gold, Platinum and Silver remain positive and significant after every deletion. The unexplained
+precious-metal pattern is therefore broad across episodes rather than an artifact of one
+exceptional event.
 
 The timing/index grid independently rebuilds macro-adjusted paths for RONI and ONI, anchored at
-both retrospective and conservative observable dates. Six candidates pass bootstrap FDR,
+both retrospective and conservative observable dates. Three candidates pass bootstrap FDR,
 calendar-matched placebo FDR and direction/sign gates in all four cells and also pass the
-leave-one-episode-out gate: coconut oil, DAP, Malaysian logs, palm oil, Thai 5% rice and RSS3
-rubber. Their mean +12 returns remain positive across the grid. Gold and Silver also reject in all
-four diagnostic cells, while Platinum rejects under bootstrap in three of four and under placebo
-in all four. The six associations are therefore robust to timing and index choice but still fail
-the study's specificity requirement; they are not validated ENSO mechanisms.
+leave-one-episode-out gate: coconut oil, palm oil and RSS3 rubber. Their mean +12 returns remain
+positive across the grid. Gold rejects in all four diagnostic bootstrap cells and Gold and Silver
+still fail the placebo specificity diagnostic throughout the grid. The three associations are
+therefore robust to timing and index choice but still fail the study's specificity requirement;
+they are not validated ENSO mechanisms.
 
 An exploratory falsification stage then compares warm episodes directly with persistently cold
 ENSO episodes using shared-label randomization. None of the 12 precious-metal specification cells
 distinguishes warm from cold at raw 5%; gold and silver are frequently positive after cold episodes
-as well. Among the six timing/index survivors, only coconut oil in two observable-date cells and
-palm oil in one observable-date cell reject the warm-minus-cold contrast after candidate-family
-FDR. The dominant pattern is therefore phase-nonspecific. This diagnostic is reported separately
-and does not rewrite the frozen primary design.
+as well. Among the three timing/index survivors, coconut oil rejects the warm-minus-cold contrast
+in both observable-date cells and palm oil rejects it only in the ONI-observable cell after
+candidate-family FDR; RSS3 rubber rejects in none. The dominant pattern is therefore
+phase-nonspecific. This diagnostic is reported separately and does not rewrite the frozen primary
+design.
 
-Endpoint diagnostics rule out simple-return convexity as the main explanation. All six prior
-survivors remain significant in cumulative log-return space in every warm cell, while 17 of 24
+Endpoint diagnostics rule out simple-return convexity as the main explanation. The three prior
+survivors remain significant in cumulative log-return space in every warm cell, while 13 of 24
 precious-metal warm/cold cells also reject in log space. Jensen gaps are present but too small to
 create the result. Only two control cells show raw time trends, both RONI-observable warm returns
 for Gold and Silver. Nine of 96 control/factor correlations reject at unadjusted 5%, led by
@@ -250,11 +256,11 @@ non-specific timing of ENSO extremes, rather than arithmetic compounding alone.
 
 The exploratory extended-control model adds a CPI-deflated three-month Treasury rate, the monthly
 Moody's Baa-minus-10-year-Treasury spread and the monthly mean Chicago Fed NFCI. These reduce
-precious-metal bootstrap rejections from 17 to 7 of 24 warm/cold cells: Platinum no longer rejects,
-Silver rejects once, but Gold still rejects in all four warm cells and two cold cells. No control
-distinguishes warm from cold. Coconut oil, palm oil and rubber retain warm bootstrap FDR in all
-four cells, but none consistently passes the direct phase contrast. Financial controls narrow the
-failure without establishing ENSO specificity.
+precious-metal bootstrap rejections from 13 to three of 24 warm/cold cells: Platinum and Silver no
+longer reject, while Gold rejects in three warm cells. No control distinguishes warm from cold.
+Coconut oil, palm oil and rubber retain positive warm estimates, but none consistently passes the
+direct phase contrast. Financial controls narrow the failure without establishing ENSO
+specificity.
 
 The palm-oil mechanism pilot uses seven transparent NASA POWER weather points across Indonesian
 and Malaysian producing regions and FAOSTAT oil-palm fruit and palm-oil observations. RONI
@@ -303,6 +309,16 @@ single time series and months are not independent draws. A year drawn twice rece
 sets of month effects, keeping a replicate one coherent alternative history in the same sense as
 the episode bootstrap. The grid covers RONI and ONI, lags of 0 to 12 months, and both weighting
 schemes; the exposure term across cells is one FDR family and the control term stays outside it.
+
+On the 2026-09-05 snapshot, the primary RONI lag-six exposure estimate is 0.00624 per unit of
+exposure (studentized p=0.013; 95% year-block interval 0.00097 to 0.01110). Its control interaction
+does not reject (p=0.127). The named exposure assignment sits at the 98.3rd percentile of 2,000
+shuffles of the same weights across candidate commodities (two-sided permutation p=0.035), so its
+mapping carries more signal than an arbitrary assignment. However, none of the 20 exposure cells
+survives FDR across the grid, the uniform candidate-versus-control specification is null at every
+lag and index, and two control cells reject at raw 5%. The panel therefore offers a suggestive
+cross-sectional pattern, not a successful independent identification result; the permutation does
+not make its post-outcome weights prospective.
 
 Two limitations are worth stating plainly. Two-way fixed effects absorb *additive* common shocks,
 not heterogeneous loadings on them, so a control series that loads three times as heavily on a

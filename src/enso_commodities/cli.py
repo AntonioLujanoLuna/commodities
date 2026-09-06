@@ -16,6 +16,7 @@ from .macro_analysis import run_macro_control_analysis
 from .macro_data import build_macro_dataset
 from .palm_oil_data import build_palm_oil_dataset
 from .palm_oil_mechanism import run_palm_oil_mechanism
+from .panel_analysis import run_panel_analysis
 from .placebo_analysis import run_neutral_date_placebo
 from .raw_events import build_raw_event_tables
 from .robustness_analysis import run_timing_index_robustness
@@ -238,5 +239,23 @@ def palm_analyse() -> None:
         args.palm_snapshot,
         tables_root=args.tables_root,
         mechanism_config_path=args.config,
+    )
+    print(output)
+
+
+def panel() -> None:
+    parser = argparse.ArgumentParser(
+        description="Run the exploratory exposure-weighted fixed-effects panel."
+    )
+    parser.add_argument("--processed-snapshot", type=Path)
+    parser.add_argument("--tables-root", type=Path)
+    parser.add_argument("--registry", type=Path)
+    parser.add_argument("--config", type=Path)
+    args = parser.parse_args()
+    output = run_panel_analysis(
+        processed_snapshot=args.processed_snapshot,
+        tables_root=args.tables_root,
+        registry_path=args.registry,
+        panel_config_path=args.config,
     )
     print(output)

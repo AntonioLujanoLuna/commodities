@@ -20,6 +20,6 @@ repos:
     hooks:
       - id: no-committed-outputs
         name: outputs are generated, never committed
-        entry: bash -c 'git diff --cached --name-only | grep -E "^(figures|tables|logs)/" && echo "figures/, tables/ and logs/ are build artefacts - run make clean" && exit 1 || exit 0'
+        entry: bash -c 'git diff --cached --name-only | grep -E "^(figures|tables|logs)/" && echo "figures/, tables/ and logs/ are generated build artefacts and must not be committed" && exit 1 || exit 0'
         language: system
         pass_filenames: false

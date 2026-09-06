@@ -20,6 +20,7 @@ with the commodity effects; only the interactions survive, which is the point.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -55,6 +56,11 @@ def panel_regressors(weighting: str) -> tuple[str, ...]:
 
 @dataclass(frozen=True)
 class PanelSpec:
+    exposure_version: int
+    exposure_method: str
+    exposure_authored_on: date
+    exposure_outcome_blind: bool
+    exposure_inference_scope: str
     outcome_column: str
     unit_fixed_effects: bool
     time_fixed_effects: bool
@@ -68,6 +74,7 @@ class PanelSpec:
     roles: tuple[str, ...]
     block: str
     bootstrap_replicates: int
+    weight_permutation_replicates: int
     confidence_level: float
     fdr_alpha: float
     random_seed: int
@@ -89,13 +96,30 @@ class PanelFit:
     design_condition_number: float
 
 
+@dataclass(frozen=True)
+class ExposurePermutationOutput:
+    observed_estimate: float
+    permutation_mean: float
+    permutation_median: float
+    mapping_percentile: float
+    p_value: float
+    valid_replicates: int
+    replicates: pd.DataFrame
+
+
 def load_panel_config(path: Path | None = None) -> PanelSpec:
     config_path = path or project_root() / "config" / "panel.yaml"
     with config_path.open(encoding="utf-8") as handle:
         raw: dict[str, Any] = yaml.safe_load(handle)
     specification = raw["specification"]
     inference = raw["inference"]
+    provenance = raw["exposure_provenance"]
     spec = PanelSpec(
+        exposure_version=int(provenance["version"]),
+        exposure_method=str(provenance["method"]),
+        exposure_authored_on=date.fromisoformat(str(provenance["authored_on"])),
+        exposure_outcome_blind=bool(provenance["outcome_blind"]),
+        exposure_inference_scope=str(provenance["inference_scope"]),
         outcome_column=str(specification["outcome_column"]),
         unit_fixed_effects=bool(specification["unit_fixed_effects"]),
         time_fixed_effects=bool(specification["time_fixed_effects"]),
@@ -109,6 +133,7 @@ def load_panel_config(path: Path | None = None) -> PanelSpec:
         roles=tuple(str(value) for value in specification["roles"]),
         block=str(inference["block"]),
         bootstrap_replicates=int(inference["bootstrap_replicates"]),
+        weight_permutation_replicates=int(inference["weight_permutation_replicates"]),
         confidence_level=float(inference["confidence_level"]),
         fdr_alpha=float(inference["fdr_alpha"]),
         random_seed=int(inference["random_seed"]),
@@ -122,6 +147,14 @@ def load_panel_config(path: Path | None = None) -> PanelSpec:
 
 
 def _validate_panel_spec(spec: PanelSpec) -> None:
+    if spec.exposure_version < 1:
+        raise ValueError("exposure provenance version must be positive")
+    if spec.exposure_method != "post_outcome_expert_judgment":
+        raise ValueError("Unsupported exposure-weight provenance method")
+    if spec.exposure_outcome_blind:
+        raise ValueError("Post-outcome expert-judgment weights cannot be labelled outcome-blind")
+    if spec.exposure_inference_scope != "exploratory_only":
+        raise ValueError("Post-outcome exposure weights must remain exploratory_only")
     if spec.outcome_column not in ALLOWED_OUTCOMES:
         raise ValueError(f"outcome_column must be one of {sorted(ALLOWED_OUTCOMES)}")
     if not spec.time_fixed_effects:
@@ -144,6 +177,8 @@ def _validate_panel_spec(spec: PanelSpec) -> None:
         raise ValueError("Only calendar-year block resampling is supported")
     if spec.bootstrap_replicates < 999:
         raise ValueError("bootstrap_replicates must be at least 999")
+    if spec.weight_permutation_replicates < 999:
+        raise ValueError("weight_permutation_replicates must be at least 999")
     if not 0 < spec.confidence_level < 1:
         raise ValueError("confidence_level must fall between zero and one")
     if not 0 < spec.fdr_alpha < 1:
@@ -172,6 +207,11 @@ def build_exposure_table(registry: CommodityRegistry, spec: PanelSpec) -> pd.Dat
     sample.loc[is_control, "exposure_weight"] = spec.negative_control_weight
     sample["uniform_weight"] = np.where(is_control, spec.negative_control_weight, 1.0)
     sample["is_negative_control"] = is_control
+    sample["exposure_version"] = spec.exposure_version
+    sample["exposure_method"] = spec.exposure_method
+    sample["exposure_authored_on"] = spec.exposure_authored_on.isoformat()
+    sample["exposure_outcome_blind"] = spec.exposure_outcome_blind
+    sample["exposure_inference_scope"] = spec.exposure_inference_scope
     return sample.sort_values("commodity", ignore_index=True)
 
 
@@ -444,3 +484,110 @@ def year_block_bootstrap(
             }
         )
     return pd.DataFrame.from_records(result_rows), pd.DataFrame.from_records(replicate_rows)
+
+
+def permute_candidate_exposure_weights(
+    panel: pd.DataFrame,
+    fit: PanelFit,
+    *,
+    replicates: int,
+    seed: int,
+    tolerance: float,
+    max_iterations: int,
+) -> ExposurePermutationOutput:
+    """Test whether the candidate-to-weight mapping matters.
+
+    Each replicate shuffles the observed exposure weights across mechanism
+    candidates while leaving negative controls fixed at zero. The multiset of
+    weights, candidate/control composition, ENSO path, outcomes and fixed
+    effects are therefore unchanged. Only the assignment of physical exposure
+    to named candidate commodities moves.
+
+    This is a falsification of the hand-authored mapping, not a cure for its
+    post-outcome construction. A small p-value says the observed assignment is
+    unusual among arbitrary assignments of the same weights; it does not make
+    those weights prospectively specified.
+    """
+    required = {
+        "commodity",
+        "date",
+        "outcome",
+        "enso_index",
+        "weight",
+        "is_negative_control",
+        CONTROL_TERM,
+    }
+    if not required.issubset(panel.columns):
+        raise ValueError(f"Panel is missing permutation columns: {sorted(required - set(panel))}")
+    if replicates < 1:
+        raise ValueError("replicates must be positive")
+    if EXPOSURE_TERM not in fit.coefficients or CONTROL_TERM not in fit.coefficients:
+        raise ValueError("Exposure permutation requires the two-term exposure specification")
+
+    metadata = panel.loc[:, ["commodity", "weight", "is_negative_control"]].drop_duplicates()
+    if metadata["commodity"].duplicated().any():
+        raise ValueError("Each commodity must have one fixed exposure weight and role")
+    controls = metadata.loc[metadata["is_negative_control"]]
+    candidates = metadata.loc[~metadata["is_negative_control"]]
+    if not controls["weight"].eq(0.0).all():
+        raise ValueError("Negative controls must remain fixed at zero during permutation")
+    if candidates.empty or candidates["weight"].nunique() < 2:
+        raise ValueError("Candidate exposure weights must vary for a mapping permutation")
+
+    unit_codes, unit_names = pd.factorize(panel["commodity"], sort=True)
+    time_codes = pd.factorize(panel["date"], sort=True)[0]
+    unit_metadata = metadata.set_index("commodity").loc[unit_names]
+    candidate_positions = np.flatnonzero(~unit_metadata["is_negative_control"].to_numpy(dtype=bool))
+    candidate_weights = unit_metadata.iloc[candidate_positions]["weight"].to_numpy(dtype="float64")
+
+    fixed = two_way_within_transform(
+        panel.loc[:, ["outcome", CONTROL_TERM]].to_numpy(dtype="float64"),
+        unit_codes,
+        time_codes,
+        tolerance=tolerance,
+        max_iterations=max_iterations,
+    )
+    enso = panel["enso_index"].to_numpy(dtype="float64")
+    generator = np.random.default_rng(seed)
+    estimates = np.full(replicates, np.nan, dtype="float64")
+    rows: list[dict[str, object]] = []
+    units = len(unit_names)
+    periods = int(time_codes.max()) + 1
+
+    for replicate in range(replicates):
+        unit_weights = np.zeros(units, dtype="float64")
+        unit_weights[candidate_positions] = generator.permutation(candidate_weights)
+        interaction = unit_weights[unit_codes] * enso
+        transformed_interaction = two_way_within_transform(
+            interaction[:, None],
+            unit_codes,
+            time_codes,
+            tolerance=tolerance,
+            max_iterations=max_iterations,
+        )[:, 0]
+        design = np.column_stack([transformed_interaction, fixed[:, 1]])
+        try:
+            coefficients, _, _, _ = _fit_demeaned(
+                fixed[:, 0], design, units=units, periods=periods
+            )
+        except (np.linalg.LinAlgError, ValueError):
+            continue
+        estimate = float(coefficients[0])
+        estimates[replicate] = estimate
+        rows.append({"replicate": replicate, "exposure_estimate": estimate})
+
+    valid = estimates[np.isfinite(estimates)]
+    if not valid.size:
+        raise ValueError("No exposure-weight permutation produced an estimable design")
+    observed = float(fit.coefficients[EXPOSURE_TERM])
+    lower_tail = (int(np.sum(valid <= observed)) + 1) / (len(valid) + 1)
+    upper_tail = (int(np.sum(valid >= observed)) + 1) / (len(valid) + 1)
+    return ExposurePermutationOutput(
+        observed_estimate=observed,
+        permutation_mean=float(valid.mean()),
+        permutation_median=float(np.median(valid)),
+        mapping_percentile=lower_tail,
+        p_value=min(1.0, 2 * min(lower_tail, upper_tail)),
+        valid_replicates=len(valid),
+        replicates=pd.DataFrame.from_records(rows),
+    )

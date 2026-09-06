@@ -20,6 +20,7 @@ from enso_commodities.panel import (
     fit_exposure_panel,
     load_panel_config,
     panel_regressors,
+    permute_candidate_exposure_weights,
     two_way_within_transform,
     year_block_bootstrap,
 )
@@ -64,6 +65,9 @@ def test_shipped_exposure_weights_cover_the_frozen_candidate_registry() -> None:
     assert exposure.loc[exposure["is_negative_control"], "exposure_weight"].eq(0.0).all()
     assert exposure.loc[~exposure["is_negative_control"], "exposure_weight"].gt(0.0).all()
     assert exposure.loc[~exposure["is_negative_control"], "uniform_weight"].eq(1.0).all()
+    assert exposure["exposure_method"].eq("post_outcome_expert_judgment").all()
+    assert exposure["exposure_outcome_blind"].eq(False).all()
+    assert exposure["exposure_inference_scope"].eq("exploratory_only").all()
     # Identification of the separate control coefficient needs the candidate
     # weights to vary; constant weights collapse to the uniform scheme.
     assert exposure.loc[~exposure["is_negative_control"], "exposure_weight"].nunique() > 1
@@ -92,6 +96,14 @@ def test_config_refuses_a_nonzero_control_exposure(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="zero exposure"):
         load_panel_config(_config_with(tmp_path, weight_the_controls))
+
+
+def test_config_refuses_to_relabel_post_outcome_weights_as_outcome_blind(tmp_path: Path) -> None:
+    def mislabel(raw: dict) -> None:
+        raw["exposure_provenance"]["outcome_blind"] = True
+
+    with pytest.raises(ValueError, match="cannot be labelled outcome-blind"):
+        load_panel_config(_config_with(tmp_path, mislabel))
 
 
 def test_two_way_transform_reproduces_an_explicit_dummy_regression() -> None:
@@ -233,6 +245,35 @@ def test_block_standard_error_exceeds_the_naive_one_under_serial_dependence() ->
     assert control["block_standard_error"] > control["naive_standard_error"]
 
 
+def test_weight_permutation_detects_the_planted_candidate_mapping() -> None:
+    fixture = synthetic_exposure_panel(seed=23)
+    panel = _panel_from(fixture)
+    fit = fit_exposure_panel(panel, tolerance=TOLERANCE, max_iterations=MAX_ITERATIONS)
+
+    first = permute_candidate_exposure_weights(
+        panel,
+        fit,
+        replicates=499,
+        seed=17,
+        tolerance=TOLERANCE,
+        max_iterations=MAX_ITERATIONS,
+    )
+    second = permute_candidate_exposure_weights(
+        panel,
+        fit,
+        replicates=499,
+        seed=17,
+        tolerance=TOLERANCE,
+        max_iterations=MAX_ITERATIONS,
+    )
+
+    assert first.observed_estimate == pytest.approx(fixture.planted_exposure_response, abs=0.0015)
+    assert first.mapping_percentile > 0.95
+    assert first.p_value < 0.05
+    assert first.valid_replicates == 499
+    pd.testing.assert_frame_equal(first.replicates, second.replicates)
+
+
 def test_lagging_the_index_shifts_the_signal_forward() -> None:
     fixture = synthetic_exposure_panel(seed=2)
     contemporaneous = _panel_from(fixture, lag_months=0)
@@ -350,6 +391,7 @@ def _write_stage_fixture(tmp_path: Path) -> tuple[Path, Path, Path, Path]:
         raw["specification"]["weighting_schemes"] = ["exposure"]
         raw["specification"]["minimum_observations"] = 100
         raw["inference"]["bootstrap_replicates"] = 999
+        raw["inference"]["weight_permutation_replicates"] = 999
         # Candidates must carry different weights or the exposure and control
         # interactions are collinear once the month effects are swept out.
         raw["exposure_weights"] = {
@@ -372,14 +414,19 @@ def test_stage_run_verifies_hashes_and_writes_a_receipt(tmp_path: Path) -> None:
     with (output_dir / "panel_summary.json").open(encoding="utf-8") as handle:
         summary = json.load(handle)
     assert summary["design"]["status"] == "exploratory"
+    assert summary["design"]["exposure_outcome_blind"] is False
+    assert summary["design"]["exposure_inference_scope"] == "exploratory_only"
     assert summary["results"]["cells"] == 1
     assert summary["results"]["primary_exposure_estimate"] is not None
+    assert summary["results"]["primary_exposure_weight_permutation_p_value"] is not None
     for name in summary["output_hashes"]:
         assert (output_dir / name).is_file()
 
     results = pd.read_csv(output_dir / "panel_specification_results.csv")
     assert set(results["term"]) == {EXPOSURE_TERM, CONTROL_TERM}
     assert results.loc[results["term"].eq(CONTROL_TERM), "bh_q_value"].isna().all()
+    permutations = pd.read_parquet(output_dir / "panel_exposure_weight_permutations.parquet")
+    assert len(permutations) == 999
 
 
 def test_stage_run_refuses_a_tampered_input(tmp_path: Path) -> None:

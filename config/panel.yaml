@@ -30,6 +30,13 @@
 # control contrast. Any conclusion that holds under `exposure` but not under
 # `uniform` is a conclusion about the weights.
 
+exposure_provenance:
+  version: 1
+  method: post_outcome_expert_judgment
+  authored_on: 2026-09-05
+  outcome_blind: false
+  inference_scope: exploratory_only
+
 specification:
   outcome_column: seasonal_adjusted_log_return
   # Commodity and calendar-month fixed effects. The month effect is the point
@@ -53,6 +60,9 @@ inference:
   # coherent alternative history in the same sense as the episode bootstrap.
   block: calendar_year
   bootstrap_replicates: 2000
+  # Shuffle the same weights across candidate commodities in the primary cell.
+  # Controls stay fixed at zero. This tests the mapping, not the weight scale.
+  weight_permutation_replicates: 2000
   confidence_level: 0.95
   fdr_alpha: 0.05
   random_seed: 20260905

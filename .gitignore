@@ -13,7 +13,7 @@ data/financial/
 data/macro/
 data/mechanisms/
 
-# Generated outputs. Rebuild with `make all`.
+# Generated outputs. Rebuild the implemented pipeline with `make real-data`.
 figures/
 tables/
 logs/
