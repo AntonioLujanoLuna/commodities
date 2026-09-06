@@ -11,18 +11,15 @@
 > negative-control gate still fails, so the numerical associations below are not ENSO-specific
 > findings. An exploratory warm-versus-cold falsification diagnostic is also implemented.
 >
-> Three diagnostics have since been added and are implemented but not yet run against a real-data
-> snapshot: a minimum-detectable-effect stage, so a null result can be told apart from an
-> underpowered one; an era-balance check on the neutral-date placebo, which tests whether the
-> placebo samples the same part of history as the events; and a resampling-block sensitivity for
-> the panel, because a calendar year is shorter than an ENSO episode. The numbers below predate
-> all three.
->
 > The bootstrap test has been recalibrated: the centred percentile test is anti-conservative at
 > this many episodes, and the studentized version is now what the gates read. An exploratory
-> exposure-weighted panel with commodity and calendar-month fixed effects is also implemented and
-> reported as a separate identification strategy. Neither design currently establishes an
-> ENSO-specific price effect. This file carries no run numbers; they live in
+> exposure-weighted panel with commodity and calendar-month fixed effects is also implemented.
+> Its v2 weights come from external crop-area and El Niño drought-hotspot rasters rather than
+> observed returns; because the mapping was authored after prior results were visible, it is a
+> retrospective external validation rather than a preregistered confirmatory test. A circular
+> whole-year timing null evaluates its full 20-cell family.
+> Neither design currently establishes an ENSO-specific price effect. This file carries no run
+> numbers; they live in
 > [`reports/current_results.md`](reports/current_results.md), generated from the run receipts.
 
 The compact, hash-grounded interpretation of the latest completed run is in
@@ -71,7 +68,7 @@ prominence as positive ones — a study that finds an effect everywhere has foun
 ## Quick start
 
 ```bash
-uv sync --extra dev
+uv sync --extra dev --extra spatial
 uv run python scripts/download_data.py
 uv run python scripts/build_dataset.py
 uv run python scripts/build_raw_events.py
@@ -80,6 +77,7 @@ uv run python scripts/build_universe.py
 uv run python scripts/run_inference.py
 uv run python scripts/run_placebo.py
 uv run python scripts/run_power.py
+uv run python scripts/run_dose_response.py
 uv run python scripts/download_macro_data.py
 uv run python scripts/build_macro_dataset.py
 uv run python scripts/run_macro_analysis.py
@@ -93,7 +91,11 @@ uv run python scripts/run_financial_analysis.py
 uv run python scripts/download_palm_oil_data.py
 uv run python scripts/build_palm_oil_dataset.py
 uv run python scripts/run_palm_oil_mechanism.py
+uv run python scripts/download_exposure_data.py
+uv run python scripts/build_external_exposure.py
 uv run python scripts/run_panel_analysis.py
+uv run python scripts/run_specification_curve.py
+uv run python scripts/build_report.py
 ```
 
 The downloader creates an immutable, dated snapshot under `data/raw/YYYY-MM-DD/`. Each input has
@@ -147,6 +149,8 @@ calendar-matched neutral-date placebo, with an era-balance diagnostic          [
         ↓
 minimum detectable effect at the frozen endpoint                               [implemented]
         ↓
+warm-episode peak-amplitude dose-response diagnostic                          [implemented]
+        ↓
 external dollar, CPI and global-activity controls                              [implemented]
         ↓
 leave-one-episode-out bootstrap/FDR fragility                                  [implemented]
@@ -161,14 +165,18 @@ real-rate, credit-spread and financial-conditions controls                    [i
         ↓
 palm-oil physical-mechanism pilot                                             [implemented]
         ↓
+external crop-area x El Niño drought-hotspot exposure weights                [implemented]
+        ↓
 exposure-weighted panel with commodity and month fixed effects, and its
 resampling-block sensitivity                                                  [implemented]
+        ↓
+whole-year circular-shift null over the 20-cell panel family                  [implemented]
         ↓
 other mechanisms, forecasting, tradability, scorecard, figures and report     [planned]
 ```
 
-Planned narrative reports will land in `reports/`; this slice emits auditable tables and run
-receipts rather than a prose report.
+The current narrative report in `reports/current_results.md` is generated from auditable tables
+and hash-linked run receipts.
 
 ### Analysis decisions
 
@@ -201,6 +209,11 @@ receipts rather than a prose report.
   replicates already are the reference distribution and no new resampling is needed. A commodity
   whose estimate falls below its own minimum detectable effect is uninformative rather than null,
   and does not belong in the NO MATERIAL ENSO EFFECT bucket.
+- **Episode amplitude is a secondary endpoint, not a moved primary gate.** The dose-response stage
+  regresses the frozen month-12 return on standardized peak RONI across the same warm episodes.
+  It permutes one whole-episode amplitude mapping across every commodity, preserving cross-series
+  dependence, and reports candidate-family BH and max-|t| correction. It neither splits the
+  17-episode sample nor changes the binary event-study contract.
 - **The placebo is checked for era balance.** Anchors are matched on calendar month, but they must
   also be neutral and outside every event window, so the eligible pool is whatever quiet stretches
   survive both filters. If those stretches sit in a different part of history than the onsets, the
@@ -323,15 +336,16 @@ measured against the same month effects, and a design that is working reports it
 indistinguishable from zero. That makes the negative-control test structural rather than
 empirical.
 
-Exposure weights are per commodity on a documented four-level scale, in `config/panel.yaml`, and
-the build refuses to run if they do not exactly cover the frozen candidate registry. They encode
-physical distance from the ENSO signal rather than any observed return, but they were written
-after this repository's event-study results were known and so cannot claim the outcome-blindness
-the commodity registry can. The `uniform` variant exists for that reason: it gives every
-candidate a weight of one, requires no judgement, and reduces the design to a candidate-versus-
-control contrast. Under uniform weights the two interactions are collinear once the fixed effects
-are swept out -- the exposure coefficient already is the contrast -- so only that term is fitted,
-and the estimator refuses a rank-deficient design rather than reporting one.
+The v2 exposure weights are outcome-independent. `config/exposure_v2.yaml` maps each supported
+crop commodity to a SPAM 2020 physical crop-area raster and combines it with FAO's historical
+El Niño drought-hotspot layer. The weight is the crop-area-weighted positive hotspot burden over
+all mapped crop area. Candidates without a defensible crop raster are explicitly excluded rather
+than assigned zero, and the build refuses incomplete or extra mappings. The recipe does not read
+commodity returns, but was frozen after earlier outcomes were visible, so its declared scope is
+retrospective external validation. The `uniform` variant
+gives every included candidate a weight of one and reduces the design to a candidate-versus-control
+contrast. Under uniform weights the two interactions are collinear once the fixed effects are
+swept out, so only that term is fitted.
 
 Inference resamples whole calendar years of the cross-section with replacement, since ENSO is a
 single time series and months are not independent draws. A year drawn twice receives two separate
@@ -339,15 +353,14 @@ sets of month effects, keeping a replicate one coherent alternative history in t
 the episode bootstrap. The grid covers RONI and ONI, lags of 0 to 12 months, and both weighting
 schemes; the exposure term across cells is one FDR family and the control term stays outside it.
 
-The primary RONI lag-six exposure estimate is positive and its studentized year-block interval
-excludes zero, while its control interaction does not reject. The named exposure assignment sits
-far into the upper tail of shuffles of the same weights across candidate commodities, so its
-mapping carries more signal than an arbitrary assignment would. None of that generalises: no
-exposure cell survives FDR across the grid, the uniform candidate-versus-control specification is
-null at every lag and index, and two control cells reject at raw 5%. The panel therefore offers a
-suggestive cross-sectional pattern, not a successful independent identification result, and the
-permutation does not make its post-outcome weights prospective. The estimates and intervals are
-in [`reports/current_results.md`](reports/current_results.md).
+With the external v2 weights, the primary RONI lag-six interval crosses zero, its mapping is not
+unusual under permutation, and no exposure cell survives FDR across the grid. A separate
+specification-curve stage shifts the ENSO series circularly by each whole-year offset from 1 to 60,
+refits all 20 cells, and compares the observed median and maximum absolute naive t statistics with
+those null alignments. This is a joint timing null for the panel family, not for every stage in the
+project, and uses naive t statistics so the same tractable statistic is evaluated across all 1,220
+fits. Current estimates, intervals and finite-sample p-values are generated in
+[`reports/current_results.md`](reports/current_results.md).
 
 Two limitations are worth stating plainly. Two-way fixed effects absorb *additive* common shocks,
 not heterogeneous loadings on them, so a control series that loads three times as heavily on a
@@ -388,6 +401,8 @@ src/enso_commodities/
   exchangeability.py whether the placebo samples the same era as the events
   power.py         minimum detectable effect from the stored bootstrap replicates
   power_analysis.py minimum-detectable-effect stage and hash-linked receipt
+  dose_response.py amplitude regression and shared episode-label permutation null
+  dose_response_analysis.py real-data dose-response outputs and hash-linked receipt
   macro_data.py    BIS, BLS/FRED and Dallas Fed parsing and transformations
   macro_adjustments.py out-of-event multivariate commodity regressions
   macro_analysis.py macro-adjusted bootstrap/placebo outputs and receipt
@@ -443,8 +458,9 @@ placebo draw and placebo replicate, with a hash-linked run receipt.
 | Financial conditions | Chicago Fed NFCI via FRED | implemented |
 | Palm weather | NASA POWER MERRA-2 monthly precipitation and temperature | implemented pilot |
 | Palm production | FAOSTAT oil-palm fruit and palm-oil annual series | implemented pilot |
-| Weather | ERA5, CHIRPS, or a pre-aggregated regional CSV | planned |
-| Production | FAOSTAT, USDA PSD | planned |
+| Global crop exposure | FAO ASIS El Niño drought hotspots + IFPRI/FAO SPAM 2020 crop area | implemented |
+| Other weather | ERA5, CHIRPS, or a pre-aggregated regional CSV | planned |
+| Other production | FAOSTAT, USDA PSD | planned |
 | Futures | vendor-licensed contract data (not redistributed) | planned |
 
 Optional-source handling and licensed futures-data interfaces will be implemented in later stages.

@@ -13,6 +13,7 @@
 #   make macro-dataset build the monthly external-control panel
 #   make macro-analysis run macro-adjusted bootstrap and placebo inference
 #   make power       estimate the minimum detectable effect at the frozen endpoint
+#   make dose-response test response against warm-episode peak RONI amplitude
 #   make fragility   run leave-one-episode-out bootstrap/FDR checks
 #   make robustness  run RONI/ONI and retrospective/observable robustness
 #   make specificity run exploratory warm-versus-cold falsification diagnostics
@@ -23,7 +24,10 @@
 #   make palm-data   download FAOSTAT and NASA POWER palm-oil inputs
 #   make palm-dataset build the palm production/weather panel
 #   make palm-analysis test the exploratory physical mechanism chain
+#   make exposure-data download external ASIS and SPAM crop-exposure rasters
+#   make exposure-weights build outcome-independent physical exposure weights
 #   make panel      run the exposure-weighted two-way fixed-effects panel
+#   make specification-curve run the whole-year circular-shift joint timing null
 #   make report     regenerate the current-results note from the run receipts
 #   make report-check verify the note still matches the receipts
 #   make real-data  run every implemented real-data stage
@@ -34,14 +38,14 @@
 UV ?= uv
 PY ?= $(UV) run python
 
-.PHONY: setup data dataset raw-events adjustments universe inference placebo power macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis panel report report-check real-data test lint format typecheck check help
+.PHONY: setup data dataset raw-events adjustments universe inference placebo power dose-response macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis exposure-data exposure-weights panel specification-curve report report-check real-data test lint format typecheck check help
 
 help:
 	@grep -E '^#   ' Makefile | sed 's/^#   //'
 
 setup:
-	$(UV) sync --extra dev
-	@echo "Optional extras: $(UV) pip install -e '.[spatial,econ]'"
+	$(UV) sync --extra dev --extra spatial
+	@echo "Optional econometrics extra: $(UV) pip install -e '.[econ]'"
 
 data:
 	$(PY) scripts/download_data.py
@@ -66,6 +70,9 @@ placebo:
 
 power:
 	$(PY) scripts/run_power.py
+
+dose-response:
+	$(PY) scripts/run_dose_response.py
 
 macro-data:
 	$(PY) scripts/download_macro_data.py
@@ -106,8 +113,17 @@ palm-dataset:
 palm-analysis:
 	$(PY) scripts/run_palm_oil_mechanism.py
 
+exposure-data:
+	$(PY) scripts/download_exposure_data.py
+
+exposure-weights:
+	$(PY) scripts/build_external_exposure.py
+
 panel:
 	$(PY) scripts/run_panel_analysis.py
+
+specification-curve:
+	$(PY) scripts/run_specification_curve.py
 
 report:
 	$(PY) scripts/build_report.py
@@ -115,7 +131,7 @@ report:
 report-check:
 	$(PY) scripts/build_report.py --check
 
-real-data: data dataset raw-events adjustments universe inference placebo power macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis panel report
+real-data: data dataset raw-events adjustments universe inference placebo power dose-response macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis exposure-data exposure-weights panel specification-curve report
 
 test:
 	$(PY) -m pytest

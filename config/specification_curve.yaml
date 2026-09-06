@@ -1,0 +1,14 @@
+# Joint timing-null diagnostic for the exposure-panel specification family.
+# Whole-year circular shifts preserve the ENSO series, its serial dependence,
+# and its calendar-month phase while severing the observed alignment with returns.
+timing_null:
+  shift_unit: whole_year
+  minimum_shift_years: 1
+  maximum_shift_years: 60
+  wrap: circular
+  include_observed: true
+
+curve:
+  primary_statistic: median_absolute_naive_t
+  secondary_statistics: [maximum_absolute_naive_t, positive_estimate_share]
+  minimum_valid_cell_share: 1.0

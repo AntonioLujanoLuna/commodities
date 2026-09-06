@@ -110,6 +110,8 @@ class PanelSpec:
     demeaning_tolerance: float
     demeaning_max_iterations: int
     exposure_weights: dict[str, float]
+    exposure_weights_file: str | None
+    excluded_candidates: tuple[str, ...]
     negative_control_weight: float
 
 
@@ -176,7 +178,13 @@ def load_panel_config(path: Path | None = None) -> PanelSpec:
         random_seed=int(inference["random_seed"]),
         demeaning_tolerance=float(inference["demeaning_tolerance"]),
         demeaning_max_iterations=int(inference["demeaning_max_iterations"]),
-        exposure_weights={str(key): float(value) for key, value in raw["exposure_weights"].items()},
+        exposure_weights={
+            str(key): float(value) for key, value in (raw.get("exposure_weights") or {}).items()
+        },
+        exposure_weights_file=(
+            str(raw["exposure_weights_file"]) if raw.get("exposure_weights_file") else None
+        ),
+        excluded_candidates=tuple(str(value) for value in raw.get("excluded_candidates") or ()),
         negative_control_weight=float(raw["negative_control_weight"]),
     )
     _validate_panel_spec(spec)
@@ -186,12 +194,30 @@ def load_panel_config(path: Path | None = None) -> PanelSpec:
 def _validate_panel_spec(spec: PanelSpec) -> None:
     if spec.exposure_version < 1:
         raise ValueError("exposure provenance version must be positive")
-    if spec.exposure_method != "post_outcome_expert_judgment":
+    allowed_methods = {
+        "post_outcome_expert_judgment",
+        "external_crop_area_x_el_nino_drought_hotspot",
+    }
+    if spec.exposure_method not in allowed_methods:
         raise ValueError("Unsupported exposure-weight provenance method")
-    if spec.exposure_outcome_blind:
-        raise ValueError("Post-outcome expert-judgment weights cannot be labelled outcome-blind")
-    if spec.exposure_inference_scope != "exploratory_only":
-        raise ValueError("Post-outcome exposure weights must remain exploratory_only")
+    if spec.exposure_method == "post_outcome_expert_judgment":
+        if spec.exposure_outcome_blind:
+            raise ValueError(
+                "Post-outcome expert-judgment weights cannot be labelled outcome-blind"
+            )
+        if spec.exposure_inference_scope != "exploratory_only":
+            raise ValueError("Post-outcome exposure weights must remain exploratory_only")
+    else:
+        if not spec.exposure_outcome_blind:
+            raise ValueError("External physical weights must be labelled outcome-blind")
+        if spec.exposure_inference_scope != "retrospective_external_validation":
+            raise ValueError(
+                "External physical weights must use retrospective external-validation scope"
+            )
+        if spec.exposure_weights_file != "external_exposure_weights.csv":
+            raise ValueError("External physical weights must come from their generated artifact")
+        if spec.exposure_weights:
+            raise ValueError("External physical weights cannot be embedded in panel.yaml")
     if spec.outcome_column not in ALLOWED_OUTCOMES:
         raise ValueError(f"outcome_column must be one of {sorted(ALLOWED_OUTCOMES)}")
     if not spec.time_fixed_effects:
@@ -234,23 +260,47 @@ def _validate_panel_spec(spec: PanelSpec) -> None:
         raise ValueError("Negative controls must carry zero exposure by construction")
     if any(weight < 0 for weight in spec.exposure_weights.values()):
         raise ValueError("Exposure weights must be non-negative")
-    if not any(weight > 0 for weight in spec.exposure_weights.values()):
+    if spec.exposure_weights and not any(weight > 0 for weight in spec.exposure_weights.values()):
         raise ValueError("At least one mechanism candidate must carry positive exposure")
 
 
-def build_exposure_table(registry: CommodityRegistry, spec: PanelSpec) -> pd.DataFrame:
+def build_exposure_table(
+    registry: CommodityRegistry,
+    spec: PanelSpec,
+    external_weights: pd.DataFrame | None = None,
+) -> pd.DataFrame:
     """Attach exposure weights to the registry, refusing any gap or surplus."""
     entries = registry.entries
     sample = entries.loc[entries["role"].isin(spec.roles), ["commodity", "role", "group"]].copy()
     candidates = set(sample.loc[sample["role"].eq("mechanism_candidate"), "commodity"])
-    weighted = set(spec.exposure_weights)
-    if candidates != weighted:
-        raise ValueError(
-            "Exposure weights do not exactly cover the mechanism candidates; "
-            f"missing={sorted(candidates - weighted)}, unknown={sorted(weighted - candidates)}"
+    weights = dict(spec.exposure_weights)
+    if external_weights is not None:
+        required = {"commodity", "exposure_weight"}
+        if not required.issubset(external_weights.columns):
+            raise ValueError("External exposure artifact is missing commodity or exposure_weight")
+        if external_weights["commodity"].duplicated().any():
+            raise ValueError("External exposure artifact has duplicate commodities")
+        weights = dict(
+            zip(
+                external_weights["commodity"].astype(str),
+                pd.to_numeric(external_weights["exposure_weight"], errors="raise"),
+                strict=True,
+            )
         )
+    expected = candidates - set(spec.excluded_candidates)
+    if candidates != expected | set(spec.excluded_candidates):
+        raise ValueError("Excluded exposure candidates contain unknown registry entries")
+    weighted = set(weights)
+    if expected != weighted:
+        raise ValueError(
+            "Exposure weights do not exactly cover the included mechanism candidates; "
+            f"missing={sorted(expected - weighted)}, unknown={sorted(weighted - expected)}"
+        )
+    sample = sample.loc[
+        ~sample["role"].eq("mechanism_candidate") | sample["commodity"].isin(expected)
+    ].copy()
     is_control = sample["role"].eq("negative_control")
-    sample["exposure_weight"] = sample["commodity"].map(spec.exposure_weights)
+    sample["exposure_weight"] = sample["commodity"].map(weights)
     sample.loc[is_control, "exposure_weight"] = spec.negative_control_weight
     sample["uniform_weight"] = np.where(is_control, spec.negative_control_weight, 1.0)
     sample["is_negative_control"] = is_control
@@ -259,12 +309,16 @@ def build_exposure_table(registry: CommodityRegistry, spec: PanelSpec) -> pd.Dat
     sample["exposure_authored_on"] = spec.exposure_authored_on.isoformat()
     sample["exposure_outcome_blind"] = spec.exposure_outcome_blind
     sample["exposure_inference_scope"] = spec.exposure_inference_scope
+    if sample.loc[~is_control, "exposure_weight"].isna().any():
+        raise ValueError("Included candidates contain missing exposure weights")
+    if (sample.loc[~is_control, "exposure_weight"] < 0).any():
+        raise ValueError("Exposure weights must be non-negative")
+    if not sample.loc[~is_control, "exposure_weight"].gt(0).any():
+        raise ValueError("At least one mechanism candidate must carry positive exposure")
     return sample.sort_values("commodity", ignore_index=True)
 
 
-def assign_resampling_blocks(
-    dates: pd.Series, *, start_month: int, length_years: int
-) -> pd.Series:
+def assign_resampling_blocks(dates: pd.Series, *, start_month: int, length_years: int) -> pd.Series:
     """Group months into consecutive resampling blocks of a given length.
 
     Blocks are cut on an absolute month index, so ``start_month=5`` and
@@ -654,9 +708,7 @@ def permute_candidate_exposure_weights(
         )[:, 0]
         design = np.column_stack([transformed_interaction, fixed[:, 1]])
         try:
-            coefficients, _, _, _ = _fit_demeaned(
-                fixed[:, 0], design, units=units, periods=periods
-            )
+            coefficients, _, _, _ = _fit_demeaned(fixed[:, 0], design, units=units, periods=periods)
         except (np.linalg.LinAlgError, ValueError):
             continue
         estimate = float(coefficients[0])

@@ -1,0 +1,61 @@
+# Outcome-independent physical exposure contract. No commodity-price series is
+# used to construct these weights.
+provenance:
+  version: 2
+  method: external_crop_area_x_el_nino_drought_hotspot
+  authored_on: 2026-09-06
+  outcome_blind: true
+  inference_scope: retrospective_external_validation
+
+sources:
+  drought_hotspot:
+    filename: asis_drought_probability_cropland.tif
+    url: https://storage.googleapis.com/fao-gismgr-ocb-data/DATA/OCB/MAPSET/ASIS-DROUGHT-PROBABILITY/OCB.ASIS-DROUGHT-PROBABILITY.CROPLAND.tif
+    landing_page: https://data.fao.org/catalog/dataset/96f1218a-51c5-48dd-abe4-1632326b489e
+    label: FAO ASIS global cropland drought-probability difference during strong El Nino
+    minimum_bytes: 20000000
+  crop_area_base_url: https://storage.googleapis.com/fao-gismgr-afirm-data/DATA/AFIRM/MAPSET/SPAM2020-PHYSICAL-AREA
+  crop_area_landing_page: https://data.fao.org/catalog/dataset/314cafcb-a0a2-448a-90d4-c0530d3e1ed8
+
+transformation:
+  crop_area_layer: ALL
+  drought_values: positive_difference_only
+  drought_scale_fraction: 1.0
+  missing_drought_values: zero_non_hotspot
+  minimum_hotspot_crop_area_share: 0.20
+
+commodity_crop_codes:
+  "Banana, US": BANA
+  "Barley": BARL
+  "Cocoa": COCO
+  "Coconut oil": CNUT
+  "Coffee, Arabica": COFF
+  "Coffee, Robusta": RCOF
+  "Cotton, A Index": COTT
+  "Groundnut oil **": GROU
+  "Maize": MAIZ
+  "Orange": CITR
+  "Palm oil": OILP
+  "Rapeseed oil": RAPE
+  "Rice, Thai 5%": RICE
+  "Rubber, RSS3": RUBB
+  "Sorghum": SORG
+  "Soybeans": SOYB
+  "Sugar, world": SUGC
+  "Sunflower oil": SUNF
+  "Tea, avg 3 auctions": TEAS
+  "Tobacco, US import u.v.": TOBA
+  "Wheat, US HRW": WHEA
+
+excluded_candidates:
+  "Beef **": no crop-area layer
+  "Chicken **": no crop-area layer
+  "Coal, Australian": no crop-area layer
+  "DAP": no crop-area layer
+  "Fish meal": no crop-area layer
+  "Lamb **": no crop-area layer
+  "Logs, Malaysian": no crop-area layer
+  "Natural gas, Europe": no crop-area layer
+  "Natural gas, US": no crop-area layer
+  "Shrimps, Mexican": no crop-area layer
+  "Urea": no crop-area layer

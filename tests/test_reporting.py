@@ -28,6 +28,12 @@ _Not yet generated._
 
 <!-- generated:run-identity end -->
 
+<!-- generated:run-context start -->
+
+_Not yet generated._
+
+<!-- generated:run-context end -->
+
 ## Evidence summary
 
 <!-- generated:evidence-summary start -->
@@ -35,6 +41,12 @@ _Not yet generated._
 _Not yet generated._
 
 <!-- generated:evidence-summary end -->
+
+<!-- generated:interpretations start -->
+
+_Not yet generated._
+
+<!-- generated:interpretations end -->
 
 ## Stage receipts
 
@@ -44,9 +56,21 @@ _Not yet generated._
 
 <!-- generated:receipts end -->
 
+## Panel result
+
+<!-- generated:panel-result start -->
+
+_Not yet generated._
+
+<!-- generated:panel-result end -->
+
 ## Bottom line
 
-Hand-written closing that the generator must never touch.
+<!-- generated:bottom-line start -->
+
+_Not yet generated._
+
+<!-- generated:bottom-line end -->
 """
 
 
@@ -92,7 +116,7 @@ def test_generated_blocks_are_filled_and_prose_is_untouched(tmp_path: Path) -> N
     text = report.read_text(encoding="utf-8")
 
     assert "Hand-written opening that the generator must never touch." in text
-    assert "Hand-written closing that the generator must never touch." in text
+    assert "The pipeline leaves" in text
     assert "_Not yet generated._" not in text
     assert "- Data snapshot: `2026-09-05`" in text
     for stage in STAGES:

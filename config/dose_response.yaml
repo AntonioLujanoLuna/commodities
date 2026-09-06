@@ -1,0 +1,21 @@
+# Secondary amplitude diagnostic. This does not change the frozen binary-event
+# endpoint or any gate in commodities.yaml.
+provenance:
+  version: 1
+  authored_on: 2026-09-06
+  inference_scope: exploratory_secondary
+
+design:
+  exposure: episode_peak_roni
+  exposure_scaling: z_score_across_warm_episodes
+  outcome: seasonal_adjusted_log_return
+  estimator: ordinary_least_squares_hc3
+  alternative: two_sided
+  minimum_valid_episodes: 10
+
+inference:
+  permutation_unit: whole_episode_amplitude_labels
+  replicates: 10000
+  random_seed: 20260906
+  fdr_alpha: 0.05
+  fwer_alpha: 0.05

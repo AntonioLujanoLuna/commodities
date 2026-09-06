@@ -1,4 +1,4 @@
-# Exploratory exposure-weighted panel design. This does NOT alter the frozen
+# Outcome-independent exposure-weighted panel design. This does NOT alter the frozen
 # primary event-study contract in commodities.yaml; it is a separate
 # identification strategy for the same question.
 #
@@ -19,23 +19,20 @@
 # across the estimation sample. It is not a level effect, and a common shock
 # that moved every commodity identically would be invisible to it.
 #
-# Honesty note on the weights
-# ---------------------------
-# These weights encode physical distance from the ENSO signal, not any observed
-# return. They were nonetheless written after this repository's event-study
-# results were known, so they cannot claim to be outcome-blind on this dataset
-# in the way the commodity registry can. The `uniform` weighting variant exists
-# for that reason: it assigns every mechanism candidate a weight of one and
-# requires no judgement at all, reducing the design to a candidate-versus-
-# control contrast. Any conclusion that holds under `exposure` but not under
-# `uniform` is a conclusion about the weights.
+# Weight contract
+# ---------------
+# Version 2 is generated mechanically from external physical data: SPAM 2020
+# crop area multiplied by the positive FAO ASIS drought-frequency difference
+# between strong El Nino and baseline years. Commodity prices never enter the
+# weight construction. Candidates without a defensible crop-area layer are
+# excluded rather than assigned zero exposure.
 
 exposure_provenance:
-  version: 1
-  method: post_outcome_expert_judgment
-  authored_on: 2026-09-05
-  outcome_blind: false
-  inference_scope: exploratory_only
+  version: 2
+  method: external_crop_area_x_el_nino_drought_hotspot
+  authored_on: 2026-09-06
+  outcome_blind: true
+  inference_scope: retrospective_external_validation
 
 specification:
   outcome_column: seasonal_adjusted_log_return
@@ -87,45 +84,18 @@ inference:
   demeaning_tolerance: 1.0e-9
   demeaning_max_iterations: 400
 
-# Exposure scale
-#   1.00  production concentrated in regions with a first-order, well documented
-#         ENSO teleconnection, or where the Pacific state is itself the mechanism
-#   0.50  production in regions with a weaker or less consistent teleconnection
-#   0.25  pathway runs through other commodities (feed, fertiliser demand,
-#         heating degree days) rather than weather at the production site
-#   0.00  negative controls: no pre-specified physical pathway at all
-exposure_weights:
-  "Cocoa": 0.50
-  "Coffee, Arabica": 1.00
-  "Coffee, Robusta": 1.00
-  "Tea, avg 3 auctions": 1.00
-  "Coconut oil": 1.00
-  "Groundnut oil **": 0.50
-  "Palm oil": 1.00
-  "Rapeseed oil": 0.25
-  "Sunflower oil": 0.50
-  "Soybeans": 1.00
-  "Barley": 0.50
-  "Maize": 0.50
-  "Sorghum": 0.50
-  "Rice, Thai 5%": 1.00
-  "Wheat, US HRW": 0.50
-  "Banana, US": 1.00
-  "Orange": 1.00
-  "Sugar, world": 1.00
-  "Cotton, A Index": 0.50
-  "Rubber, RSS3": 1.00
-  "Tobacco, US import u.v.": 0.25
-  "Logs, Malaysian": 1.00
-  "Fish meal": 1.00
-  "Shrimps, Mexican": 1.00
-  "Beef **": 0.25
-  "Chicken **": 0.25
-  "Lamb **": 0.50
-  "Coal, Australian": 1.00
-  "Natural gas, Europe": 0.25
-  "Natural gas, US": 0.50
-  "DAP": 0.25
-  "Urea": 0.25
+exposure_weights_file: external_exposure_weights.csv
+excluded_candidates:
+  - "Beef **"
+  - "Chicken **"
+  - "Coal, Australian"
+  - "DAP"
+  - "Fish meal"
+  - "Lamb **"
+  - "Logs, Malaysian"
+  - "Natural gas, Europe"
+  - "Natural gas, US"
+  - "Shrimps, Mexican"
+  - "Urea"
 
 negative_control_weight: 0.0

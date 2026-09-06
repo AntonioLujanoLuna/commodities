@@ -6,8 +6,10 @@ from pathlib import Path
 from .adjusted_events import build_adjusted_event_tables
 from .config import project_root
 from .dataset import build_real_dataset
+from .dose_response_analysis import run_dose_response_analysis
 from .download import download_all
 from .endpoint_analysis import run_endpoint_diagnostics
+from .external_exposure import build_external_exposure_weights, download_exposure_data
 from .financial_analysis import run_financial_control_analysis
 from .financial_data import build_financial_dataset
 from .fragility_analysis import run_leave_one_episode_out
@@ -22,6 +24,7 @@ from .power_analysis import run_power_analysis
 from .raw_events import build_raw_event_tables
 from .reporting import build_current_results
 from .robustness_analysis import run_timing_index_robustness
+from .specification_curve_analysis import run_specification_curve
 from .specificity_analysis import run_specificity_diagnostics
 from .universe import build_inference_universe
 
@@ -283,6 +286,22 @@ def power() -> None:
     print(output)
 
 
+def dose_response() -> None:
+    parser = argparse.ArgumentParser(
+        description="Run the secondary warm-episode amplitude dose-response diagnostic."
+    )
+    parser.add_argument("--processed-snapshot", type=Path)
+    parser.add_argument("--tables-root", type=Path)
+    parser.add_argument("--config", type=Path)
+    args = parser.parse_args()
+    output = run_dose_response_analysis(
+        processed_snapshot=args.processed_snapshot,
+        tables_root=args.tables_root,
+        config_path=args.config,
+    )
+    print(output)
+
+
 def panel() -> None:
     parser = argparse.ArgumentParser(
         description="Run the exploratory exposure-weighted fixed-effects panel."
@@ -299,3 +318,50 @@ def panel() -> None:
         panel_config_path=args.config,
     )
     print(output)
+
+
+def specification_curve() -> None:
+    parser = argparse.ArgumentParser(
+        description="Run the whole-year circular-shift panel specification curve."
+    )
+    parser.add_argument("--processed-snapshot", type=Path)
+    parser.add_argument("--tables-root", type=Path)
+    parser.add_argument("--registry", type=Path)
+    parser.add_argument("--panel-config", type=Path)
+    parser.add_argument("--curve-config", type=Path)
+    args = parser.parse_args()
+    output = run_specification_curve(
+        processed_snapshot=args.processed_snapshot,
+        tables_root=args.tables_root,
+        registry_path=args.registry,
+        panel_config_path=args.panel_config,
+        curve_config_path=args.curve_config,
+    )
+    print(output)
+
+
+def exposure_download() -> None:
+    parser = argparse.ArgumentParser(description="Download external physical-exposure rasters.")
+    parser.add_argument("--raw-root", type=Path)
+    parser.add_argument("--config", type=Path)
+    args = parser.parse_args()
+    print(download_exposure_data(raw_root=args.raw_root, config_path=args.config))
+
+
+def exposure_build() -> None:
+    parser = argparse.ArgumentParser(description="Build outcome-independent exposure weights.")
+    parser.add_argument("--processed-snapshot", type=Path)
+    parser.add_argument("--raw-snapshot", type=Path)
+    parser.add_argument("--tables-root", type=Path)
+    parser.add_argument("--config", type=Path)
+    parser.add_argument("--registry", type=Path)
+    args = parser.parse_args()
+    print(
+        build_external_exposure_weights(
+            processed_snapshot=args.processed_snapshot,
+            raw_snapshot=args.raw_snapshot,
+            tables_root=args.tables_root,
+            config_path=args.config,
+            registry_path=args.registry,
+        )
+    )

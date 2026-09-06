@@ -73,7 +73,22 @@ def run_panel_analysis(
 
     monthly = pd.read_parquet(output_dir / monthly_name)
     enso = pd.read_csv(snapshot / enso_name, parse_dates=["date"])
-    exposure = build_exposure_table(registry, spec)
+    external_summary_path = output_dir / "external_exposure_summary.json"
+    external_weights_path = output_dir / (spec.exposure_weights_file or "")
+    external_summary: dict[str, Any] | None = None
+    external_weights: pd.DataFrame | None = None
+    if spec.exposure_weights_file:
+        external_summary = _load_real_summary(external_summary_path, "Panel analysis")
+        verify_hashes(
+            output_dir,
+            {
+                spec.exposure_weights_file: external_summary["output_hashes"][
+                    spec.exposure_weights_file
+                ]
+            },
+        )
+        external_weights = pd.read_csv(external_weights_path)
+    exposure = build_exposure_table(registry, spec, external_weights)
 
     results, replicates = _run_specification_grid(monthly, enso, exposure, spec)
     primary_panel = build_panel(
@@ -159,6 +174,14 @@ def run_panel_analysis(
                 registry_path or project_root() / "config" / "commodities.yaml"
             ),
             "panel.yaml": sha256_file(config_path),
+            **(
+                {
+                    external_summary_path.name: sha256_file(external_summary_path),
+                    external_weights_path.name: sha256_file(external_weights_path),
+                }
+                if external_summary is not None
+                else {}
+            ),
         },
         "output_hashes": {
             block_sensitivity_path.name: sha256_file(block_sensitivity_path),
@@ -186,9 +209,7 @@ def run_panel_analysis(
             "primary_exposure_weight_permutation_mean": permutation.permutation_mean,
             "primary_exposure_weight_permutation_median": permutation.permutation_median,
             "primary_exposure_weight_permutation_p_value": permutation.p_value,
-            "primary_exposure_weight_permutation_valid_replicates": (
-                permutation.valid_replicates
-            ),
+            "primary_exposure_weight_permutation_valid_replicates": (permutation.valid_replicates),
             # The frozen block is shorter than an ENSO episode, so it can only
             # have understated the interval. These say by how much.
             "primary_exposure_block_sensitivity": _block_sensitivity_digest(block_sensitivity),

@@ -31,6 +31,8 @@ def _validate_download(path: Path, source: Source) -> None:
         raise ValueError(f"{source.name}: NOAA ASCII header not found")
     if source.format == "csv" and prefix.lstrip().lower().startswith((b"<html", b"<!doctype")):
         raise ValueError(f"{source.name}: response is HTML, not CSV")
+    if source.format == "tif" and not prefix.startswith((b"II*\x00", b"MM\x00*")):
+        raise ValueError(f"{source.name}: response is not a TIFF file")
 
 
 def download_source(

@@ -40,13 +40,15 @@ entirely on a dated record of what was specified before the numbers arrived.
 ## Relationship to preregistration
 
 Frozen contracts live in `config/` (`commodities.yaml` for the primary endpoint,
-`panel.yaml` for the exploratory panel), because a machine reads them and the
+`panel.yaml` for the panel, `exposure_v2.yaml` for its external weights, and
+`dose_response.yaml` for the secondary amplitude diagnostic), because a machine reads them and the
 build refuses to run when they drift. The log records the *reasoning* around
 those freezes, which YAML cannot carry: what alternative was considered, what
 would have to be true for the choice to be wrong, and what was already known
 about the outcomes at the moment the choice was made.
 
-That last point is the one that matters most here. `panel.yaml` already carries
-`exposure_provenance.outcome_blind: false` because its weights were written
-after the event-study results were known. Any future weight set, endpoint or
-gate needs the same disclosure, and this is where the argument for it lives.
+That last point is the one that matters most here. The retired v1 panel weights
+were written after the event-study results were known; v2 records immutable
+external source URLs, hashes, transformations and exclusions instead. Any future
+weight set, endpoint or gate needs the same disclosure, and this is where the
+argument for it lives.

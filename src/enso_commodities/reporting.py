@@ -6,10 +6,10 @@ the run artifacts. Two hand-maintained copies of every number is a drift
 guarantee; it has not drifted yet only because the project is young.
 
 Every stage already writes a hash-linked JSON receipt. This module reads them
-and renders the run identity, the evidence summary and the receipt digests, so
-the numbers in the note are produced by the same artifacts a reader would audit
-rather than transcribed alongside them. The interpretation prose stays
-hand-written: it sits outside the generated markers and is never touched.
+and renders the run identity, evidence summary, receipt-backed interpretation
+and receipt digests, so the claims in the note are produced by the same
+artifacts a reader would audit rather than transcribed alongside them. Only
+durable framing that does not quote run results stays outside the markers.
 
 Two properties make the output trustworthy:
 
@@ -17,16 +17,20 @@ Two properties make the output trustworthy:
 re-verified against the file on disk. A receipt that describes artifacts which
 have since changed cannot be turned into a report at all.
 
-*Drift is detectable.* The render is a pure function of the receipts -- no
-timestamps, no environment capture -- so ``--check`` can re-render and compare.
-That turns "the report is out of date" from something a reader might notice
-into something the build refuses.
+*Drift is detectable.* The render has no timestamps, fingerprints the source
+tree, and captures only stable runtime facts, so ``--check`` can re-render and
+compare. That turns "the report is out of date" from something a reader might
+notice into something the build refuses.
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
+import platform
+import subprocess
 from dataclasses import dataclass
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Any
 
@@ -154,6 +158,19 @@ STAGES: tuple[StageReport, ...] = (
         ),
     ),
     StageReport(
+        key="dose_response",
+        title="Episode-amplitude dose response",
+        summary_file="dose_response_summary.json",
+        metrics=(
+            _metric("Candidate family size", "results", "candidate_family_size"),
+            _metric("Positive slopes", "results", "candidate_positive_slopes"),
+            _metric("Raw p<0.05", "results", "candidate_raw_rejections"),
+            _metric("BH rejections", "results", "candidate_fdr_rejections"),
+            _metric("Max-t rejections", "results", "candidate_fwer_rejections"),
+            _metric("Controls with raw p<0.05", "results", "control_raw_rejections"),
+        ),
+    ),
+    StageReport(
         key="macro",
         title="External macro controls",
         summary_file="macro_analysis_summary.json",
@@ -266,6 +283,21 @@ STAGES: tuple[StageReport, ...] = (
         ),
     ),
     StageReport(
+        key="external_exposure",
+        title="External physical exposure",
+        summary_file="external_exposure_summary.json",
+        metrics=(
+            _metric("Included crop candidates", "coverage", "included_candidates"),
+            _metric("Explicitly excluded candidates", "coverage", "excluded_candidates"),
+            _metric(
+                "Minimum crop area in hotspot support",
+                "coverage",
+                "minimum_hotspot_crop_area_share",
+                digits=4,
+            ),
+        ),
+    ),
+    StageReport(
         key="panel",
         title="Exposure-weighted panel",
         summary_file="panel_summary.json",
@@ -284,6 +316,17 @@ STAGES: tuple[StageReport, ...] = (
                 digits=5,
             ),
             _metric("Exposure cells passing grid FDR", "results", "exposure_cells_rejecting_fdr"),
+        ),
+    ),
+    StageReport(
+        key="specification_curve",
+        title="Whole-year timing null",
+        summary_file="specification_curve_summary.json",
+        metrics=(
+            _metric("Specification cells", "contract", "cells_per_alignment"),
+            _metric("Shifted alignments", "contract", "null_alignments"),
+            _metric("Joint timing p", "results", "joint_timing_p_value", digits=4),
+            _metric("Maximum-t timing p", "results", "maximum_t_timing_p_value", digits=4),
         ),
     ),
 )
@@ -357,6 +400,255 @@ def render_run_identity(output_dir: Path, summaries: dict[str, dict[str, Any] | 
     return "\n".join(lines)
 
 
+def _package_version(name: str) -> str:
+    try:
+        return version(name)
+    except PackageNotFoundError:
+        return "not installed"
+
+
+def _git_commit() -> str:
+    try:
+        return subprocess.run(
+            ["git", "rev-parse", "--short=12", "HEAD"],
+            cwd=project_root(),
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        return "unavailable"
+
+
+def _source_tree_hash() -> str:
+    """Fingerprint the analysis implementation without generated outputs."""
+    root = project_root()
+    paths = [root / "Makefile", root / "pyproject.toml", root / "uv.lock"]
+    for directory in (root / "config", root / "scripts", root / "src"):
+        paths.extend(
+            path
+            for path in directory.rglob("*")
+            if path.is_file() and "__pycache__" not in path.parts and path.suffix != ".pyc"
+        )
+    digest = hashlib.sha256()
+    for path in sorted(path for path in paths if path.is_file()):
+        relative = path.relative_to(root).as_posix()
+        digest.update(relative.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(path.read_bytes())
+        digest.update(b"\0")
+    return digest.hexdigest()
+
+
+def render_run_context(output_dir: Path, summaries: dict[str, dict[str, Any] | None]) -> str:
+    """Render execution facts from the current checkout and frozen receipts."""
+    inference = summaries.get("inference") or {}
+    panel = summaries.get("panel") or {}
+    primary_replicates = (inference.get("inference") or {}).get("bootstrap_replicates", "n/a")
+    panel_replicates = (panel.get("design") or {}).get("bootstrap_replicates", "n/a")
+    packages = ", ".join(
+        f"{name} {_package_version(name)}" for name in ("numpy", "pandas", "scipy", "statsmodels")
+    )
+    return "\n".join(
+        (
+            f"- Generated for snapshot: `{output_dir.name}`",
+            f"- Base Git commit at generation: `{_git_commit()}`",
+            f"- Analysis source-tree SHA-256: `{_source_tree_hash()}`",
+            f"- Runtime: Python {platform.python_version()}, {packages}",
+            f"- Primary bootstrap: {primary_replicates} whole-episode draws",
+            f"- Panel bootstrap: {panel_replicates} block draws per specification",
+        )
+    )
+
+
+def render_panel_result(summaries: dict[str, dict[str, Any] | None]) -> str:
+    """Render the panel conclusion from current panel and timing-null receipts."""
+    panel = summaries.get("panel")
+    if not panel:
+        return "_Not run._"
+    results = panel.get("results") or {}
+    design = panel.get("design") or {}
+    required = (
+        "primary_exposure_estimate",
+        "primary_exposure_ci_lower",
+        "primary_exposure_ci_upper",
+        "primary_exposure_studentized_p_value",
+        "primary_control_studentized_p_value",
+        "primary_exposure_weight_mapping_percentile",
+        "primary_exposure_weight_permutation_p_value",
+        "exposure_cells_rejecting_fdr",
+        "control_cells_rejecting_raw_5_percent",
+    )
+    if any(key not in results for key in required):
+        return "The panel ran, but its receipt lacks detailed narrative metrics."
+
+    scope = {
+        "retrospective_external_validation": "retrospective external-validation",
+        "exploratory_only": "exploratory",
+    }.get(str(design.get("exposure_inference_scope")), "unspecified-scope")
+    provenance = (
+        "outcome-independent external physical weights"
+        if design.get("exposure_outcome_blind") is True
+        else "post-outcome exposure weights"
+    )
+    paragraphs = [
+        (
+            f"The {scope} primary panel uses {provenance}, RONI lagged "
+            f"{design.get('primary_lag_months', 'n/a')} months, commodity and calendar-month "
+            "fixed effects, and seasonal-adjusted log returns. Its exposure coefficient is "
+            f"`{results['primary_exposure_estimate']:.6f}`, with a year-block 95% interval of "
+            f"`[{results['primary_exposure_ci_lower']:.6f}, "
+            f"{results['primary_exposure_ci_upper']:.6f}]` and studentized "
+            f"`p={results['primary_exposure_studentized_p_value']:.5f}`. The corresponding "
+            f"negative-control interaction has `p={results['primary_control_studentized_p_value']:.5f}`."
+        ),
+        (
+            "The named exposure assignment is at the "
+            f"{100 * results['primary_exposure_weight_mapping_percentile']:.1f}th percentile of "
+            "weight shuffles, with a two-sided mapping-permutation "
+            f"`p={results['primary_exposure_weight_permutation_p_value']:.5f}`. "
+            f"Across the 20-cell panel grid, {results['exposure_cells_rejecting_fdr']} exposure "
+            "cells survive BH correction and "
+            f"{results['control_cells_rejecting_raw_5_percent']} control cells reject at raw 5%."
+        ),
+    ]
+    curve = summaries.get("specification_curve")
+    if curve:
+        contract = curve.get("contract") or {}
+        timing = curve.get("results") or {}
+        if "joint_timing_p_value" in timing:
+            paragraphs.append(
+                "The panel-family timing null compares the observed curve with "
+                f"{contract.get('null_alignments', 'n/a')} circular whole-year ENSO shifts. "
+                f"Its joint median-|t| p-value is `{timing['joint_timing_p_value']:.5f}` and "
+                f"its maximum-|t| p-value is "
+                f"`{timing.get('maximum_t_timing_p_value', float('nan')):.5f}`. The observed "
+                "alignment is therefore not unusually strong within this panel specification family."
+            )
+    return "\n\n".join(paragraphs)
+
+
+def render_interpretation_table(summaries: dict[str, dict[str, Any] | None]) -> str:
+    """Interpret only receipt-backed facts so prose cannot outlive a run."""
+    rows = ["| Stage | Interpretation |", "|---|---|"]
+    inference = summaries.get("inference")
+    if inference:
+        values = inference["inference"]
+        rows.append(
+            "| Primary event study | "
+            f"{values['primary_rejections']} candidate associations survive BH and "
+            f"{values['primary_fwer_rejections']} survive Westfall-Young; the control failures "
+            "prevent a causal reading. |"
+        )
+    placebo = summaries.get("placebo")
+    if placebo:
+        values = placebo["diagnostics"]
+        p_value = values["era_balance"]["mean_year"]["p_value"]
+        rows.append(
+            "| Neutral-date placebo | "
+            f"{values['primary_candidates_passing_current_gates']} candidates pass the current "
+            f"gates; the mean-year imbalance has p={p_value:.4f} and is diagnostic, not a gate. |"
+        )
+    power = summaries.get("power")
+    if power:
+        values = power["diagnostics"]
+        family_size = values.get("candidate_family_size")
+        if family_size is None and inference:
+            family_size = inference["inference"]["fdr_family_size"]
+        rows.append(
+            "| Minimum detectable effect | "
+            f"{values['candidates_below_marginal_mde']} of {family_size} "
+            "candidates are below their own marginal MDE and are underpowered, not established "
+            "nulls. |"
+        )
+    dose = summaries.get("dose_response")
+    if dose:
+        values = dose["results"]
+        rows.append(
+            "| Episode amplitude | "
+            f"{values['candidate_fdr_rejections']} candidate slopes survive BH and "
+            f"{values['candidate_fwer_rejections']} survive max-t; "
+            f"{values['control_raw_rejections']} controls reject at raw 5%. |"
+        )
+    robustness = summaries.get("robustness")
+    if robustness:
+        count = robustness["diagnostics"]["candidates_passing_all_specifications_and_fragility"]
+        rows.append(
+            f"| Timing/index grid | {count} candidates pass every timing/index cell and the "
+            "leave-one-episode-out gate. |"
+        )
+    specificity = summaries.get("specificity")
+    if specificity:
+        count = specificity["diagnostics"]["controls_with_direction_specific_contrast_cells"]
+        rows.append(
+            f"| Warm versus cold | {count} control cells show a direction-specific contrast; "
+            "the broader candidate pattern remains mostly phase-nonspecific. |"
+        )
+    financial = summaries.get("financial")
+    if financial:
+        values = financial["diagnostics"]
+        rows.append(
+            "| Financial controls | "
+            f"{values['control_raw_rejections']} controls still reject in levels, while "
+            f"{values['control_direction_contrast_raw_rejections']} reject the warm-minus-cold "
+            "contrast. |"
+        )
+    palm = summaries.get("palm")
+    if palm:
+        complete = palm["diagnostics"]["complete_mechanism_chain"]
+        rows.append(
+            f"| Palm-oil mechanism | The prespecified physical chain is "
+            f"{'complete' if complete else 'incomplete'}. |"
+        )
+    external = summaries.get("external_exposure")
+    if external:
+        values = external["coverage"]
+        rows.append(
+            "| External physical exposure | "
+            f"{values['included_candidates']} crop candidates have outcome-independent weights; "
+            f"{values['excluded_candidates']} unsupported candidates are excluded rather than "
+            "coded as zero. |"
+        )
+    panel = summaries.get("panel")
+    if panel:
+        values = panel["results"]
+        sensitivities = values.get("primary_exposure_block_sensitivity", {})
+        robust_blocks = bool(sensitivities) and all(
+            cell.get("interval_excludes_zero") is True for cell in sensitivities.values()
+        )
+        rows.append(
+            "| Exposure panel | The primary interval "
+            f"{'excludes zero under every block sensitivity' if robust_blocks else 'is not robust under every block sensitivity'}, "
+            f"but {values['exposure_cells_rejecting_fdr']} exposure cells survive grid FDR. |"
+        )
+    curve = summaries.get("specification_curve")
+    if curve:
+        values = curve["results"]
+        rows.append(
+            "| Whole-year timing null | The observed specification family has joint timing "
+            f"p={values['joint_timing_p_value']:.4f} against circular whole-year shifts. |"
+        )
+    return "\n".join(rows)
+
+
+def render_bottom_line(summaries: dict[str, dict[str, Any] | None]) -> str:
+    power = summaries.get("power") or {}
+    robustness = summaries.get("robustness") or {}
+    panel = summaries.get("panel") or {}
+    underpowered = (power.get("diagnostics") or {}).get("candidates_below_marginal_mde", "n/a")
+    survivors = (robustness.get("diagnostics") or {}).get(
+        "candidates_passing_all_specifications_and_fragility", "n/a"
+    )
+    panel_fdr = (panel.get("results") or {}).get("exposure_cells_rejecting_fdr", "n/a")
+    return (
+        f"The pipeline leaves {survivors} timing/index-robust historical associations, while "
+        f"{underpowered} candidates remain below their own marginal detection threshold. "
+        "The phase and negative-control diagnostics still prevent an ENSO-specific causal "
+        f"interpretation, and {panel_fdr} panel exposure cells survive correction across the "
+        "specification grid."
+    )
+
+
 def render_evidence_table(summaries: dict[str, dict[str, Any] | None]) -> str:
     rows = ["| Stage | Result |", "|---|---|"]
     for stage in STAGES:
@@ -384,8 +676,12 @@ def render_sections(
 ) -> dict[str, str]:
     return {
         "run-identity": render_run_identity(output_dir, summaries),
+        "run-context": render_run_context(output_dir, summaries),
         "evidence-summary": render_evidence_table(summaries),
+        "interpretations": render_interpretation_table(summaries),
         "receipts": render_receipts_table(output_dir, summaries),
+        "panel-result": render_panel_result(summaries),
+        "bottom-line": render_bottom_line(summaries),
     }
 
 

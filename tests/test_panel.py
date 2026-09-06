@@ -12,6 +12,7 @@ import pytest
 import yaml
 
 from enso_commodities.config import project_root
+from enso_commodities.external_exposure import load_exposure_config
 from enso_commodities.panel import (
     CONTROL_TERM,
     EXPOSURE_TERM,
@@ -63,15 +64,19 @@ def _panel_from(fixture, *, lag_months: int = 0, weighting: str = "exposure") ->
 
 def test_shipped_exposure_weights_cover_the_frozen_candidate_registry() -> None:
     spec = load_panel_config(SHIPPED_CONFIG)
-    exposure = build_exposure_table(load_commodity_registry(), spec)
+    names = sorted(load_exposure_config().commodity_crop_codes)
+    external = pd.DataFrame(
+        {"commodity": names, "exposure_weight": np.linspace(0.1, 1.0, len(names))}
+    )
+    exposure = build_exposure_table(load_commodity_registry(), spec, external)
 
-    assert len(exposure) == 35
+    assert len(exposure) == 24
     assert exposure.loc[exposure["is_negative_control"], "exposure_weight"].eq(0.0).all()
     assert exposure.loc[~exposure["is_negative_control"], "exposure_weight"].gt(0.0).all()
     assert exposure.loc[~exposure["is_negative_control"], "uniform_weight"].eq(1.0).all()
-    assert exposure["exposure_method"].eq("post_outcome_expert_judgment").all()
-    assert exposure["exposure_outcome_blind"].eq(False).all()
-    assert exposure["exposure_inference_scope"].eq("exploratory_only").all()
+    assert exposure["exposure_method"].eq("external_crop_area_x_el_nino_drought_hotspot").all()
+    assert exposure["exposure_outcome_blind"].eq(True).all()
+    assert exposure["exposure_inference_scope"].eq("retrospective_external_validation").all()
     # Identification of the separate control coefficient needs the candidate
     # weights to vary; constant weights collapse to the uniform scheme.
     assert exposure.loc[~exposure["is_negative_control"], "exposure_weight"].nunique() > 1
@@ -81,9 +86,11 @@ def test_exposure_table_refuses_a_registry_it_does_not_cover() -> None:
     spec = load_panel_config(SHIPPED_CONFIG)
     registry = load_commodity_registry()
     registry.entries.loc[registry.entries.index[0], "commodity"] = "Unlisted commodity"
+    names = sorted(load_exposure_config().commodity_crop_codes)
+    external = pd.DataFrame({"commodity": names, "exposure_weight": 0.5})
 
-    with pytest.raises(ValueError, match="do not exactly cover"):
-        build_exposure_table(registry, spec)
+    with pytest.raises(ValueError, match="included mechanism candidates"):
+        build_exposure_table(registry, spec, external)
 
 
 def test_config_refuses_to_drop_the_month_fixed_effects(tmp_path: Path) -> None:
@@ -102,11 +109,11 @@ def test_config_refuses_a_nonzero_control_exposure(tmp_path: Path) -> None:
         load_panel_config(_config_with(tmp_path, weight_the_controls))
 
 
-def test_config_refuses_to_relabel_post_outcome_weights_as_outcome_blind(tmp_path: Path) -> None:
+def test_config_refuses_to_relabel_external_weights_as_outcome_informed(tmp_path: Path) -> None:
     def mislabel(raw: dict) -> None:
-        raw["exposure_provenance"]["outcome_blind"] = True
+        raw["exposure_provenance"]["outcome_blind"] = False
 
-    with pytest.raises(ValueError, match="cannot be labelled outcome-blind"):
+    with pytest.raises(ValueError, match="must be labelled outcome-blind"):
         load_panel_config(_config_with(tmp_path, mislabel))
 
 
@@ -536,6 +543,13 @@ def _write_stage_fixture(tmp_path: Path) -> tuple[Path, Path, Path, Path]:
     )
 
     def shrink(raw: dict) -> None:
+        raw["exposure_provenance"] = {
+            "version": 1,
+            "method": "post_outcome_expert_judgment",
+            "authored_on": "2026-09-05",
+            "outcome_blind": False,
+            "inference_scope": "exploratory_only",
+        }
         raw["specification"]["index_definitions"] = ["roni"]
         raw["specification"]["reported_lag_months"] = [0]
         raw["specification"]["primary_lag_months"] = 0
@@ -548,6 +562,8 @@ def _write_stage_fixture(tmp_path: Path) -> tuple[Path, Path, Path, Path]:
         raw["exposure_weights"] = {
             name: [0.25, 0.5, 1.0][position % 3] for position, name in enumerate(candidates)
         }
+        raw.pop("exposure_weights_file", None)
+        raw["excluded_candidates"] = []
 
     return snapshot, tmp_path / "tables", registry_path, _config_with(tmp_path, shrink)
 
