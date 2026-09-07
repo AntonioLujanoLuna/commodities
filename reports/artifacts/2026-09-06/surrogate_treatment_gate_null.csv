@@ -1,0 +1,5 @@
+statistic,observed,surrogate_mean,surrogate_median,surrogate_maximum,surrogates_at_least_observed,surrogates,finite_sample_p_value
+candidates_passing_gates,9,0.315,0.0,8,0,400,0.0024937655860349127
+candidates_rejecting_bootstrap_fdr,11,0.3925,0.0,10,0,400,0.0024937655860349127
+controls_rejecting_bootstrap_raw,3,0.3575,0.0,3,6,400,0.017456359102244388
+controls_rejecting_placebo_raw,3,1.1825,1.0,3,45,400,0.11471321695760599

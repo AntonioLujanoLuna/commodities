@@ -241,6 +241,49 @@ STAGES: tuple[StageReport, ...] = (
         ),
     ),
     StageReport(
+        key="surrogate_treatment",
+        title="Placebo treatments",
+        summary_file="surrogate_treatment_run_summary.json",
+        metrics=(
+            _metric("Surrogate treatments", "diagnostics", "surrogate_cells"),
+            _metric("External climate treatments", "diagnostics", "external_cells"),
+            _metric(
+                "External max candidates passing gates",
+                "diagnostics",
+                "external_maximum_candidates_passing_gates",
+            ),
+            _metric(
+                "External max controls rejecting",
+                "diagnostics",
+                "external_maximum_controls_rejecting_bootstrap_raw",
+            ),
+            _metric(
+                "Mean control rejection rate under surrogates",
+                "diagnostics",
+                "mean_control_bootstrap_rejection_rate_under_surrogates",
+                digits=4,
+            ),
+            _metric(
+                "Candidates-passing surrogate p",
+                "diagnostics",
+                "candidates_passing_gates_finite_sample_p_value",
+                digits=4,
+            ),
+            _metric(
+                "Controls-rejecting-bootstrap surrogate p",
+                "diagnostics",
+                "controls_rejecting_bootstrap_raw_finite_sample_p_value",
+                digits=4,
+            ),
+            _metric(
+                "Controls-rejecting-placebo surrogate p",
+                "diagnostics",
+                "controls_rejecting_placebo_raw_finite_sample_p_value",
+                digits=4,
+            ),
+        ),
+    ),
+    StageReport(
         key="endpoint",
         title="Endpoint diagnostics",
         summary_file="endpoint_diagnostics_summary.json",
@@ -642,6 +685,16 @@ def render_interpretation_table(summaries: dict[str, dict[str, Any] | None]) -> 
             "| Exposure panel | The primary interval "
             f"{'excludes zero under every block sensitivity' if robust_blocks else 'is not robust under every block sensitivity'}, "
             f"but {values['exposure_cells_rejecting_fdr']} exposure cells survive grid FDR. |"
+        )
+    surrogate = summaries.get("surrogate_treatment")
+    if surrogate:
+        values = surrogate["diagnostics"]
+        rows.append(
+            "| Placebo treatments | Under spectrum-matched surrogate treatments the candidate "
+            f"gate count is unusual (p={values['candidates_passing_gates_finite_sample_p_value']:.4f}) "
+            "and no alternative climate index reproduces it, but the negative-control placebo "
+            f"failure is not unusual (p={values['controls_rejecting_placebo_raw_finite_sample_p_value']:.4f}) "
+            "and so is not evidence against ENSO specificity. |"
         )
     curve = summaries.get("specification_curve")
     if curve:

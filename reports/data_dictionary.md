@@ -370,6 +370,43 @@ retains every randomization statistic. `specificity_summary.json` labels the sta
 records the real-data input/output hash chain. No ENSO, price, macro or return values are simulated;
 only observed episode labels are randomized under the comparison null.
 
+## Exploratory placebo treatments
+
+`config/surrogate_treatment.yaml` freezes a separate exploratory contract and refuses to load if
+it claims to change a frozen gate. The stage keeps the dates and replaces the treatment, which is
+the complement of the neutral-date placebo.
+
+`data/climate/raw/<snapshot>/` holds the immutable NOAA PSL downloads for the Dipole Mode Index,
+the Pacific Decadal Oscillation, the North Atlantic Oscillation and the Atlantic Multidecadal
+Oscillation, each with the usual provenance sidecar. `climate_indices_monthly.csv` is the parsed
+monthly panel; the parser requires the file's own missing-value sentinel line and refuses to guess
+it, so a placeholder is never read as an observation. These series are substitute treatments only.
+They are never controls, never regressors and never robustness indices.
+
+`surrogate_treatment_summary.csv` has one row per treatment: its kind (`reference`,
+`external_climate_index`, `phase_randomized`, `seasonal_preserving`), the episode count its own
+threshold crossings produce, its correlation with RONI, and the four gate counts. The
+`reference` row runs the substitute-treatment code path with RONI itself and must reproduce the
+frozen macro-adjusted estimates; `reference_mean_reconstruction_max_abs_difference` in the receipt
+records by how much, and the stage aborts above 1e-10.
+
+`surrogate_treatment_results.csv` is the per-treatment, per-commodity detail: bootstrap and
+placebo p-values, candidate-family q-values, eligibility, sign agreement and the composite
+`passes_gates`. Controls carry raw diagnostic p-values and stay outside the candidate family, as
+everywhere else in the project.
+
+`surrogate_treatment_gate_null.csv` compares each observed gate count with its distribution over
+the phase-randomized surrogates and reports the finite-sample p-value `(1 + #{surrogate >=
+observed}) / (1 + surrogates)`. `surrogate_treatment_commodity_rates.csv` does the same one
+commodity at a time: how often that commodity rejects the bootstrap, rejects the placebo or passes
+every gate under a treatment with RONI's spectrum and no relationship to history.
+
+Substitute treatments are moment-matched to RONI over the shared analysis window before the frozen
+threshold is applied. Phase randomization preserves the power spectrum, and optionally the
+calendar-month climatology, and is seeded from the recorded research seed.
+`surrogate_treatment_run_summary.json` labels the stage exploratory and records the full real-data
+hash chain. No price, macro or return value is simulated; only the treatment series is replaced.
+
 ## Exploratory endpoint diagnostics
 
 `config/endpoint_diagnostics.yaml` freezes a separate diagnostic contract.

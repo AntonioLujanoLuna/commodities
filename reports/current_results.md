@@ -20,7 +20,7 @@ interpretation.
 <!-- generated:run-identity start -->
 
 - Data snapshot: `2026-09-06`
-- Stage receipts: `inference`, `placebo`, `power`, `dose_response`, `macro`, `fragility`, `robustness`, `specificity`, `endpoint`, `financial`, `palm`, `external_exposure`, `panel`, `specification_curve`, `forecast`, `program_timing_null`
+- Stage receipts: `inference`, `placebo`, `power`, `dose_response`, `macro`, `fragility`, `robustness`, `specificity`, `surrogate_treatment`, `endpoint`, `financial`, `palm`, `external_exposure`, `panel`, `specification_curve`, `forecast`, `program_timing_null`
 - `commodities.yaml` SHA-256: `9a46280084782b9cf1b09b217a964a0774d725e6e4a46669911a60cd89f1a046`
 - `dose_response.yaml` SHA-256: `6650ed543f2483b5c1dc35e885df8b82f1a6121f00feaa5d1328ddae39f14b30`
 - `endpoint_diagnostics.yaml` SHA-256: `3faf58d68cb94ac3899f3fc0aee577173f8331fe5a8011914314b5fcfe543866`
@@ -31,6 +31,7 @@ interpretation.
 - `research.yaml` SHA-256: `faf1582043e0a3b52f42539cd3850b509b364f4b2767c178dda2b809dbd9c614`
 - `specification_curve.yaml` SHA-256: `1aeab89ab10fb3c2235396550cd8f8f8478d007e6a00c5c32d86c11e46f0f72a`
 - `specificity.yaml` SHA-256: `aba273464931378a9c1056513c9c536c6438e72f2694bb23f1f05cee738848ed`
+- `surrogate_treatment.yaml` SHA-256: `71541eff7ce55ba16ea415b9e14db08612aff7f1f04de58797c2a1daeaaf79be`
 - `validation_v2.yaml` SHA-256: `f002ab4d284c7e1526598a575e1b9c65278dfdd6a4e82785be12072bf751e40a`
 
 <!-- generated:run-identity end -->
@@ -38,7 +39,7 @@ interpretation.
 <!-- generated:run-context start -->
 
 - Generated for snapshot: `2026-09-06`
-- Analysis source-tree SHA-256: `f5ef55e97b13958f31aaf2206189afb6980b193c9c65cc925dc106cf6d9c3829`
+- Analysis source-tree SHA-256: `586ddb04cd226853e23c946ea82ec6e14a3896176d24ce77a35d10f1ecff8d84`
 - Primary bootstrap: 10000 whole-episode draws
 - Panel bootstrap: 2000 block draws per specification
 
@@ -58,6 +59,7 @@ interpretation.
 | Leave one episode out | Episode deletions 17; Candidates surviving every deletion 7; Controls rejecting after every deletion 3 |
 | Timing and index grid | Candidates passing every cell 3; Controls failing specificity everywhere 1 |
 | Warm versus cold | Candidate cells 120; Control cells 12; Control direction-specific cells 0 |
+| Placebo treatments | Surrogate treatments 400; External climate treatments 4; External max candidates passing gates 0; External max controls rejecting 1; Mean control rejection rate under surrogates 0.1192; Candidates-passing surrogate p 0.0025; Controls-rejecting-bootstrap surrogate p 0.0175; Controls-rejecting-placebo surrogate p 0.1147 |
 | Endpoint diagnostics | Control log-mean rejections 13; Control time-trend rejections 2; Control regime correlations 9 |
 | Financial controls | Models estimated 122; Control raw rejections 3; Control contrast rejections 0 |
 | Palm-oil mechanism | Tests 18; Complete physical chain no |
@@ -87,6 +89,7 @@ Generated one line per stage from the same receipts as the evidence table above.
 | Palm-oil mechanism | The prespecified physical chain is incomplete. |
 | External physical exposure | 21 crop candidates have outcome-independent weights; 11 unsupported candidates are excluded rather than coded as zero. |
 | Exposure panel | The primary interval is not robust under every block sensitivity, but 0 exposure cells survive grid FDR. |
+| Placebo treatments | Under spectrum-matched surrogate treatments the candidate gate count is unusual (p=0.0025) and no alternative climate index reproduces it, but the negative-control placebo failure is not unusual (p=0.1147) and so is not evidence against ENSO specificity. |
 | Whole-year timing null | The observed specification family has joint timing p=0.4098 against circular whole-year shifts. |
 | Recursive forecast benchmark | ENSO improves RMSE in 8 of 9 cells, with paired-loss p<0.05 in 1 cell; final RONI and non-investable indexes make this pseudo-OOS. |
 | Best forecast cell | Rubber, RSS3 at 12 months has paired-loss p=0.0137 and RMSE improvement 0.0384, but its price-index strategy excess over long-only is -1.1752. |
@@ -108,6 +111,7 @@ Generated one line per stage from the same receipts as the evidence table above.
 | Leave one episode out | `macro_fragility_run_summary.json` | `e618ade0cc5e79b6a261ad886d2f16fcf2e89cbd6af662d0a9011f21953d114c` |
 | Timing and index grid | `robustness_summary.json` | `6f09751e643c96c902839f630b561bcdf942110287a07acc1c609c62e7934bc6` |
 | Warm versus cold | `specificity_summary.json` | `ac3ea45455964d669f45a8fbc188f6af0a1b3b1795d6a38e351629d05e50626e` |
+| Placebo treatments | `surrogate_treatment_run_summary.json` | `c1bf18c5e0f57532bcbea0f28592411f296e305a9b487ca35feedba10c34a310` |
 | Endpoint diagnostics | `endpoint_diagnostics_summary.json` | `160de331e8e51cfcedb8be26656be3fd7f3aecdb9ee21a772539703672a4127f` |
 | Financial controls | `financial_control_summary.json` | `57932049a8c82a5f76b0f868fcfa2d1a05cd8e63d494b7f9ef662ccb42f3cf49` |
 | Palm-oil mechanism | `palm_mechanism_summary.json` | `323295e83a6826f62386a9fbcca187a144bc5ba05420ea5e464578b541c73cee` |

@@ -1,0 +1,61 @@
+{
+  "contract": {
+    "bootstrap_replicates": 2000,
+    "changes_frozen_gates": false,
+    "external_treatments": [
+      "dmi",
+      "pdo",
+      "nao",
+      "amo"
+    ],
+    "gates": [
+      "eligible",
+      "sign_agreement",
+      "bootstrap_fdr",
+      "placebo_fdr"
+    ],
+    "placebo_replicates": 2000,
+    "reference_treatment": "roni",
+    "role": "placebo_treatment_falsification",
+    "surrogate_replicates": 200,
+    "surrogate_variants": [
+      "phase_randomized",
+      "seasonal_preserving"
+    ]
+  },
+  "data_provenance": "real",
+  "diagnostics": {
+    "candidates_passing_gates_finite_sample_p_value": 0.0024937655860349127,
+    "candidates_rejecting_bootstrap_fdr_finite_sample_p_value": 0.0024937655860349127,
+    "controls_rejecting_bootstrap_raw_finite_sample_p_value": 0.017456359102244388,
+    "controls_rejecting_placebo_raw_finite_sample_p_value": 0.11471321695760599,
+    "external_cells": 4,
+    "external_maximum_candidates_passing_gates": 0,
+    "external_maximum_controls_rejecting_bootstrap_raw": 1,
+    "mean_control_bootstrap_rejection_rate_under_surrogates": 0.11916666666666666,
+    "reference_episodes": 22,
+    "reference_mean_reconstruction_max_abs_difference": 1.1102230246251565e-16,
+    "surrogate_cells": 400,
+    "surrogate_median_episodes": 21.0
+  },
+  "input_hashes": {
+    "climate_indices_monthly.csv": "93af412d20a15a6d536734e2888bf206d7ff2fde1fb854179a97899a65f5780e",
+    "commodity_returns_monthly.parquet": "aeee18abaf410b36373fed375a70e995d37dec1cd1d4a8759fa61b2fef5d49ae",
+    "enso_monthly.csv": "ae2e227dfc392b8ba5c9c3e483a02169a7652de6ab99a672639d767a3a60cc95",
+    "macro_control_results.csv": "83e0244443d156e1adb718aa73c0116df146a8adcd0117419f7c4252d586a539",
+    "macro_controls_monthly.csv": "2d20d7d6932086b6ef66422755af7e922a0a053c4f03bc7090f8b61ccc870ccd",
+    "macro_primary_results.csv": "2691498eb27239a05a9dc210379bf84292e6f1ab0269be87151ca495933ed70f",
+    "research.yaml": "faf1582043e0a3b52f42539cd3850b509b364f4b2767c178dda2b809dbd9c614",
+    "surrogate_treatment.yaml": "71541eff7ce55ba16ea415b9e14db08612aff7f1f04de58797c2a1daeaaf79be",
+    "world_bank_indices_monthly.csv": "76f4d84328020c23eb4ebc4c295407abec04de94d08c89b90400d3b4ae07c3eb"
+  },
+  "output_hashes": {
+    "surrogate_treatment_commodity_rates.csv": "43adfeef95498d0d1ba91b731fa5289cd4d7bb527ce1d5352a24c60f7fd9a355",
+    "surrogate_treatment_gate_null.csv": "3afca7322a92a966664847cb8b8f97bf7a8981511918cfbcae643375967efdfb",
+    "surrogate_treatment_results.csv": "7e3ffa14c275b368915981a05fdb6e34148794be40c4df706d327d285810a668",
+    "surrogate_treatment_summary.csv": "907323b692ae1f1c040b501240625277f50df32a4870f7bed67e9ee85fb06741"
+  },
+  "random_seed": 20260905,
+  "snapshot": "2026-09-06",
+  "status": "exploratory"
+}

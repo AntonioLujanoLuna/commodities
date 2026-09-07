@@ -1,0 +1,32 @@
+# Alternative climate indices used only as substitute treatments in the
+# placebo-treatment stage. They are never controls, never regressors and never
+# enter the frozen primary contract. See config/surrogate_treatment.yaml.
+sources:
+  dmi:
+    label: NOAA PSL Dipole Mode Index (Indian Ocean Dipole), HadISST1.1, monthly
+    url: https://psl.noaa.gov/gcos_wgsp/Timeseries/Data/dmi.had.long.data
+    landing_page: https://psl.noaa.gov/gcos_wgsp/timeseries/DMI/
+    filename: psl_dmi.data
+    format: psl_index
+    minimum_bytes: 10000
+  pdo:
+    label: NOAA PSL Pacific Decadal Oscillation index, monthly
+    url: https://psl.noaa.gov/data/correlation/pdo.data
+    landing_page: https://psl.noaa.gov/data/climateindices/list/
+    filename: psl_pdo.data
+    format: psl_index
+    minimum_bytes: 4000
+  nao:
+    label: NOAA PSL North Atlantic Oscillation index from CPC, monthly
+    url: https://psl.noaa.gov/data/correlation/nao.data
+    landing_page: https://psl.noaa.gov/data/climateindices/list/
+    filename: psl_nao.data
+    format: psl_index
+    minimum_bytes: 4000
+  amo:
+    label: NOAA PSL Atlantic Multidecadal Oscillation, unsmoothed, Kaplan SST V2, monthly
+    url: https://psl.noaa.gov/data/correlation/amon.us.long.data
+    landing_page: https://psl.noaa.gov/data/timeseries/AMO/
+    filename: psl_amo.data
+    format: psl_index
+    minimum_bytes: 8000

@@ -1,0 +1,45 @@
+# Placebo-treatment falsification.
+#
+# The neutral-date placebo moves the dates and keeps the treatment. This stage
+# keeps the dates and replaces the treatment, which is the direct test of whether
+# the negative-control failure is a property of ENSO or of the machinery.
+#
+# Exploratory. It promotes and demotes nothing in the frozen event-study
+# contract; it reports how often that contract fires under a treatment that
+# cannot have caused anything.
+contract:
+  role: placebo_treatment_falsification
+  status: exploratory
+  changes_frozen_gates: false
+  # The reference cell re-runs the substitute-treatment code path with the
+  # primary index itself and must reproduce the frozen primary estimates.
+  reference_treatment: roni
+
+external_treatments:
+  # Real climate indices with their own persistence and their own episodes.
+  # Chosen before any surrogate result was inspected, and never used as
+  # controls, regressors or robustness indices anywhere else in the project.
+  # dmi is deliberately included despite being physically coupled to ENSO: its
+  # correlation with RONI is reported so a reader can weight it accordingly.
+  - dmi
+  - pdo
+  - nao
+  - amo
+
+surrogates:
+  # Fourier phase randomization keeps the power spectrum, and so the
+  # autocorrelation, of RONI and destroys its alignment to actual history.
+  replicates: 200
+  variants:
+    - phase_randomized
+    - seasonal_preserving
+
+inference:
+  # Reduced from the primary 10000 because the surrogate grid runs the whole
+  # gate stack hundreds of times. The reference cell is checked at these
+  # settings against the frozen estimates, so any resampling error is visible.
+  bootstrap_replicates: 2000
+  placebo_replicates: 2000
+  # Placebo anchors are drawn with replacement here: a surrogate treatment can
+  # leave too few eligible neutral anchors for a without-replacement draw.
+  placebo_sample_without_replacement: false

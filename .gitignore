@@ -13,6 +13,7 @@ data/financial/
 data/macro/
 data/mechanisms/
 data/exposure/
+data/climate/
 
 # Generated outputs. Rebuild the implemented pipeline with `make real-data`.
 figures/

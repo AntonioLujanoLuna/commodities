@@ -1,0 +1,100 @@
+commodity,registry_family,gate,observed_under_primary_index,surrogate_rate,surrogates,finite_sample_p_value
+"Banana, US",mechanism_candidate,reject_bootstrap_raw,False,0.0975,400,1.0
+"Banana, US",mechanism_candidate,reject_placebo_raw,False,0.25,400,1.0
+"Banana, US",mechanism_candidate,passes_gates,False,0.0075,400,1.0
+Barley,mechanism_candidate,reject_bootstrap_raw,True,0.125,400,0.12718204488778054
+Barley,mechanism_candidate,reject_placebo_raw,True,0.3275,400,0.32917705735660846
+Barley,mechanism_candidate,passes_gates,False,0.015,400,1.0
+Beef **,mechanism_candidate,reject_bootstrap_raw,False,0.1175,400,1.0
+Beef **,mechanism_candidate,reject_placebo_raw,False,0.37,400,1.0
+Beef **,mechanism_candidate,passes_gates,False,0.01,400,1.0
+Chicken **,mechanism_candidate,reject_bootstrap_raw,False,0.125,400,1.0
+Chicken **,mechanism_candidate,reject_placebo_raw,True,0.305,400,0.30673316708229426
+Chicken **,mechanism_candidate,passes_gates,False,0.01,400,1.0
+"Coal, Australian",mechanism_candidate,reject_bootstrap_raw,True,0.1225,400,0.12468827930174564
+"Coal, Australian",mechanism_candidate,reject_placebo_raw,True,0.3975,400,0.39900249376558605
+"Coal, Australian",mechanism_candidate,passes_gates,True,0.02,400,0.022443890274314215
+Cocoa,mechanism_candidate,reject_bootstrap_raw,False,0.1375,400,1.0
+Cocoa,mechanism_candidate,reject_placebo_raw,True,0.425,400,0.42643391521197005
+Cocoa,mechanism_candidate,passes_gates,False,0.01,400,1.0
+Coconut oil,mechanism_candidate,reject_bootstrap_raw,True,0.18,400,0.18204488778054864
+Coconut oil,mechanism_candidate,reject_placebo_raw,True,0.3875,400,0.38902743142144636
+Coconut oil,mechanism_candidate,passes_gates,True,0.0175,400,0.0199501246882793
+"Coffee, Arabica",mechanism_candidate,reject_bootstrap_raw,True,0.09,400,0.09226932668329177
+"Coffee, Arabica",mechanism_candidate,reject_placebo_raw,False,0.3425,400,1.0
+"Coffee, Arabica",mechanism_candidate,passes_gates,False,0.0075,400,1.0
+"Coffee, Robusta",mechanism_candidate,reject_bootstrap_raw,True,0.1,400,0.10224438902743142
+"Coffee, Robusta",mechanism_candidate,reject_placebo_raw,True,0.355,400,0.3566084788029925
+"Coffee, Robusta",mechanism_candidate,passes_gates,True,0.01,400,0.012468827930174564
+"Cotton, A Index",mechanism_candidate,reject_bootstrap_raw,False,0.0775,400,1.0
+"Cotton, A Index",mechanism_candidate,reject_placebo_raw,True,0.31,400,0.3117206982543641
+"Cotton, A Index",mechanism_candidate,passes_gates,False,0.01,400,1.0
+DAP,mechanism_candidate,reject_bootstrap_raw,True,0.095,400,0.09725685785536159
+DAP,mechanism_candidate,reject_placebo_raw,True,0.375,400,0.3765586034912718
+DAP,mechanism_candidate,passes_gates,False,0.015,400,1.0
+Fish meal,mechanism_candidate,reject_bootstrap_raw,True,0.1325,400,0.13466334164588528
+Fish meal,mechanism_candidate,reject_placebo_raw,False,0.3025,400,1.0
+Fish meal,mechanism_candidate,passes_gates,False,0.01,400,1.0
+Gold,negative_control,reject_bootstrap_raw,True,0.125,400,0.12718204488778054
+Gold,negative_control,reject_placebo_raw,True,0.425,400,0.42643391521197005
+Gold,negative_control,passes_gates,False,0.0,400,1.0
+Groundnut oil **,mechanism_candidate,reject_bootstrap_raw,False,0.1675,400,1.0
+Groundnut oil **,mechanism_candidate,reject_placebo_raw,True,0.33,400,0.3316708229426434
+Groundnut oil **,mechanism_candidate,passes_gates,False,0.01,400,1.0
+Lamb **,mechanism_candidate,reject_bootstrap_raw,False,0.12,400,1.0
+Lamb **,mechanism_candidate,reject_placebo_raw,False,0.3825,400,1.0
+Lamb **,mechanism_candidate,passes_gates,False,0.0075,400,1.0
+"Logs, Malaysian",mechanism_candidate,reject_bootstrap_raw,True,0.07,400,0.07231920199501247
+"Logs, Malaysian",mechanism_candidate,reject_placebo_raw,True,0.3375,400,0.33915211970074816
+"Logs, Malaysian",mechanism_candidate,passes_gates,True,0.0025,400,0.004987531172069825
+Maize,mechanism_candidate,reject_bootstrap_raw,False,0.1575,400,1.0
+Maize,mechanism_candidate,reject_placebo_raw,True,0.31,400,0.3117206982543641
+Maize,mechanism_candidate,passes_gates,False,0.0175,400,1.0
+"Natural gas, Europe",mechanism_candidate,reject_bootstrap_raw,True,0.155,400,0.1571072319201995
+"Natural gas, Europe",mechanism_candidate,reject_placebo_raw,True,0.4875,400,0.48877805486284287
+"Natural gas, Europe",mechanism_candidate,passes_gates,True,0.02,400,0.022443890274314215
+"Natural gas, US",mechanism_candidate,reject_bootstrap_raw,True,0.1125,400,0.11471321695760599
+"Natural gas, US",mechanism_candidate,reject_placebo_raw,False,0.305,400,1.0
+"Natural gas, US",mechanism_candidate,passes_gates,False,0.0025,400,1.0
+Orange,mechanism_candidate,reject_bootstrap_raw,False,0.1275,400,1.0
+Orange,mechanism_candidate,reject_placebo_raw,False,0.24,400,1.0
+Orange,mechanism_candidate,passes_gates,False,0.005,400,1.0
+Palm oil,mechanism_candidate,reject_bootstrap_raw,True,0.2125,400,0.2144638403990025
+Palm oil,mechanism_candidate,reject_placebo_raw,True,0.3225,400,0.32418952618453867
+Palm oil,mechanism_candidate,passes_gates,True,0.02,400,0.022443890274314215
+Platinum,negative_control,reject_bootstrap_raw,True,0.125,400,0.12718204488778054
+Platinum,negative_control,reject_placebo_raw,True,0.35,400,0.3516209476309227
+Platinum,negative_control,passes_gates,False,0.0,400,1.0
+"Rice, Thai 5%",mechanism_candidate,reject_bootstrap_raw,True,0.095,400,0.09725685785536159
+"Rice, Thai 5%",mechanism_candidate,reject_placebo_raw,True,0.3775,400,0.3790523690773067
+"Rice, Thai 5%",mechanism_candidate,passes_gates,True,0.005,400,0.007481296758104738
+"Rubber, RSS3",mechanism_candidate,reject_bootstrap_raw,True,0.1475,400,0.14962593516209477
+"Rubber, RSS3",mechanism_candidate,reject_placebo_raw,True,0.3175,400,0.3192019950124688
+"Rubber, RSS3",mechanism_candidate,passes_gates,True,0.0025,400,0.004987531172069825
+"Shrimps, Mexican",mechanism_candidate,reject_bootstrap_raw,False,0.085,400,1.0
+"Shrimps, Mexican",mechanism_candidate,reject_placebo_raw,True,0.2375,400,0.23940149625935161
+"Shrimps, Mexican",mechanism_candidate,passes_gates,False,0.0075,400,1.0
+Silver,negative_control,reject_bootstrap_raw,True,0.1075,400,0.10972568578553615
+Silver,negative_control,reject_placebo_raw,True,0.4075,400,0.4089775561097257
+Silver,negative_control,passes_gates,False,0.0,400,1.0
+Sorghum,mechanism_candidate,reject_bootstrap_raw,False,0.1025,400,1.0
+Sorghum,mechanism_candidate,reject_placebo_raw,True,0.3,400,0.30174563591022446
+Sorghum,mechanism_candidate,passes_gates,False,0.015,400,1.0
+Soybeans,mechanism_candidate,reject_bootstrap_raw,False,0.13,400,1.0
+Soybeans,mechanism_candidate,reject_placebo_raw,True,0.2975,400,0.29925187032418954
+Soybeans,mechanism_candidate,passes_gates,False,0.015,400,1.0
+"Sugar, world",mechanism_candidate,reject_bootstrap_raw,False,0.075,400,1.0
+"Sugar, world",mechanism_candidate,reject_placebo_raw,True,0.375,400,0.3765586034912718
+"Sugar, world",mechanism_candidate,passes_gates,False,0.0075,400,1.0
+"Tea, avg 3 auctions",mechanism_candidate,reject_bootstrap_raw,False,0.0925,400,1.0
+"Tea, avg 3 auctions",mechanism_candidate,reject_placebo_raw,True,0.2875,400,0.2892768079800499
+"Tea, avg 3 auctions",mechanism_candidate,passes_gates,False,0.0025,400,1.0
+"Tobacco, US import u.v.",mechanism_candidate,reject_bootstrap_raw,False,0.1425,400,1.0
+"Tobacco, US import u.v.",mechanism_candidate,reject_placebo_raw,True,0.38,400,0.38154613466334164
+"Tobacco, US import u.v.",mechanism_candidate,passes_gates,False,0.0075,400,1.0
+Urea,mechanism_candidate,reject_bootstrap_raw,True,0.125,400,0.12718204488778054
+Urea,mechanism_candidate,reject_placebo_raw,True,0.35,400,0.3516209476309227
+Urea,mechanism_candidate,passes_gates,True,0.0075,400,0.00997506234413965
+"Wheat, US HRW",mechanism_candidate,reject_bootstrap_raw,False,0.1275,400,1.0
+"Wheat, US HRW",mechanism_candidate,reject_placebo_raw,True,0.31,400,0.3117206982543641
+"Wheat, US HRW",mechanism_candidate,passes_gates,False,0.0175,400,1.0

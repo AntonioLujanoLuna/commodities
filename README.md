@@ -8,8 +8,11 @@
 > bootstrap inference, candidate-family FDR and calendar-matched neutral-date placebos are
 > implemented. External dollar, CPI and global-activity controls are also implemented. The
 > leave-one-episode-out and alternate-index/onset gates are implemented too. The prespecified
-> negative-control gate still fails, so the numerical associations below are not ENSO-specific
-> findings. An exploratory warm-versus-cold falsification diagnostic is also implemented.
+> negative-control gate still fails, but a placebo-treatment stage shows that gate is
+> miscalibrated: the controls reject the neutral-date placebo about as often under treatments that
+> cannot have caused a price move. Its failure is no longer read as evidence against ENSO
+> specificity, and no positive claim replaces it. An exploratory warm-versus-cold falsification
+> diagnostic is also implemented.
 >
 > The bootstrap test has been recalibrated: the centred percentile test is anti-conservative at
 > this many episodes, and the studentized version is now what the gates read. An exploratory
@@ -97,6 +100,9 @@ uv run python scripts/build_palm_oil_dataset.py
 uv run python scripts/run_palm_oil_mechanism.py
 uv run python scripts/download_exposure_data.py
 uv run python scripts/build_external_exposure.py
+uv run python scripts/download_climate_data.py
+uv run python scripts/build_climate_dataset.py
+uv run python scripts/run_surrogate_treatment.py
 uv run python scripts/run_panel_analysis.py
 uv run python scripts/run_specification_curve.py
 uv run python scripts/run_forecast_analysis.py
@@ -165,6 +171,9 @@ leave-one-episode-out bootstrap/FDR fragility                                  [
 alternate-index and onset-definition robustness                               [implemented]
         ↓
 warm-versus-cold phase-specificity falsification                              [implemented]
+        ↓
+substitute-treatment falsification: alternative climate indices and
+spectrum-matched phase-randomized surrogates                                  [implemented]
         ↓
 endpoint convexity, time-drift and observed-regime diagnostics                [implemented]
         ↓
@@ -336,6 +345,61 @@ with the prespecified signs. Aggregate palm-oil production growth does not predi
 palm-oil price growth at either the contemporaneous or the one-year lag. The physical chain
 therefore fails at the supply-to-price link, and palm oil remains interesting but unproven.
 
+**Placebo treatments.** The stage that keeps the dates and replaces the treatment reaches a
+sharper conclusion than any control block did. The candidate gate count is not something the
+machinery produces from an arbitrary persistent series: no phase-randomized surrogate of RONI
+reaches it, and no alternative climate index produces a single candidate passing every gate. The
+negative-control failure is the opposite. Gold, Silver and Platinum reject the neutral-date
+placebo under a large minority of treatments that cannot have caused a price move, so the
+observed count of control placebo rejections is unremarkable against that null. The prespecified
+reading of the failing control gate -- that the associations cannot be ENSO-specific because the
+controls fail too -- does not survive the calibration. This removes an argument against the
+survivors without supplying one for them: the physical chain still breaks at the supply-to-price
+link, the exposure panel still finds nothing surviving correction, and the forecast benchmark is
+still pseudo-out-of-sample.
+
+### Placebo treatments
+
+Every control block added to the event study narrowed the precious-metal failure without
+removing it, and the neutral-date placebo cannot settle whether that failure is about ENSO at
+all: it moves the dates and keeps the treatment, so it compares ENSO onsets with quiet stretches
+of history that sit in a different macro-financial era. The complementary experiment keeps the
+dates and replaces the treatment.
+
+The stage re-runs the frozen pipeline end to end -- episode construction, seasonal and
+common-market adjustment, the external-macro model, the +12 endpoint, the studentized
+whole-episode bootstrap, candidate-family Benjamini-Hochberg and the calendar-matched
+neutral-date placebo -- with the ENSO index swapped for a substitute series. Two families of
+substitute are used.
+
+*Alternative climate indices.* The Indian Ocean Dipole, the Pacific Decadal Oscillation, the
+North Atlantic Oscillation and the Atlantic Multidecadal Oscillation are real geophysical series
+with their own persistence and their own episodes. The IOD is physically coupled to ENSO and is
+included with its correlation to RONI reported; the North Atlantic pair have no plausible pathway
+to tropical crop supply.
+
+*Phase-randomized surrogates of RONI.* Fourier phase randomization keeps the amplitude of every
+frequency and replaces the phases with uniform draws. The surrogate has the same power spectrum,
+and so the same autocorrelation, as the real index, and no relationship at all to actual history.
+The seasonal-preserving variant removes the calendar-month climatology first and adds it back
+afterwards, so the annual cycle the seasonal adjustment stage is built around survives too.
+Running the whole gate stack over hundreds of surrogates gives the finite-sample distribution of
+every gate count under a treatment that cannot have caused a price move -- which is a direct
+measurement of the false-positive rate the negative-control gate is failing on, on the real
+price data rather than on synthetic panels.
+
+Every substitute treatment is moment-matched to RONI over the shared analysis window before the
+frozen 0.5 threshold is applied, so an episode means the same number of standard deviations for
+every treatment. The map is affine, and it is the identity for RONI itself: the stage runs a
+reference cell through the substitute-treatment code path with the real index and refuses to
+continue unless it reproduces the frozen macro-adjusted estimates. The surrogate grid also uses a
+vectorized endpoint builder rather than the full -12/+24 event path, which the test suite pins
+against the frozen construction to machine precision.
+
+The stage is exploratory and changes no gate; its configuration refuses to load otherwise. What
+it can establish is negative: a gate that fires as often under a spectrum-matched surrogate as it
+does under RONI is not measuring ENSO.
+
 ### The exposure-weighted panel
 
 Every control block added so far has narrowed the precious-metal problem without removing it.
@@ -433,13 +497,14 @@ rubber contract histories are exchange data and are not present in this reposito
 ## Current repository layout
 
 ```
-config/            official sources, research settings, frozen commodity registry
-                   and the panel exposure weights
+config/            official sources, research settings, frozen commodity registry,
+                   the panel exposure weights and the substitute-treatment contract
 data/raw/          immutable date-stamped downloads + .meta.json provenance sidecars
 data/processed/    tidy real-data tables and the joined monthly panel
 data/macro/        separate immutable raw and processed external-control snapshots
 data/financial/    immutable real-rate, credit-spread and NFCI snapshots
 data/mechanisms/   immutable weather and production snapshots for physical pilots
+data/climate/      immutable alternative climate indices, substitute treatments only
 src/enso_commodities/
   download.py      streamed downloads, format checks and immutable snapshots
   parsers.py       NOAA ASCII and Pink Sheet workbook parsers
@@ -468,6 +533,10 @@ src/enso_commodities/
   robustness_analysis.py RONI/ONI and timing-grid reconstruction and inference
   specificity.py warm/cold randomization and episode-influence diagnostics
   specificity_analysis.py exploratory real-data falsification stage and receipt
+  climate_data.py  NOAA PSL alternative climate index parsing and validation
+  surrogate_treatment.py substitute treatments, phase randomization and the
+                   frozen gate stack run under a treatment that is not ENSO
+  surrogate_analysis.py placebo-treatment grid and hash-linked receipt
   endpoint_diagnostics.py endpoint shape, time trend and regime correlations
   endpoint_analysis.py exploratory endpoint diagnostic stage and receipt
   financial_data.py verified financial-control parsing and transformations
@@ -527,6 +596,7 @@ placebo draw and placebo replicate, with a hash-linked run receipt.
 | Palm weather | NASA POWER MERRA-2 monthly precipitation and temperature | implemented pilot |
 | Palm production | FAOSTAT oil-palm fruit and palm-oil annual series | implemented pilot |
 | Global crop exposure | FAO ASIS El Niño drought hotspots + IFPRI/FAO SPAM 2020 crop area | implemented |
+| Substitute treatments | NOAA PSL DMI (IOD), PDO, NAO and AMO monthly indices | implemented |
 | Other weather | ERA5, CHIRPS, or a pre-aggregated regional CSV | contract implemented; data pending |
 | Other production/forecast revisions | FAOSTAT, USDA PSD | contract implemented; timestamped inputs pending |
 | Futures | vendor-licensed contract data (not redistributed) | adapter implemented; data pending |

@@ -1,5 +1,5 @@
 {
-  "analysis_source_tree_sha256": "f5ef55e97b13958f31aaf2206189afb6980b193c9c65cc925dc106cf6d9c3829",
+  "analysis_source_tree_sha256": "586ddb04cd226853e23c946ea82ec6e14a3896176d24ce77a35d10f1ecff8d84",
   "data_provenance": "real",
   "published_files": {
     "README.md": "17d3ce97d38f4b8f39c38004751b1004615e3f6f0e138a803eab902acb6cb77a",
@@ -49,7 +49,11 @@
     "specification_curve_summary.json": "f9c09f557ef0ab4923580fd91aa7b34bdbbd7b47953d4dbb573dc62448581126",
     "specificity_candidate_results.csv": "9ff6c788eeda426cf30419b821a4ee642f8adfe35d537b49d5e889f7fbd41375",
     "specificity_control_results.csv": "475eed4272c575a9d840250553ca85ea5ddcbc6d3d0d4dbf4dfcba87d71ae35a",
-    "specificity_summary.json": "ac3ea45455964d669f45a8fbc188f6af0a1b3b1795d6a38e351629d05e50626e"
+    "specificity_summary.json": "ac3ea45455964d669f45a8fbc188f6af0a1b3b1795d6a38e351629d05e50626e",
+    "surrogate_treatment_commodity_rates.csv": "43adfeef95498d0d1ba91b731fa5289cd4d7bb527ce1d5352a24c60f7fd9a355",
+    "surrogate_treatment_gate_null.csv": "3afca7322a92a966664847cb8b8f97bf7a8981511918cfbcae643375967efdfb",
+    "surrogate_treatment_run_summary.json": "c1bf18c5e0f57532bcbea0f28592411f296e305a9b487ca35feedba10c34a310",
+    "surrogate_treatment_summary.csv": "907323b692ae1f1c040b501240625277f50df32a4870f7bed67e9ee85fb06741"
   },
   "snapshot": "2026-09-06",
   "source_receipts": {
@@ -68,6 +72,7 @@
     "program_timing_null_summary.json": "aac58a9495181466fbddefdcd4eb0e27e3477b053047da0325003fd2d4b6391a",
     "robustness_summary.json": "6f09751e643c96c902839f630b561bcdf942110287a07acc1c609c62e7934bc6",
     "specification_curve_summary.json": "f9c09f557ef0ab4923580fd91aa7b34bdbbd7b47953d4dbb573dc62448581126",
-    "specificity_summary.json": "ac3ea45455964d669f45a8fbc188f6af0a1b3b1795d6a38e351629d05e50626e"
+    "specificity_summary.json": "ac3ea45455964d669f45a8fbc188f6af0a1b3b1795d6a38e351629d05e50626e",
+    "surrogate_treatment_run_summary.json": "c1bf18c5e0f57532bcbea0f28592411f296e305a9b487ca35feedba10c34a310"
   }
 }
