@@ -1,0 +1,28 @@
+{
+  "data_provenance": "real",
+  "diagnostics": {
+    "complete_mechanism_chain": false,
+    "link_passes": {
+      "enso_to_precipitation": true,
+      "enso_to_temperature": true,
+      "precipitation_to_yield": true,
+      "production_to_price": false,
+      "temperature_to_yield": true
+    },
+    "tests": 18
+  },
+  "input_hashes": {
+    "commodity_prices_monthly.parquet": "e4b1de55f82c7367fe8ef8c03825345167b0adb1e2b1f7c4ef7bdeaa75ce4a77",
+    "enso_monthly.csv": "ae2e227dfc392b8ba5c9c3e483a02169a7652de6ab99a672639d767a3a60cc95",
+    "palm_dataset_summary.json": "449fa84dd0cf2aed74411c1e0b3e2efc9bf542f1be0d42971ef0539dd1dd8a0f",
+    "palm_oil_mechanism.yaml": "32c0308feb2e255f76903b39311b5ad46ff8e536e035968158a10354c9a2c867"
+  },
+  "output_hashes": {
+    "palm_country_year_panel.csv": "6d3d1e6b32565992f69fbf5e8cb6fa1af099bae15ff64119b59c7eb6f50a9be5",
+    "palm_mechanism_results.csv": "7b3b4221787e6602eac49dd2f66eb0cc2492109790d5596afcd59473d2ed5dfb",
+    "palm_production_price_panel.csv": "f8d7088fb3a75630ea676999d05cea9e46f4a1eae56a25f05afa224625361813",
+    "palm_weather_anomalies_monthly.csv": "e9bdc1d69bb9e53baa6609abe717a40d32aaa371feb18b3983a7e31d848e3389"
+  },
+  "scope": "exploratory_mechanism_pilot_not_primary_design",
+  "snapshot": "2026-09-06"
+}

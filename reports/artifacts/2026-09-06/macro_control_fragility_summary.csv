@@ -1,0 +1,4 @@
+commodity,full_macro_mean_return,deletions_tested,loo_min_mean_return,loo_max_mean_return,loo_max_abs_change_from_full,most_influential_episode_id,loo_stable_direction_all,loo_raw_bootstrap_rejections,rejects_after_every_deletion
+Gold,0.188200310679003,17,0.15460005163024593,0.20497217237540838,0.033600259048757075,roni_warm_1972_04,True,17,True
+Platinum,0.1361615775743985,17,0.11508345268077788,0.15461406646801237,0.021078124893620626,roni_warm_1982_05,True,17,True
+Silver,0.3193103731903863,17,0.262940580001989,0.3454405889185968,0.0563697931883973,roni_warm_1982_05,True,17,True

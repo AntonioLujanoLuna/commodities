@@ -1,0 +1,4 @@
+commodity,specifications_tested,bootstrap_raw_rejections,placebo_raw_rejections,stable_direction_all,fails_specificity_everywhere
+Gold,4,3,4,True,False
+Platinum,4,3,4,True,False
+Silver,4,4,4,True,True

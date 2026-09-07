@@ -1,0 +1,63 @@
+{
+  "contract": {
+    "controls": [
+      "market_seasonal_adjusted_log_return",
+      "us_neer_log_change",
+      "us_cpi_log_change",
+      "global_real_activity_change"
+    ],
+    "estimation_exclusion_window": [
+      -12,
+      24
+    ],
+    "estimator": "ordinary_least_squares_with_intercept",
+    "minimum_model_observations": 60,
+    "primary_horizon_months": 12
+  },
+  "data_provenance": "real",
+  "diagnostics": {
+    "eligible_neutral_anchors": 71,
+    "endpoint_reconstruction_max_abs_difference": 8.881784197001252e-16,
+    "macro_models_estimated": 71,
+    "macro_models_not_estimated": 0,
+    "negative_controls_rejecting_bootstrap_raw": 3,
+    "negative_controls_rejecting_placebo_raw": 3,
+    "primary_candidates_passing_macro_gates": 9,
+    "primary_candidates_rejecting_bootstrap_fdr": 11,
+    "primary_candidates_rejecting_placebo_fdr": 23,
+    "primary_candidates_with_estimated_placebo": 30,
+    "primary_macro_eligible_candidates": 30,
+    "real_macro_episode_count": 17
+  },
+  "input_hashes": {
+    "adjusted_event_summary.json": "5f1a8833d5a23386642d7ca66633d97d451f8eecd929c471290f7630d78cc940",
+    "commodity_returns_adjusted_monthly.parquet": "db44b474b25a355af37c863b2ad98c20bd311c4fa6ebf47386d9141ce50e1fb7",
+    "enso_episodes.csv": "1965f1eae2181312e0233f7ba21856d5704a0f9add389d18bd49db2bfaf7bf97",
+    "enso_monthly.csv": "ae2e227dfc392b8ba5c9c3e483a02169a7652de6ab99a672639d767a3a60cc95",
+    "inference_summary.json": "eb87020ddff7b28c22ce29d14ca7cc0873275b7427a25f2a31189e0f53bdcef7",
+    "macro_controls_monthly.csv": "2d20d7d6932086b6ef66422755af7e922a0a053c4f03bc7090f8b61ccc870ccd",
+    "raw_event_return_paths.parquet": "64243b5cfac637bde9146aaab9af08e2bbd07a6ef06283006ad044cef9b75a3b",
+    "research.yaml": "faf1582043e0a3b52f42539cd3850b509b364f4b2767c178dda2b809dbd9c614",
+    "summary.json": "c6619804b6ab1fd99309cd4ef41f11994dae84bf677a0008aca53ae4d5a282d0"
+  },
+  "macro_snapshot": "2026-09-06",
+  "output_hashes": {
+    "commodity_returns_macro_adjusted_monthly.parquet": "61f1a229b9139ad5e9a9b786ec691511f3de56b0f8cbccf37e7a9d5e364d71fb",
+    "macro_adjusted_event_paths.parquet": "32c05c4e36d62c297d8231e018ecbe1d7bcaf4d2781eb78bb210fcc3ad9a26aa",
+    "macro_candidate_sample.parquet": "364de5631417b99dee185bce25ccd0bad5a02912fd72058e72c33e03a97d63c8",
+    "macro_control_bootstrap_replicates.parquet": "4a635254b947d587ed78d0a635097478bc7747e7fc576ff955d550d71d953960",
+    "macro_control_placebo_draws.parquet": "927dd53644e97f52ddc62a55a1569df7108e32d1396720ffd77eb4807b0a582f",
+    "macro_control_placebo_replicates.parquet": "2b72b5ef6328046f57e5d54065382d2e80c5a81cb8dc9d6b5375d84c0cc60884",
+    "macro_control_results.csv": "83e0244443d156e1adb718aa73c0116df146a8adcd0117419f7c4252d586a539",
+    "macro_models.csv": "9b26d62d6a3d30f12dd90de49ba45140f33a1095a7fa810eb689f59dc3f3a854",
+    "macro_negative_control_sample.parquet": "5640769cd2e624521adfc428811b2e935d8b8f13c67bd316c0036a900c42ac0c",
+    "macro_placebo_eligible_anchors.csv": "508eaa959b37fac1c8ac8340052bbe077c16d4074945b5e3188d779b96924d58",
+    "macro_placebo_endpoints.parquet": "086ff95699da23cd07ba78674e1f6a82255604a6330176c226870e9e0659fe4e",
+    "macro_primary_bootstrap_replicates.parquet": "f3b119a46a0712d23231bde173b9095485e5dac9dd9f91f0b3fce6943e563aca",
+    "macro_primary_placebo_draws.parquet": "bea23ac468bfc14ea0170f1e28f2cd1582fa966395d796b7de02a7ad57b53fed",
+    "macro_primary_placebo_replicates.parquet": "cd03cae137da83d7035d39018691b44038c66a3fea579a87a0f1856fbce011cc",
+    "macro_primary_results.csv": "2691498eb27239a05a9dc210379bf84292e6f1ab0269be87151ca495933ed70f"
+  },
+  "random_seed": 20260905,
+  "snapshot": "2026-09-06"
+}

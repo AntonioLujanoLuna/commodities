@@ -1,0 +1,35 @@
+{
+  "contract": {
+    "cells_per_alignment": 20,
+    "maximum_shift_years": 60,
+    "minimum_shift_years": 1,
+    "null_alignments": 60,
+    "primary_statistic": "median_absolute_naive_t",
+    "shift_unit": "whole_year",
+    "wrap": "circular"
+  },
+  "data_provenance": "real",
+  "input_hashes": {
+    "adjusted_event_summary.json": "5f1a8833d5a23386642d7ca66633d97d451f8eecd929c471290f7630d78cc940",
+    "commodities.yaml": "9a46280084782b9cf1b09b217a964a0774d725e6e4a46669911a60cd89f1a046",
+    "commodity_returns_adjusted_monthly.parquet": "db44b474b25a355af37c863b2ad98c20bd311c4fa6ebf47386d9141ce50e1fb7",
+    "enso_monthly.csv": "ae2e227dfc392b8ba5c9c3e483a02169a7652de6ab99a672639d767a3a60cc95",
+    "external_exposure_summary.json": "8f5192c97e9a8cb44844bb094dfff273db06404570a53c335defe0feecd69ec5",
+    "panel.yaml": "a42f4702d88bb338770fc4e80353b1964a052dfae4643ba7289acbdbb41349bd",
+    "specification_curve.yaml": "1aeab89ab10fb3c2235396550cd8f8f8478d007e6a00c5c32d86c11e46f0f72a"
+  },
+  "output_hashes": {
+    "specification_curve_cells.csv": "5942d010234e21b006bd95d08def79e958168b178ec37b465476d07646880e2d",
+    "specification_curve_shifts.csv": "b1749c338d7fd99ed17222eeb37f4232bbc2c02996dff948fd0d5644c17f1af4"
+  },
+  "results": {
+    "joint_timing_p_value": 0.4098360655737705,
+    "maximum_t_timing_p_value": 0.7377049180327869,
+    "observed_maximum_absolute_naive_t": 1.8386971310047928,
+    "observed_median_absolute_naive_t": 1.0010130109785014,
+    "observed_positive_estimate_share": 0.75,
+    "positive_share_timing_p_value": 0.21311475409836064
+  },
+  "scope": "panel_specification_family_joint_timing_null",
+  "snapshot": "2026-09-06"
+}

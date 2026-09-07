@@ -1,0 +1,34 @@
+{
+  "contract": {
+    "bootstrap_replicates_per_deletion": 10000,
+    "fdr_alpha": 0.05,
+    "fdr_family": "mechanism_candidates_only",
+    "inference_gate": "bootstrap_fdr",
+    "method": "leave_one_episode_out",
+    "require_sign_agreement": true,
+    "require_stable_direction": true
+  },
+  "data_provenance": "real",
+  "diagnostics": {
+    "candidate_scenario_rows": 510,
+    "controls_rejecting_after_every_deletion": 3,
+    "episode_deletions": 17,
+    "primary_candidates_surviving_all_deletions": 7
+  },
+  "input_hashes": {
+    "macro_analysis_summary.json": "ffc23350b02ee104767c668703728da7438d0d3d7bea3214e49fc25ee2bd9ad7",
+    "macro_candidate_sample.parquet": "364de5631417b99dee185bce25ccd0bad5a02912fd72058e72c33e03a97d63c8",
+    "macro_control_results.csv": "83e0244443d156e1adb718aa73c0116df146a8adcd0117419f7c4252d586a539",
+    "macro_negative_control_sample.parquet": "5640769cd2e624521adfc428811b2e935d8b8f13c67bd316c0036a900c42ac0c",
+    "macro_primary_results.csv": "2691498eb27239a05a9dc210379bf84292e6f1ab0269be87151ca495933ed70f",
+    "research.yaml": "faf1582043e0a3b52f42539cd3850b509b364f4b2767c178dda2b809dbd9c614"
+  },
+  "output_hashes": {
+    "macro_control_fragility_summary.csv": "902fdda185b4eebc170dcbc4bbace219f2a849f209af754d7d0d056dae72eab1",
+    "macro_fragility_summary.csv": "4396ae8caaae025543ff7ba6f8269851f211cfae1258d56307c756ea5e561d90",
+    "macro_leave_one_out_candidates.csv": "3f38ab6b840e7772e096b1eb5d91f863dc692c7499ae2c05f02cf74c91ad1766",
+    "macro_leave_one_out_controls.csv": "c9a5371c3ee8d6346190f26cf6208f3c96f0d1c92921598d509f4de31c43ea05"
+  },
+  "random_seed": 20260905,
+  "snapshot": "2026-09-06"
+}

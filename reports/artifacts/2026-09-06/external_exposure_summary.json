@@ -1,0 +1,47 @@
+{
+  "coverage": {
+    "excluded_candidates": 11,
+    "included_candidates": 21,
+    "minimum_hotspot_crop_area_share": 0.2110142973242361
+  },
+  "data_provenance": "real",
+  "input_hashes": {
+    "asis_drought_probability_cropland.tif": "67429c8f0209f5f35e0c760d942f201f09a082c2e9bfa43cc44f4c9c6de2d743",
+    "commodities.yaml": "9a46280084782b9cf1b09b217a964a0774d725e6e4a46669911a60cd89f1a046",
+    "exposure_v2.yaml": "f6e01cc6c56cec042a4ddf61b8e6de639a2244c6efbe4ef19effcfe112543e98",
+    "manifest.json": "f46aa7796af8f19a6142e01dd4e97c18a666cb8c3cfec51feb5fe7c1ad3b554c",
+    "spam2020_bana.tif": "8332d424ec7722518de2685f55f7beca4aff4133acc7f91298d2d74fea02291b",
+    "spam2020_barl.tif": "97677ce31aec165c242ffa4b7cacaabeab6ed4828fec13a5f7cf199e7b615bee",
+    "spam2020_citr.tif": "488e460f656a2b5a2ba7da684db65855b0b75635d643299c35a4589e821e2a20",
+    "spam2020_cnut.tif": "a1294158f57f4e92504bbfff59f26ee6a78c1fbdb7e05afcc27bcacd4680f7bd",
+    "spam2020_coco.tif": "8704f57ff186fb38499b3be6feda9781d490ebb46f6e34aec59ddb9f54e12fa0",
+    "spam2020_coff.tif": "8e9813b1eed2582059cd6308dde4efb1654ef6400c2dd62a2c92009ed1dd4bd2",
+    "spam2020_cott.tif": "9a31122d9ae2bbf33e1cca33475b1f9c2ab0debef18c72b5f240a564c0f1f196",
+    "spam2020_grou.tif": "991471722c03828c419175ec003b250e30b4ad86728c24262e29959f35fb65cb",
+    "spam2020_maiz.tif": "9052a47a2436b1ef2e54bb664c7556eaa73a50bb227166886aa36fc44988994c",
+    "spam2020_oilp.tif": "0bcc7b21cbb6dd2a10b5997ff07c387f306126afcd2047c2e76a656aa25ad402",
+    "spam2020_rape.tif": "e115727797108840a1498715cb9236bdb1b0f4095e8291beb7d71e12ccdc0fc3",
+    "spam2020_rcof.tif": "0b62c9290c91f4c6f53a9bc5dbc5ff282213afa840bb16363347ecc0e1746a1b",
+    "spam2020_rice.tif": "36b23e629a0d793e462163eb5196d8d72680f0ea56d0000bd575050e01b69106",
+    "spam2020_rubb.tif": "caf1b10f2918c14f9712e55c462610917c83fefc667f2d5f8a9a93564cb3958c",
+    "spam2020_sorg.tif": "9c0924515297cd070fd7feb360a24232a4f1cbfab2ddeb2b2e8be71449747b96",
+    "spam2020_soyb.tif": "ef4fcb9ce1cb75d32546830ca8650af74809b6f0ea18f71f2a153d1fd7cec7fc",
+    "spam2020_sugc.tif": "c204006e654d2d9a5b639141cacaa45df81239098522369cdaa2447e103ae124",
+    "spam2020_sunf.tif": "78cfff30a0af02a4262fd29a7cf10054f5024b076c4847b9f5f3baf92997b31f",
+    "spam2020_teas.tif": "fb2731c303cc4847707c28579645d487d6238693b1dbe91c9421479c22075f64",
+    "spam2020_toba.tif": "894e6c72dc12b43a057cbea1b0f4d51e84e8b6a1a0902b479f390b672519c5c6",
+    "spam2020_whea.tif": "d0a68c7c1e0919facdaca29e7f9eae440a7691489a459257d7ec6169bd2fcf3f"
+  },
+  "output_hashes": {
+    "external_exposure_weights.csv": "69067ceab51d0161ddfaff813f564ac69104bbe97629a779fddbd6f3a6250a75"
+  },
+  "provenance": {
+    "authored_on": "2026-09-06",
+    "inference_scope": "retrospective_external_validation",
+    "method": "external_crop_area_x_el_nino_drought_hotspot",
+    "outcome_blind": true,
+    "version": 2
+  },
+  "snapshot": "2026-09-06",
+  "source_snapshot": "2026-09-06"
+}

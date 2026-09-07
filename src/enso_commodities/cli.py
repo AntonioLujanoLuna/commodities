@@ -21,6 +21,7 @@ from .palm_oil_mechanism import run_palm_oil_mechanism
 from .panel_analysis import run_panel_analysis
 from .placebo_analysis import run_neutral_date_placebo
 from .power_analysis import run_power_analysis
+from .publication import build_publication_bundle, verify_publication_bundle
 from .raw_events import build_raw_event_tables
 from .reporting import build_current_results
 from .robustness_analysis import run_timing_index_robustness
@@ -80,7 +81,18 @@ def analyse() -> None:
 
 
 def figures() -> None:
-    raise SystemExit("The figure stage is not implemented yet.")
+    parser = argparse.ArgumentParser(description="Build the scorecard and publication figures.")
+    parser.add_argument("--processed-snapshot", type=Path)
+    parser.add_argument("--tables-root", type=Path)
+    parser.add_argument("--output-root", type=Path)
+    args = parser.parse_args()
+    print(
+        build_publication_bundle(
+            processed_snapshot=args.processed_snapshot,
+            tables_root=args.tables_root,
+            output_root=args.output_root,
+        )
+    )
 
 
 def macro_build() -> None:
@@ -256,18 +268,49 @@ def report() -> None:
     parser.add_argument("--tables-root", type=Path)
     parser.add_argument("--report", type=Path)
     parser.add_argument(
+        "--published-bundle",
+        type=Path,
+        help="Use a verified compact publication bundle when full local tables are unavailable.",
+    )
+    parser.add_argument(
         "--check",
         action="store_true",
         help="Fail if the note does not already match the receipts, instead of rewriting it.",
     )
     args = parser.parse_args()
+    if args.published_bundle:
+        verify_publication_bundle(args.published_bundle)
+        args.processed_snapshot = args.published_bundle
+        args.tables_root = args.published_bundle.parent
     output = build_current_results(
         processed_snapshot=args.processed_snapshot,
         tables_root=args.tables_root,
         report_path=args.report,
         check=args.check,
+        verify_outputs=not bool(args.published_bundle),
     )
     print(output)
+
+
+def publication() -> None:
+    parser = argparse.ArgumentParser(
+        description="Build or verify the compact auditable results bundle."
+    )
+    parser.add_argument("--processed-snapshot", type=Path)
+    parser.add_argument("--tables-root", type=Path)
+    parser.add_argument("--output-root", type=Path)
+    parser.add_argument("--bundle", type=Path)
+    parser.add_argument("--check", action="store_true")
+    args = parser.parse_args()
+    print(
+        build_publication_bundle(
+            processed_snapshot=args.processed_snapshot,
+            tables_root=args.tables_root,
+            output_root=args.output_root,
+            check=args.check,
+            bundle=args.bundle,
+        )
+    )
 
 
 def power() -> None:

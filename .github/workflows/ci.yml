@@ -34,7 +34,15 @@ jobs:
         run: uv sync --frozen --extra dev
 
       - name: Run tests
-        run: uv run python -m pytest
+        run: uv run python -m pytest --cov=enso_commodities --cov-report=term-missing --cov-fail-under=50
+
+      - name: Verify published receipts, scorecard and figures
+        if: matrix.python-version == '3.13'
+        run: uv run enso-publication --check --bundle reports/artifacts/2026-09-06
+
+      - name: Verify current-results report
+        if: matrix.python-version == '3.13'
+        run: uv run enso-report --check --published-bundle reports/artifacts/2026-09-06
 
       - name: Smoke-test installed CLI
         run: |

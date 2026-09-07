@@ -1,0 +1,75 @@
+{
+  "data_provenance": "real",
+  "diagnostics": {
+    "eligible_neutral_anchors": 105,
+    "endpoint_reconstruction_max_abs_difference": 4.440892098500626e-16,
+    "era_balance": {
+      "mean_year": {
+        "observed": 1992.0964912280704,
+        "p_value": 0.11378862113788621,
+        "placebo_interval_lower": 1978.3070175438597,
+        "placebo_interval_upper": 1993.5701754385966,
+        "placebo_mean": 1985.8552333333337
+      },
+      "median_year": {
+        "observed": 1993.0,
+        "p_value": 0.07739226077392261,
+        "placebo_interval_lower": 1974.5,
+        "placebo_interval_upper": 2000.5,
+        "placebo_mean": 1983.2662
+      },
+      "year_dispersion": {
+        "observed": 18.40388913117815,
+        "p_value": 0.21097890210978903,
+        "placebo_interval_lower": 17.042999456064777,
+        "placebo_interval_upper": 23.428601028172267,
+        "placebo_mean": 20.49788980902365
+      }
+    },
+    "era_diagnostic_length_years": 10,
+    "negative_controls_rejecting_raw_placebo": 3,
+    "primary_candidates_passing_current_gates": 8,
+    "primary_candidates_rejecting_placebo_fdr": 20,
+    "primary_candidates_with_estimated_placebo": 29,
+    "primary_candidates_with_insufficient_placebo_replicates": 1,
+    "real_episode_count": 19
+  },
+  "input_hashes": {
+    "adjusted_event_summary.json": "5f1a8833d5a23386642d7ca66633d97d451f8eecd929c471290f7630d78cc940",
+    "commodity_returns_adjusted_monthly.parquet": "db44b474b25a355af37c863b2ad98c20bd311c4fa6ebf47386d9141ce50e1fb7",
+    "enso_episodes.csv": "1965f1eae2181312e0233f7ba21856d5704a0f9add389d18bd49db2bfaf7bf97",
+    "enso_monthly.csv": "ae2e227dfc392b8ba5c9c3e483a02169a7652de6ab99a672639d767a3a60cc95",
+    "inference_summary.json": "eb87020ddff7b28c22ce29d14ca7cc0873275b7427a25f2a31189e0f53bdcef7",
+    "negative_control_inference.csv": "8841af0623cba1f76e539d3b9edfa210767865c067b507f88e1bb887eb4d0b12",
+    "primary_inference_results.csv": "4b31e53ff61dc93e710b8b41d98fac649f612f1955a4af86bc439983ff62005f",
+    "research.yaml": "faf1582043e0a3b52f42539cd3850b509b364f4b2767c178dda2b809dbd9c614"
+  },
+  "output_hashes": {
+    "negative_control_placebo_draws.parquet": "77f95368f18ee00b60d0a17f0a8521b78b03a9fb1655f148c3fec2e686b468d4",
+    "negative_control_placebo_replicates.parquet": "dd67449e854c7b46acfae07b60ed0875e707266bcbdeb3a6769c56521e4b32e4",
+    "negative_control_placebo_results.csv": "e68eb2bb59f5615f648c267a7e0cf137549a69c197fa6faedd1fc892656e32bd",
+    "placebo_eligible_anchors.csv": "47d7343a2729cc6b1b50e3fc132aac9bb9799fb02e7111fa3abd5fa470bafed4",
+    "placebo_endpoints.parquet": "493faa36cbd4a7deb5e4599aca4b7c41e25dab8be109943e7ca2c895b0dea7ac",
+    "placebo_era_composition.csv": "d01429e9cda48918f0225238199afe97c7ea46122f9565b24054a6ae1ee26974",
+    "placebo_era_statistics.csv": "f24dc9c68330888fc59da8631b885a9faf02ad67a854795056cd9ba613229f82",
+    "primary_placebo_draws.parquet": "a15d89eec4fba8e7f6b5356207f40dda46b2de2aac103ff82ed503c19b6082eb",
+    "primary_placebo_replicates.parquet": "3446f85e5ae12f4ac90d08cfc08ace040f0c5bc0a7c19ee1d7823932c89b5ed1",
+    "primary_placebo_results.csv": "6fd1c631b776163e559f13d16cbf545cfb31623f85fbc5c40020c6d493d2f0e5"
+  },
+  "placebo_contract": {
+    "actual_event_exclusion_window": [
+      -12,
+      24
+    ],
+    "alternative": "equal_tailed_two_sided",
+    "match_anchor_calendar_month": true,
+    "minimum_valid_episodes": 10,
+    "minimum_valid_replicate_share": 0.9,
+    "neutral_absolute_threshold": 0.5,
+    "primary_horizon_months": 12,
+    "replicates": 10000,
+    "sample_without_replacement": true
+  },
+  "random_seed": 20260905,
+  "snapshot": "2026-09-06"
+}

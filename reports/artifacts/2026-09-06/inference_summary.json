@@ -1,0 +1,32 @@
+{
+  "data_provenance": "real",
+  "inference": {
+    "alternative": "two_sided",
+    "bootstrap_replicates": 10000,
+    "confidence_level": 0.95,
+    "fdr_alpha": 0.05,
+    "fdr_family_size": 30,
+    "fwer_alpha": 0.05,
+    "negative_controls_rejecting_fwer": 3,
+    "negative_controls_with_raw_p_below_0_05": 3,
+    "p_value_method": "studentized",
+    "primary_fwer_rejections": 5,
+    "primary_rejections": 10,
+    "primary_rejections_arbitrary_dependence": 6,
+    "sign_agreement_count": 26
+  },
+  "input_hashes": {
+    "negative_control_sample.parquet": "0954aea60e77295e3f8db312e80e7fd0c163d21760a24b8429108732aeafe512",
+    "primary_inference_family.parquet": "6f66710c4710363bd6cf8a55d5f46f9c358dfa77378368d41f0a2e7828bde060",
+    "research.yaml": "faf1582043e0a3b52f42539cd3850b509b364f4b2767c178dda2b809dbd9c614",
+    "universe_summary.json": "7504fa323cb7c8233c802060712fed797147cda350758a73ea101352cbcc5cf6"
+  },
+  "output_hashes": {
+    "negative_control_bootstrap_replicates.parquet": "c6700d48a0a4b8716857c8b327f5395ff75bf6b642bf2237ab882580f60a1e55",
+    "negative_control_inference.csv": "8841af0623cba1f76e539d3b9edfa210767865c067b507f88e1bb887eb4d0b12",
+    "primary_bootstrap_replicates.parquet": "28bfdf7ac2585d84d62e1fa2a2a113919de73683d07579fb64986491765367da",
+    "primary_inference_results.csv": "4b31e53ff61dc93e710b8b41d98fac649f612f1955a4af86bc439983ff62005f"
+  },
+  "random_seed": 20260905,
+  "snapshot": "2026-09-06"
+}

@@ -1,0 +1,59 @@
+{
+  "contract": {
+    "anchor_types": [
+      "retrospective",
+      "observable"
+    ],
+    "bootstrap_replicates": 10000,
+    "confidence_level": 0.95,
+    "controls": [
+      "market_seasonal_adjusted_log_return",
+      "us_neer_log_change",
+      "us_cpi_log_change",
+      "global_real_activity_change",
+      "us_ex_post_real_short_rate_percent",
+      "us_baa_treasury_spread_percent",
+      "chicago_fed_nfci"
+    ],
+    "estimation_exclusion_window": [
+      -12,
+      24
+    ],
+    "fdr_alpha": 0.05,
+    "fdr_family": "mechanism_candidates_only",
+    "horizon_months": 12,
+    "index_definitions": [
+      "roni",
+      "oni"
+    ],
+    "minimum_model_observations": 120,
+    "minimum_studentized_replicate_share": 0.9,
+    "p_value_method": "studentized",
+    "random_seed": 20260905
+  },
+  "data_provenance": "real",
+  "diagnostics": {
+    "control_direction_contrast_raw_rejections": 0,
+    "control_raw_rejections": 3,
+    "models_estimated": 122,
+    "result_rows": 264
+  },
+  "input_hashes": {
+    "financial_robustness.yaml": "3bc06010b146d7bb1b7a4e3fed811012a284a84a6b7fd662fbee8b33c46275a1",
+    "financial_summary.json": "febf50183a9d994cf19a819e92bcbe2c5a152c79659299844abd849414850d13",
+    "macro_controls_monthly.csv": "2d20d7d6932086b6ef66422755af7e922a0a053c4f03bc7090f8b61ccc870ccd",
+    "robustness_summary.json": "6f09751e643c96c902839f630b561bcdf942110287a07acc1c609c62e7934bc6",
+    "specificity_summary.json": "ac3ea45455964d669f45a8fbc188f6af0a1b3b1795d6a38e351629d05e50626e"
+  },
+  "output_hashes": {
+    "financial_adjusted_monthly.parquet": "e9696969a69be82c7ee710d1a2e74d7290823be154eed807df150b5b11b5c085",
+    "financial_contrast_replicates.parquet": "65d8015bc7a85d0dac02359965dbfe1172e09ef973ba34efe3e45a80c15fe0f6",
+    "financial_control_bootstrap_replicates.parquet": "22acbe1a1bd33921dd47cbfa131243f097b56a9c7523370a5a5986b823b5ea47",
+    "financial_control_endpoints.parquet": "6657f5f3cd8f2ad10637941569a70515b3e7fcfe40649e49cba0601df4eb88e2",
+    "financial_control_models.csv": "e248914454f32110f98e14c75658add3bbadfc1299508df2e38d00708b5666e1",
+    "financial_control_results.csv": "2689d364b07d0266b9e9def79e79e23d04f9d75c5ddd3167eee098123ce6997c",
+    "financial_direction_contrasts.csv": "6713c1c503b52273af79e6a652d19d378665f637fbc17cbda2682d30ac89152d"
+  },
+  "scope": "exploratory_financial_control_not_primary_design",
+  "snapshot": "2026-09-06"
+}

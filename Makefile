@@ -30,6 +30,9 @@
 #   make specification-curve run the whole-year circular-shift joint timing null
 #   make report     regenerate the current-results note from the run receipts
 #   make report-check verify the note still matches the receipts
+#   make publication build the compact receipt bundle, scorecard and figures
+#   make publication-check verify the committed publication bundle
+#   make figures    regenerate the publication bundle and its three figures
 #   make real-data  run every implemented real-data stage
 #   make test       run the test suite
 #   make check      lint, type-check and test
@@ -38,7 +41,7 @@
 UV ?= uv
 PY ?= $(UV) run python
 
-.PHONY: setup data dataset raw-events adjustments universe inference placebo power dose-response macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis exposure-data exposure-weights panel specification-curve report report-check real-data test lint format typecheck check help
+.PHONY: setup data dataset raw-events adjustments universe inference placebo power dose-response macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis exposure-data exposure-weights panel specification-curve report report-check publication publication-check figures real-data test lint format typecheck check help
 
 help:
 	@grep -E '^#   ' Makefile | sed 's/^#   //'
@@ -131,7 +134,15 @@ report:
 report-check:
 	$(PY) scripts/build_report.py --check
 
-real-data: data dataset raw-events adjustments universe inference placebo power dose-response macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis exposure-data exposure-weights panel specification-curve report
+publication:
+	$(PY) scripts/build_publication.py
+
+publication-check:
+	$(PY) scripts/build_publication.py --check
+
+figures: publication
+
+real-data: data dataset raw-events adjustments universe inference placebo power dose-response macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis exposure-data exposure-weights panel specification-curve report publication
 
 test:
 	$(PY) -m pytest

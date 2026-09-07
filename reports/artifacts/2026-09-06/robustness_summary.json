@@ -1,0 +1,56 @@
+{
+  "contract": {
+    "anchor_types": [
+      "retrospective",
+      "observable"
+    ],
+    "index_definitions": [
+      "roni",
+      "oni"
+    ],
+    "placebo_sample_without_replacement": false,
+    "required_gates": [
+      "primary_fragility_pass",
+      "stable_direction",
+      "sign_agreement",
+      "bootstrap_fdr",
+      "placebo_fdr"
+    ],
+    "specifications": 4
+  },
+  "data_provenance": "real",
+  "diagnostics": {
+    "baseline_mean_reconstruction_max_abs_difference": 8.326672684688674e-17,
+    "candidate_result_rows": 120,
+    "candidates_passing_all_specifications_and_fragility": 3,
+    "control_result_rows": 12,
+    "controls_failing_specificity_everywhere": 1
+  },
+  "input_hashes": {
+    "commodity_returns_monthly.parquet": "aeee18abaf410b36373fed375a70e995d37dec1cd1d4a8759fa61b2fef5d49ae",
+    "enso_monthly.csv": "ae2e227dfc392b8ba5c9c3e483a02169a7652de6ab99a672639d767a3a60cc95",
+    "macro_control_fragility_summary.csv": "902fdda185b4eebc170dcbc4bbace219f2a849f209af754d7d0d056dae72eab1",
+    "macro_control_results.csv": "83e0244443d156e1adb718aa73c0116df146a8adcd0117419f7c4252d586a539",
+    "macro_controls_monthly.csv": "2d20d7d6932086b6ef66422755af7e922a0a053c4f03bc7090f8b61ccc870ccd",
+    "macro_fragility_run_summary.json": "e618ade0cc5e79b6a261ad886d2f16fcf2e89cbd6af662d0a9011f21953d114c",
+    "macro_fragility_summary.csv": "4396ae8caaae025543ff7ba6f8269851f211cfae1258d56307c756ea5e561d90",
+    "macro_primary_results.csv": "2691498eb27239a05a9dc210379bf84292e6f1ab0269be87151ca495933ed70f",
+    "research.yaml": "faf1582043e0a3b52f42539cd3850b509b364f4b2767c178dda2b809dbd9c614",
+    "world_bank_indices_monthly.csv": "76f4d84328020c23eb4ebc4c295407abec04de94d08c89b90400d3b4ae07c3eb"
+  },
+  "output_hashes": {
+    "robustness_bootstrap_replicates.parquet": "69799b701b808f2a994a6b564ed4bfae4d571ad4a45df088d1b31532ad0bdb06",
+    "robustness_candidate_results.csv": "ecde030bf9ffe7eb4d92bef155a2e106402e72f038f2b981331a7d229b45c339",
+    "robustness_candidate_summary.csv": "598f68f91b0f6193fab40520226909918ee6c63c03bb1b37a70e16a4bad86916",
+    "robustness_control_results.csv": "add0cb57e957c868f242ff0f3038c245afe12c83bdc7b039235acb9548f3ea09",
+    "robustness_control_summary.csv": "701338afb27b52f03c5f7ca65bec8d389b78da02b5b4e9c4a6745ae3eb876635",
+    "robustness_episodes.csv": "03221cc30b13feb4231e2ddf2b8e549080c82acde1f97f6f43c3a5d0c7da59fd",
+    "robustness_event_paths.parquet": "f6d49c3c6c6cdd134366f2d4917646946d1ecd5817a6ffa76080105c53dad1b6",
+    "robustness_macro_adjusted_monthly.parquet": "bd56d3c8c7379e259a18ddbc163319e425eec7a2f664abe0f544ceaab83dca97",
+    "robustness_macro_models.csv": "a840d0d6b4e9772f6c13d152175ab078af7bc509e428ba4c7976fa8c96ec1f99",
+    "robustness_placebo_draws.parquet": "fcd8f7f2ae4fa489068ff7bdba2e10bdf044b8e4fb459be7d734923c5acf52fe",
+    "robustness_placebo_replicates.parquet": "eff69fedd212c2a3f3adf0e3ad75c67369f0b961c9d21e65bb9c55efc8d39a3c"
+  },
+  "random_seed": 20260905,
+  "snapshot": "2026-09-06"
+}

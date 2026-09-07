@@ -1,0 +1,48 @@
+{
+  "data_provenance": "real",
+  "diagnostics": {
+    "candidate_family_size": 30,
+    "candidates_below_marginal_mde": 22,
+    "candidates_with_unreachable_family_mde": 0,
+    "median_minimum_detectable_effect_family": 0.3377342224121094,
+    "median_minimum_detectable_effect_marginal": 0.19173622131347656,
+    "median_power_at_reference_effect": {
+      "0.05": 0.0014,
+      "0.1": 0.0054,
+      "0.2": 0.11699999999999999,
+      "0.3": 0.6205499999999999,
+      "0.5": 0.9944
+    },
+    "negative_control_median_minimum_detectable_effect": 0.17751693725585938
+  },
+  "input_hashes": {
+    "inference_summary.json": "eb87020ddff7b28c22ce29d14ca7cc0873275b7427a25f2a31189e0f53bdcef7",
+    "negative_control_bootstrap_replicates.parquet": "c6700d48a0a4b8716857c8b327f5395ff75bf6b642bf2237ab882580f60a1e55",
+    "negative_control_inference.csv": "8841af0623cba1f76e539d3b9edfa210767865c067b507f88e1bb887eb4d0b12",
+    "primary_bootstrap_replicates.parquet": "28bfdf7ac2585d84d62e1fa2a2a113919de73683d07579fb64986491765367da",
+    "primary_inference_results.csv": "4b31e53ff61dc93e710b8b41d98fac649f612f1955a4af86bc439983ff62005f",
+    "research.yaml": "faf1582043e0a3b52f42539cd3850b509b364f4b2767c178dda2b809dbd9c614"
+  },
+  "output_hashes": {
+    "negative_control_minimum_detectable_effect.csv": "9505e3f767a313c359467aece93de1693971a5b393e63c8d5213274793ed0d65",
+    "negative_control_power_curves.csv": "79bc436bc4bac0c5915723ac1fb692fb255427ac5b563dcf08be07bda7ae33b2",
+    "primary_minimum_detectable_effect.csv": "3a00773474601449affafb0431448e0225720711b0ce5859104c6d6e735330ae",
+    "primary_power_curves.csv": "8df7b28a4c566846e7bf1ce2bc3c538c83c2c68e37cc8cd05e57a493aafa3440"
+  },
+  "power_contract": {
+    "alternative": "additive_shift_on_the_frozen_endpoint",
+    "family_alpha_rule": "fdr_alpha divided by the candidate-family size, the level Benjamini-Hochberg requires when exactly one member rejects",
+    "marginal_alpha": 0.05,
+    "maximum_effect": 5.0,
+    "reference_effects": [
+      0.05,
+      0.1,
+      0.2,
+      0.3,
+      0.5
+    ],
+    "target_power": 0.8,
+    "test": "two_sided_studentized_bootstrap"
+  },
+  "snapshot": "2026-09-06"
+}

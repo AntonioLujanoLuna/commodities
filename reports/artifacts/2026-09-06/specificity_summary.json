@@ -1,0 +1,54 @@
+{
+  "contract": {
+    "anchor_types": [
+      "retrospective",
+      "observable"
+    ],
+    "cold_threshold": -0.5,
+    "comparison": "warm_minus_cold",
+    "confidence_level": 0.95,
+    "fdr_alpha": 0.05,
+    "fdr_family": "mechanism_candidates_only",
+    "horizon_months": 12,
+    "index_definitions": [
+      "roni",
+      "oni"
+    ],
+    "minimum_duration_months": 5,
+    "minimum_studentized_replicate_share": 0.9,
+    "observable_delay_after_center_months": 2,
+    "p_value_method": "studentized",
+    "random_seed": 20260905,
+    "randomization_replicates": 10000
+  },
+  "data_provenance": "real",
+  "diagnostics": {
+    "candidate_rows": 120,
+    "cold_episode_counts": {
+      "oni": 20,
+      "roni": 22
+    },
+    "control_rows": 12,
+    "controls_with_direction_specific_contrast_cells": 0
+  },
+  "input_hashes": {
+    "commodity_returns_monthly.parquet": "aeee18abaf410b36373fed375a70e995d37dec1cd1d4a8759fa61b2fef5d49ae",
+    "enso_monthly.csv": "ae2e227dfc392b8ba5c9c3e483a02169a7652de6ab99a672639d767a3a60cc95",
+    "robustness_candidate_results.csv": "ecde030bf9ffe7eb4d92bef155a2e106402e72f038f2b981331a7d229b45c339",
+    "robustness_control_results.csv": "add0cb57e957c868f242ff0f3038c245afe12c83bdc7b039235acb9548f3ea09",
+    "robustness_event_paths.parquet": "f6d49c3c6c6cdd134366f2d4917646946d1ecd5817a6ffa76080105c53dad1b6",
+    "robustness_macro_adjusted_monthly.parquet": "bd56d3c8c7379e259a18ddbc163319e425eec7a2f664abe0f544ceaab83dca97",
+    "robustness_summary.json": "6f09751e643c96c902839f630b561bcdf942110287a07acc1c609c62e7934bc6",
+    "specificity.yaml": "aba273464931378a9c1056513c9c536c6438e72f2694bb23f1f05cee738848ed"
+  },
+  "output_hashes": {
+    "specificity_candidate_results.csv": "9ff6c788eeda426cf30419b821a4ee642f8adfe35d537b49d5e889f7fbd41375",
+    "specificity_cold_episodes.csv": "62a422132d41b818732e18703a51b46b870849915bc7169acb3e829313161f3a",
+    "specificity_contrast_replicates.parquet": "05e70b0d24875e1c6d73d1017a9de1d7e3a603b9e6f2fea801090b659982fe77",
+    "specificity_control_episode_influence.csv": "7604eb9b050430fdb43667b56d7639d663f62dcbd0073f7a3155054abdb5b2cb",
+    "specificity_control_results.csv": "475eed4272c575a9d840250553ca85ea5ddcbc6d3d0d4dbf4dfcba87d71ae35a",
+    "specificity_event_endpoints.parquet": "919b97e210d1411a657416454cc42875044293d010d18a6eb68fc1a47a7d8795"
+  },
+  "scope": "exploratory_falsification_not_primary_design",
+  "snapshot": "2026-09-06"
+}

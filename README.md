@@ -96,6 +96,7 @@ uv run python scripts/build_external_exposure.py
 uv run python scripts/run_panel_analysis.py
 uv run python scripts/run_specification_curve.py
 uv run python scripts/build_report.py
+uv run python scripts/build_publication.py
 ```
 
 The downloader creates an immutable, dated snapshot under `data/raw/YYYY-MM-DD/`. Each input has
@@ -172,11 +173,18 @@ resampling-block sensitivity                                                  [i
         ↓
 whole-year circular-shift null over the 20-cell panel family                  [implemented]
         ↓
-other mechanisms, forecasting, tradability, scorecard, figures and report     [planned]
+generated scorecard, publication figures and auditable compact bundle         [implemented]
+        ↓
+other mechanisms, forecasting and tradability                                [planned]
 ```
 
 The current narrative report in `reports/current_results.md` is generated from auditable tables
 and hash-linked run receipts.
+
+The compact publication layer under `reports/artifacts/<snapshot>/` carries the small receipts,
+selected result tables, a one-row-per-candidate scorecard and three generated figures. Its
+manifest hashes every published file and fingerprints the complete analysis source tree, allowing
+a clone to audit the reported numbers without committing the large bootstrap replicate tables.
 
 ### Analysis decisions
 
@@ -428,6 +436,7 @@ tests/             ingestion, episode, adjustment, integrity, universe, panel,
                    and synthetic recovery/calibration tests
 reports/           data dictionary and the latest-run interpretation
 reports/log/       append-only research log: decisions, findings, negative results
+reports/artifacts/ compact receipts, result tables, scorecard and publication figures
 ```
 
 ## Reproducibility
@@ -435,7 +444,11 @@ reports/log/       append-only research log: decisions, findings, negative resul
 The implemented downloader records the retrieval timestamp, source URL, HTTP metadata, byte count
 and SHA-256 of each raw file. The dataset builder verifies those hashes and records the source
 manifest hash. The raw-event stage also records hashes for its processed inputs and research
-configuration. Git hashes, package-version manifests and figure metadata remain planned.
+configuration. The generated report fingerprints the complete analysis source tree, with text
+line endings normalized for cross-platform verification, rather than embedding the current Git
+commit: a tracked report containing `HEAD` would invalidate itself as soon as that report was
+committed. Runtime manifests belong in future stage receipts rather than being sampled from
+whichever machine happens to check the tracked report.
 
 The bootstrap and placebo use a recorded seed, stable independent salts for candidates and
 controls, and store every replicate and placebo draw. Leave-one-out scenarios use a stable seed
@@ -471,7 +484,9 @@ Licensed data will not be redistributed.
 ```bash
 uv run ruff check src tests scripts
 uv run mypy src
-uv run python -m pytest
+uv run python -m pytest --cov=enso_commodities --cov-fail-under=50
+uv run enso-publication --check --bundle reports/artifacts/2026-09-06
+uv run enso-report --check --published-bundle reports/artifacts/2026-09-06
 ```
 
 Validation is explicit and directly tested. Fatal format, history-length, key-integrity and hash

@@ -163,6 +163,16 @@ def test_rendering_is_deterministic_so_check_mode_means_something(tmp_path: Path
     assert render_sections(output_dir, summaries) == render_sections(output_dir, summaries)
 
 
+def test_run_context_does_not_depend_on_the_commit_that_contains_the_report(tmp_path: Path) -> None:
+    """A tracked report cannot contain HEAD: committing it would immediately stale it."""
+    _, tables_root = _write_receipts(tmp_path)
+    sections = render_sections(
+        tables_root / "2026-09-05", load_stage_summaries(tables_root / "2026-09-05")
+    )
+    assert "Git commit" not in sections["run-context"]
+    assert "Analysis source-tree SHA-256" in sections["run-context"]
+
+
 def test_stages_that_disagree_about_a_configuration_are_refused(tmp_path: Path) -> None:
     snapshot, tables_root = _write_receipts(tmp_path)
     path = tables_root / "2026-09-05" / "panel_summary.json"

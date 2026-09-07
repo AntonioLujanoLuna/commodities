@@ -1,0 +1,102 @@
+{
+  "data_provenance": "real",
+  "design": {
+    "bootstrap_replicates": 2000,
+    "estimator": "two_way_within_ordinary_least_squares",
+    "exposure_authored_on": "2026-09-06",
+    "exposure_inference_scope": "retrospective_external_validation",
+    "exposure_method": "external_crop_area_x_el_nino_drought_hotspot",
+    "exposure_outcome_blind": true,
+    "exposure_version": 2,
+    "identification": "cross-sectional exposure interacted with the ENSO index, with commodity and calendar-month fixed effects",
+    "outcome_column": "seasonal_adjusted_log_return",
+    "primary_index": "roni",
+    "primary_lag_months": 6,
+    "primary_weighting": "exposure",
+    "random_seed": 20260905,
+    "resampling_block": "calendar_year",
+    "resampling_block_sensitivity": [
+      {
+        "length_years": 1,
+        "name": "enso_year",
+        "start_month": 5
+      },
+      {
+        "length_years": 2,
+        "name": "enso_two_year",
+        "start_month": 5
+      },
+      {
+        "length_years": 3,
+        "name": "enso_three_year",
+        "start_month": 5
+      }
+    ],
+    "status": "retrospective_external_validation",
+    "weight_permutation_replicates": 2000
+  },
+  "input_hashes": {
+    "adjusted_event_summary.json": "5f1a8833d5a23386642d7ca66633d97d451f8eecd929c471290f7630d78cc940",
+    "commodities.yaml": "9a46280084782b9cf1b09b217a964a0774d725e6e4a46669911a60cd89f1a046",
+    "commodity_returns_adjusted_monthly.parquet": "db44b474b25a355af37c863b2ad98c20bd311c4fa6ebf47386d9141ce50e1fb7",
+    "enso_monthly.csv": "ae2e227dfc392b8ba5c9c3e483a02169a7652de6ab99a672639d767a3a60cc95",
+    "external_exposure_summary.json": "8f5192c97e9a8cb44844bb094dfff273db06404570a53c335defe0feecd69ec5",
+    "external_exposure_weights.csv": "69067ceab51d0161ddfaff813f564ac69104bbe97629a779fddbd6f3a6250a75",
+    "panel.yaml": "a42f4702d88bb338770fc4e80353b1964a052dfae4643ba7289acbdbb41349bd"
+  },
+  "output_hashes": {
+    "panel_block_sensitivity.csv": "40531bd837db958e2f2cc40774f0c733904685727ffdbf410ca734b948463ea8",
+    "panel_bootstrap_replicates.parquet": "366b8ed18d01ab9e2223d2a9ae5f2e6adebb99f82e850b83f2051283d63e489a",
+    "panel_exposure_weight_permutations.parquet": "dbb5bd4fcc3c74b1c408981e19f6cafe6efbf654e0a130a3fe56ccda5271d163",
+    "panel_exposure_weights.csv": "269fe1d871bc574ccd722cd7ce7de0b48a1b5d084097ba76bf3456f81951aaf5",
+    "panel_specification_results.csv": "ab84fa2aadefb1bc4d579ce8a7d794505446957eebc6569406e3cb4880a5a598"
+  },
+  "results": {
+    "cells": 20,
+    "control_cells_rejecting_raw_5_percent": 0,
+    "exposure_cells_rejecting_fdr": 0,
+    "exposure_cells_with_positive_estimate": 15,
+    "primary_control_estimate": 0.002561693846506448,
+    "primary_control_studentized_p_value": 0.4877561219390305,
+    "primary_exposure_block_sensitivity": {
+      "calendar_year": {
+        "blocks": 67,
+        "ci_lower": -0.024635547538370533,
+        "ci_upper": 0.10814297545404512,
+        "interval_excludes_zero": false,
+        "studentized_p_value": 0.19940029985007496
+      },
+      "enso_three_year": {
+        "blocks": 23,
+        "ci_lower": -0.025198606051079583,
+        "ci_upper": 0.10357187763913205,
+        "interval_excludes_zero": false,
+        "studentized_p_value": 0.1774112943528236
+      },
+      "enso_two_year": {
+        "blocks": 35,
+        "ci_lower": -0.01976761751462818,
+        "ci_upper": 0.10536321709618263,
+        "interval_excludes_zero": false,
+        "studentized_p_value": 0.18040979510244878
+      },
+      "enso_year": {
+        "blocks": 68,
+        "ci_lower": -0.027561596567288765,
+        "ci_upper": 0.11422301785764122,
+        "interval_excludes_zero": false,
+        "studentized_p_value": 0.2273863068465767
+      }
+    },
+    "primary_exposure_ci_lower": -0.022914936949933195,
+    "primary_exposure_ci_upper": 0.1096998961355366,
+    "primary_exposure_estimate": 0.04244947975908688,
+    "primary_exposure_studentized_p_value": 0.20839580209895053,
+    "primary_exposure_weight_mapping_percentile": 0.7371314342828585,
+    "primary_exposure_weight_permutation_mean": 0.001505819812632829,
+    "primary_exposure_weight_permutation_median": 0.0009673634547335292,
+    "primary_exposure_weight_permutation_p_value": 0.526736631684158,
+    "primary_exposure_weight_permutation_valid_replicates": 2000
+  },
+  "snapshot": "2026-09-06"
+}

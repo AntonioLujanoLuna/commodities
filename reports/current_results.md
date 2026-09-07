@@ -37,9 +37,7 @@ interpretation.
 <!-- generated:run-context start -->
 
 - Generated for snapshot: `2026-09-06`
-- Base Git commit at generation: `c251dc1bad6c`
-- Analysis source-tree SHA-256: `40508930278e20f64bea2bf2b158231252d7c25d73576349c90f4babf6c8d064`
-- Runtime: Python 3.13.1, numpy 2.5.2, pandas 3.0.5, scipy 1.18.1, statsmodels 0.15.0
+- Analysis source-tree SHA-256: `5867b76a20ea41767a414ac4cc29dd5f0fb924a8222557093360deeb1deb6bec`
 - Primary bootstrap: 10000 whole-episode draws
 - Panel bootstrap: 2000 block draws per specification
 

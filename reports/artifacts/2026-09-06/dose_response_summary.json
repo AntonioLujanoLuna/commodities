@@ -1,0 +1,36 @@
+{
+  "data_provenance": "real",
+  "design": {
+    "alternative": "two_sided",
+    "estimator": "ordinary_least_squares_hc3",
+    "exposure": "episode_peak_roni",
+    "exposure_scaling": "z_score_across_warm_episodes",
+    "inference_scope": "exploratory_secondary",
+    "minimum_valid_episodes": 10,
+    "outcome": "seasonal_adjusted_log_return",
+    "permutation_replicates": 10000,
+    "permutation_unit": "whole_episode_amplitude_labels"
+  },
+  "input_hashes": {
+    "dose_response.yaml": "6650ed543f2483b5c1dc35e885df8b82f1a6121f00feaa5d1328ddae39f14b30",
+    "enso_episodes.csv": "1965f1eae2181312e0233f7ba21856d5704a0f9add389d18bd49db2bfaf7bf97",
+    "negative_control_sample.parquet": "0954aea60e77295e3f8db312e80e7fd0c163d21760a24b8429108732aeafe512",
+    "primary_inference_family.parquet": "6f66710c4710363bd6cf8a55d5f46f9c358dfa77378368d41f0a2e7828bde060",
+    "raw_event_summary.json": "cdaa1cf645d3b466dcd01553cd99ff3fe06e963fd1f45f564219c04f8cf8f585",
+    "universe_summary.json": "7504fa323cb7c8233c802060712fed797147cda350758a73ea101352cbcc5cf6"
+  },
+  "output_hashes": {
+    "dose_response_permutations.parquet": "f9880bdaaa2d03c3ea3739dc266786bb7f1f9226f3fa2997b10e1b66da031bb2",
+    "dose_response_results.csv": "014e8f65be6b512573879e02ad5d2d7a54e5d678bf48828d8fd6a0b5454deb41"
+  },
+  "random_seed": 20260906,
+  "results": {
+    "candidate_family_size": 30,
+    "candidate_fdr_rejections": 0,
+    "candidate_fwer_rejections": 0,
+    "candidate_positive_slopes": 10,
+    "candidate_raw_rejections": 2,
+    "control_raw_rejections": 0
+  },
+  "snapshot": "2026-09-06"
+}

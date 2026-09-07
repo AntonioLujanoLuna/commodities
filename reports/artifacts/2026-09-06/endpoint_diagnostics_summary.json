@@ -1,0 +1,42 @@
+{
+  "contract": {
+    "bootstrap_replicates": 10000,
+    "confidence_level": 0.95,
+    "factor_columns": [
+      "market_seasonal_adjusted_log_return",
+      "us_neer_log_change",
+      "us_cpi_log_change",
+      "global_real_activity_change"
+    ],
+    "fdr_alpha": 0.05,
+    "fdr_family": "mechanism_candidates_only",
+    "horizon_months": 12,
+    "minimum_studentized_replicate_share": 0.9,
+    "p_value_method": "studentized",
+    "random_seed": 20260905
+  },
+  "data_provenance": "real",
+  "diagnostics": {
+    "candidate_regime_correlations_fdr": 6,
+    "control_log_mean_raw_rejections": 13,
+    "control_regime_correlations_raw": 9,
+    "control_time_trend_raw_rejections": 2,
+    "result_rows": 264
+  },
+  "input_hashes": {
+    "endpoint_diagnostics.yaml": "3faf58d68cb94ac3899f3fc0aee577173f8331fe5a8011914314b5fcfe543866",
+    "robustness_macro_adjusted_monthly.parquet": "bd56d3c8c7379e259a18ddbc163319e425eec7a2f664abe0f544ceaab83dca97",
+    "specificity_candidate_results.csv": "9ff6c788eeda426cf30419b821a4ee642f8adfe35d537b49d5e889f7fbd41375",
+    "specificity_control_results.csv": "475eed4272c575a9d840250553ca85ea5ddcbc6d3d0d4dbf4dfcba87d71ae35a",
+    "specificity_event_endpoints.parquet": "919b97e210d1411a657416454cc42875044293d010d18a6eb68fc1a47a7d8795",
+    "specificity_summary.json": "ac3ea45455964d669f45a8fbc188f6af0a1b3b1795d6a38e351629d05e50626e"
+  },
+  "output_hashes": {
+    "endpoint_diagnostic_results.csv": "9c63b74726d7fb18c5290eaae3ff43826ca05d8594325cd24c7b46b5907f94b9",
+    "endpoint_factor_windows.csv": "c3d5381ff0ee0a95451f3825d4f58d9c81388bca53bb2192b2467b9a7664fc8a",
+    "endpoint_log_bootstrap_replicates.parquet": "3c30220cfbbdd51e08af92b9d8d5775e97a292835b387c0ec48a337caa1483c1",
+    "endpoint_regime_correlations.csv": "425051e2d96f3596f130c1f11a9f8f2aa94fd544a4678d17078b41186a1eaa33"
+  },
+  "scope": "exploratory_endpoint_falsification_not_primary_design",
+  "snapshot": "2026-09-06"
+}

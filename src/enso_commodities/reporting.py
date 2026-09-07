@@ -18,7 +18,7 @@ re-verified against the file on disk. A receipt that describes artifacts which
 have since changed cannot be turned into a report at all.
 
 *Drift is detectable.* The render has no timestamps, fingerprints the source
-tree, and captures only stable runtime facts, so ``--check`` can re-render and
+tree, and captures only stable receipt facts, so ``--check`` can re-render and
 compare. That turns "the report is out of date" from something a reader might
 notice into something the build refuses.
 """
@@ -27,10 +27,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-import platform
-import subprocess
 from dataclasses import dataclass
-from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Any
 
@@ -400,27 +397,7 @@ def render_run_identity(output_dir: Path, summaries: dict[str, dict[str, Any] | 
     return "\n".join(lines)
 
 
-def _package_version(name: str) -> str:
-    try:
-        return version(name)
-    except PackageNotFoundError:
-        return "not installed"
-
-
-def _git_commit() -> str:
-    try:
-        return subprocess.run(
-            ["git", "rev-parse", "--short=12", "HEAD"],
-            cwd=project_root(),
-            check=True,
-            capture_output=True,
-            text=True,
-        ).stdout.strip()
-    except (OSError, subprocess.CalledProcessError):
-        return "unavailable"
-
-
-def _source_tree_hash() -> str:
+def analysis_source_tree_hash() -> str:
     """Fingerprint the analysis implementation without generated outputs."""
     root = project_root()
     paths = [root / "Makefile", root / "pyproject.toml", root / "uv.lock"]
@@ -435,7 +412,9 @@ def _source_tree_hash() -> str:
         relative = path.relative_to(root).as_posix()
         digest.update(relative.encode("utf-8"))
         digest.update(b"\0")
-        digest.update(path.read_bytes())
+        # Git normalizes these text inputs, while Windows working trees commonly
+        # use CRLF. Hash logical content so the same commit verifies on CI/Linux.
+        digest.update(path.read_bytes().replace(b"\r\n", b"\n"))
         digest.update(b"\0")
     return digest.hexdigest()
 
@@ -446,15 +425,10 @@ def render_run_context(output_dir: Path, summaries: dict[str, dict[str, Any] | N
     panel = summaries.get("panel") or {}
     primary_replicates = (inference.get("inference") or {}).get("bootstrap_replicates", "n/a")
     panel_replicates = (panel.get("design") or {}).get("bootstrap_replicates", "n/a")
-    packages = ", ".join(
-        f"{name} {_package_version(name)}" for name in ("numpy", "pandas", "scipy", "statsmodels")
-    )
     return "\n".join(
         (
             f"- Generated for snapshot: `{output_dir.name}`",
-            f"- Base Git commit at generation: `{_git_commit()}`",
-            f"- Analysis source-tree SHA-256: `{_source_tree_hash()}`",
-            f"- Runtime: Python {platform.python_version()}, {packages}",
+            f"- Analysis source-tree SHA-256: `{analysis_source_tree_hash()}`",
             f"- Primary bootstrap: {primary_replicates} whole-episode draws",
             f"- Panel bootstrap: {panel_replicates} block draws per specification",
         )
@@ -709,6 +683,7 @@ def build_current_results(
     tables_root: Path | None = None,
     report_path: Path | None = None,
     check: bool = False,
+    verify_outputs: bool = True,
 ) -> Path:
     """Render the generated blocks of the current-results note.
 
@@ -720,7 +695,8 @@ def build_current_results(
     path = report_path or project_root() / "reports" / "current_results.md"
 
     summaries = load_stage_summaries(output_dir)
-    verify_stage_outputs(output_dir, summaries)
+    if verify_outputs:
+        verify_stage_outputs(output_dir, summaries)
     text = path.read_text(encoding="utf-8")
     rendered = apply_sections(text, render_sections(output_dir, summaries))
     if check:

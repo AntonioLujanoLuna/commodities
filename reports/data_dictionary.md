@@ -1,5 +1,17 @@
 # Real-data foundation
 
+## Compact publication bundle
+
+`reports/artifacts/YYYY-MM-DD/` is the Git-sized audit layer for a completed run. It contains
+byte-identical stage summary receipts, selected result CSV files, `scorecard.csv`, a Markdown
+rendering of that scorecard, and three figures. `manifest.json` records the SHA-256 of every
+published file and the full analysis source-tree fingerprint. Large bootstrap replicates, raw
+inputs and licensed data remain outside Git.
+
+The scorecard combines existing gates only. `evidence_status` is a descriptive label and does not
+create a new test or alter the frozen inference family. `mechanism_status` and
+`out_of_sample_status` make unimplemented evidence explicit rather than treating it as failure.
+
 ## Sources
 
 The source URLs and expected formats are declared in `config/sources.yaml`.
