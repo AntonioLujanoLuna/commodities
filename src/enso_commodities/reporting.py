@@ -326,6 +326,54 @@ STAGES: tuple[StageReport, ...] = (
             _metric("Maximum-t timing p", "results", "maximum_t_timing_p_value", digits=4),
         ),
     ),
+    StageReport(
+        key="forecast",
+        title="Recursive forecast benchmark",
+        summary_file="forecast_summary.json",
+        metrics=(
+            _metric("Forecast cells", "results", "cells"),
+            _metric("Cells improving RMSE", "results", "cells_with_positive_rmse_improvement"),
+            _metric(
+                "Loss tests rejecting raw",
+                "results",
+                "cells_with_loss_difference_p_below_0_05",
+            ),
+            _metric(
+                "Proxy cells beating long-only",
+                "results",
+                "cells_with_positive_net_excess_over_buy_and_hold",
+            ),
+            _metric("Best cell commodity", "results", "best_loss_test_commodity"),
+            _metric("Best cell horizon", "results", "best_loss_test_horizon_months"),
+            _metric("Best cell p", "results", "best_loss_test_p_value", digits=4),
+            _metric(
+                "Best cell RMSE improvement",
+                "results",
+                "best_loss_test_rmse_improvement",
+                digits=4,
+            ),
+            _metric(
+                "Best cell excess over long-only",
+                "results",
+                "best_loss_test_net_excess_over_buy_and_hold",
+                digits=4,
+            ),
+            _metric("Genuine out of sample", "genuine_out_of_sample"),
+            _metric("Tradability claim permitted", "tradability_claim_permitted"),
+        ),
+    ),
+    StageReport(
+        key="program_timing_null",
+        title="Selected-family timing null",
+        summary_file="program_timing_null_summary.json",
+        metrics=(
+            _metric("Specification cells", "contract", "cells_per_alignment"),
+            _metric("Shifted alignments", "contract", "null_alignments"),
+            _metric("Median-|t| timing p", "results", "median_absolute_t_p_value", digits=4),
+            _metric("Maximum-|t| timing p", "results", "maximum_absolute_t_p_value", digits=4),
+            _metric("Outcome-informed selection", "selection_is_outcome_informed"),
+        ),
+    ),
 )
 
 
@@ -602,6 +650,33 @@ def render_interpretation_table(summaries: dict[str, dict[str, Any] | None]) -> 
             "| Whole-year timing null | The observed specification family has joint timing "
             f"p={values['joint_timing_p_value']:.4f} against circular whole-year shifts. |"
         )
+    forecast = summaries.get("forecast")
+    if forecast:
+        values = forecast["results"]
+        loss_cells = int(values["cells_with_loss_difference_p_below_0_05"])
+        loss_cell_word = "cell" if loss_cells == 1 else "cells"
+        rows.append(
+            "| Recursive forecast benchmark | "
+            f"ENSO improves RMSE in {values['cells_with_positive_rmse_improvement']} of "
+            f"{values['cells']} cells, with paired-loss p<0.05 in "
+            f"{loss_cells} {loss_cell_word}; final RONI and "
+            "non-investable indexes make this pseudo-OOS. |"
+        )
+        rows.append(
+            "| Best forecast cell | "
+            f"{values['best_loss_test_commodity']} at {values['best_loss_test_horizon_months']} "
+            f"months has paired-loss p={values['best_loss_test_p_value']:.4f} and RMSE improvement "
+            f"{values['best_loss_test_rmse_improvement']:.4f}, but its price-index strategy excess "
+            f"over long-only is {values['best_loss_test_net_excess_over_buy_and_hold']:.4f}. |"
+        )
+    program = summaries.get("program_timing_null")
+    if program:
+        values = program["results"]
+        rows.append(
+            "| Selected-family timing null | The locked 96-cell selected family has median-|t| "
+            f"timing p={values['median_absolute_t_p_value']:.4f}, but selection used the discovery "
+            "outcomes and this is retrospective calibration, not independent validation. |"
+        )
     return "\n".join(rows)
 
 
@@ -614,12 +689,19 @@ def render_bottom_line(summaries: dict[str, dict[str, Any] | None]) -> str:
         "candidates_passing_all_specifications_and_fragility", "n/a"
     )
     panel_fdr = (panel.get("results") or {}).get("exposure_cells_rejecting_fdr", "n/a")
+    forecast = summaries.get("forecast") or {}
+    forecast_rejections = (forecast.get("results") or {}).get(
+        "cells_with_loss_difference_p_below_0_05", "n/a"
+    )
+    forecast_cell_word = "cell" if forecast_rejections == 1 else "cells"
     return (
         f"The pipeline leaves {survivors} timing/index-robust historical associations, while "
         f"{underpowered} candidates remain below their own marginal detection threshold. "
         "The phase and negative-control diagnostics still prevent an ENSO-specific causal "
         f"interpretation, and {panel_fdr} panel exposure cells survive correction across the "
-        "specification grid."
+        f"specification grid. The retrospective forecast benchmark has paired-loss p<0.05 in "
+        f"{forecast_rejections} {forecast_cell_word} and does not yet satisfy the genuine "
+        "out-of-sample gate."
     )
 
 

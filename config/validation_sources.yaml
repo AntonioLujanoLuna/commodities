@@ -1,0 +1,24 @@
+# Candidate authoritative sources. This file records acquisition targets only;
+# none becomes an input until a dated file and provenance sidecar are downloaded.
+sources:
+  noaa_cpc_roni_current:
+    landing_page: https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso/roni/
+    role: current revised index only
+    validation_status: insufficient_for_genuine_real_time_backtest
+  noaa_cpc_roni_outlook:
+    landing_page: https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso/roni/outlook/
+    role: current official forecast distribution
+    validation_status: archive_of_issue_vintages_not_identified
+  usda_fas_psd_open_data:
+    landing_page: https://apps.fas.usda.gov/opendatawebV2/
+    role: timestamped production supply and distribution forecasts and release dates
+    validation_status: acquisition_and_commodity_coverage_check_pending
+  cme_daily_settlements:
+    landing_page: https://www.cmegroup.com/market-data/daily-settlements.html
+    role: palm-oil contract settlements
+    validation_status: licensed_history_not_present
+  sgx_sicom_rubber:
+    landing_page: https://www.sgx.com/derivatives/products/sicom-rubber
+    role: RSS3 and TSR20 contract market
+    validation_status: licensed_contract_history_not_present
+

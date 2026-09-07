@@ -12,6 +12,7 @@ from .endpoint_analysis import run_endpoint_diagnostics
 from .external_exposure import build_external_exposure_weights, download_exposure_data
 from .financial_analysis import run_financial_control_analysis
 from .financial_data import build_financial_dataset
+from .forecast_analysis import run_forecast_analysis
 from .fragility_analysis import run_leave_one_episode_out
 from .inference import run_primary_inference
 from .macro_analysis import run_macro_control_analysis
@@ -21,6 +22,7 @@ from .palm_oil_mechanism import run_palm_oil_mechanism
 from .panel_analysis import run_panel_analysis
 from .placebo_analysis import run_neutral_date_placebo
 from .power_analysis import run_power_analysis
+from .program_timing_analysis import run_program_timing_null
 from .publication import build_publication_bundle, verify_publication_bundle
 from .raw_events import build_raw_event_tables
 from .reporting import build_current_results
@@ -381,6 +383,42 @@ def specification_curve() -> None:
         curve_config_path=args.curve_config,
     )
     print(output)
+
+
+def forecast() -> None:
+    parser = argparse.ArgumentParser(
+        description="Run the expanding-window pseudo-out-of-sample forecast benchmark."
+    )
+    parser.add_argument("--processed-snapshot", type=Path)
+    parser.add_argument("--tables-root", type=Path)
+    parser.add_argument("--validation-config", type=Path)
+    args = parser.parse_args()
+    print(
+        run_forecast_analysis(
+            processed_snapshot=args.processed_snapshot,
+            tables_root=args.tables_root,
+            validation_config_path=args.validation_config,
+        )
+    )
+
+
+def program_timing_null() -> None:
+    parser = argparse.ArgumentParser(
+        description="Run the circular whole-year null for the locked v2 event-study family."
+    )
+    parser.add_argument("--processed-snapshot", type=Path)
+    parser.add_argument("--tables-root", type=Path)
+    parser.add_argument("--validation-config", type=Path)
+    parser.add_argument("--research-config", type=Path)
+    args = parser.parse_args()
+    print(
+        run_program_timing_null(
+            processed_snapshot=args.processed_snapshot,
+            tables_root=args.tables_root,
+            validation_config_path=args.validation_config,
+            research_config_path=args.research_config,
+        )
+    )
 
 
 def exposure_download() -> None:

@@ -61,7 +61,7 @@ def test_scorecard_exposes_robust_and_underpowered_states(tmp_path: Path) -> Non
     _write_scorecard_inputs(tmp_path)
     scorecard = build_scorecard(tmp_path).set_index("commodity")
     assert scorecard.loc["A", "evidence_status"] == "robust_historical_association"
-    assert scorecard.loc["B", "evidence_status"] == "underpowered"
+    assert scorecard.loc["B", "evidence_status"] == "inconclusive_underpowered"
     assert bool(scorecard.loc["A", "any_warm_cold_contrast_fdr"])
     assert set(scorecard["out_of_sample_status"]) == {"not_tested"}
 

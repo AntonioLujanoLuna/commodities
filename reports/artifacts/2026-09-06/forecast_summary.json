@@ -1,0 +1,33 @@
+{
+  "data_provenance": "real",
+  "genuine_out_of_sample": false,
+  "input_hashes": {
+    "adjusted_event_summary.json": "5f1a8833d5a23386642d7ca66633d97d451f8eecd929c471290f7630d78cc940",
+    "commodity_returns_adjusted_monthly.parquet": "db44b474b25a355af37c863b2ad98c20bd311c4fa6ebf47386d9141ce50e1fb7",
+    "enso_monthly.csv": "ae2e227dfc392b8ba5c9c3e483a02169a7652de6ab99a672639d767a3a60cc95",
+    "validation_v2.yaml": "f002ab4d284c7e1526598a575e1b9c65278dfdd6a4e82785be12072bf751e40a"
+  },
+  "limitations": [
+    "RONI values are final revised series rather than archived real-time vintages",
+    "World Bank price indexes are not investable futures returns",
+    "transaction costs are a configured proxy and exclude contract roll mechanics"
+  ],
+  "output_hashes": {
+    "forecast_predictions.csv": "b85eddae1e2b34394bd653ae90bfa12bdb59280aae6cfd53db3af19459e36238",
+    "forecast_results.csv": "5f374de848c90b7abb52d2bf92fc80291e5d7b78cdc989e7d0f27bc6faedc833"
+  },
+  "results": {
+    "best_loss_test_commodity": "Rubber, RSS3",
+    "best_loss_test_horizon_months": 12,
+    "best_loss_test_net_excess_over_buy_and_hold": -1.1751667860096582,
+    "best_loss_test_p_value": 0.0137,
+    "best_loss_test_rmse_improvement": 0.0384092565790603,
+    "cells": 9,
+    "cells_with_loss_difference_p_below_0_05": 1,
+    "cells_with_positive_net_excess_over_buy_and_hold": 5,
+    "cells_with_positive_rmse_improvement": 8
+  },
+  "scope": "retrospective_pseudo_out_of_sample_price_index_proxy",
+  "snapshot": "2026-09-06",
+  "tradability_claim_permitted": false
+}

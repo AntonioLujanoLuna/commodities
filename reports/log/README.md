@@ -41,7 +41,10 @@ entirely on a dated record of what was specified before the numbers arrived.
 
 Frozen contracts live in `config/` (`commodities.yaml` for the primary endpoint,
 `panel.yaml` for the panel, `exposure_v2.yaml` for its external weights, and
-`dose_response.yaml` for the secondary amplitude diagnostic), because a machine reads them and the
+`dose_response.yaml` for the secondary amplitude diagnostic). The post-discovery
+`validation_v2.yaml` freezes the selected validation family, while `mechanism_v2.yaml` freezes
+the schema that new physical and supply-revision inputs must satisfy. These are explicit about
+what was already known when they were authored, because a machine reads them and the
 build refuses to run when they drift. The log records the *reasoning* around
 those freezes, which YAML cannot carry: what alternative was considered, what
 would have to be true for the choice to be wrong, and what was already known

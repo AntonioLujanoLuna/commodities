@@ -52,6 +52,10 @@ RESULT_FILES = (
     "panel_block_sensitivity.csv",
     "specification_curve_shifts.csv",
     "specification_curve_cells.csv",
+    "forecast_predictions.csv",
+    "forecast_results.csv",
+    "program_timing_null_shifts.csv",
+    "program_timing_null_cells.csv",
 )
 
 
@@ -111,14 +115,45 @@ def build_scorecard(source_dir: Path) -> pd.DataFrame:
         if bool(row["reject_fdr"]):
             return "primary_association_not_robust"
         if bool(row["observed_effect_below_marginal_mde"]):
-            return "underpowered"
-        return "no_detected_association"
+            return "inconclusive_underpowered"
+        # Without a prespecified equivalence bound, failure to reject is not
+        # evidence that the effect is economically negligible.
+        return "inconclusive"
 
     scorecard["evidence_status"] = scorecard.apply(label, axis=1)
     scorecard["mechanism_status"] = np.where(
         scorecard["commodity"].eq("Palm oil"), "tested_incomplete", "not_tested"
     )
+    forecast_path = source_dir / "forecast_results.csv"
     scorecard["out_of_sample_status"] = "not_tested"
+    if forecast_path.is_file():
+        forecast = pd.read_csv(forecast_path)
+        forecast_status = (
+            forecast.groupby("commodity", observed=True)
+            .agg(
+                all_horizons_improve=("rmse_improvement", lambda values: bool(values.gt(0).all())),
+                any_loss_test_rejects=(
+                    "loss_difference_p_value",
+                    lambda values: bool(values.lt(0.05).any()),
+                ),
+            )
+            .reset_index()
+        )
+        forecast_status["out_of_sample_status"] = np.where(
+            forecast_status["all_horizons_improve"]
+            & forecast_status["any_loss_test_rejects"],
+            "pseudo_oos_incremental_value",
+            "pseudo_oos_not_established",
+        )
+        scorecard = scorecard.drop(columns="out_of_sample_status").merge(
+            forecast_status[["commodity", "out_of_sample_status"]],
+            on="commodity",
+            how="left",
+            validate="one_to_one",
+        )
+        scorecard["out_of_sample_status"] = scorecard["out_of_sample_status"].fillna(
+            "not_tested"
+        )
     return scorecard.sort_values(["evidence_status", "commodity"]).reset_index(drop=True)
 
 
@@ -129,8 +164,8 @@ def _save_effect_figure(scorecard: pd.DataFrame, path: Path) -> None:
         "robust_historical_association": "#087f5b",
         "familywise_primary_association": "#1971c2",
         "primary_association_not_robust": "#f08c00",
-        "underpowered": "#868e96",
-        "no_detected_association": "#ced4da",
+        "inconclusive_underpowered": "#868e96",
+        "inconclusive": "#ced4da",
     }
     colors = [palette[value] for value in ordered["evidence_status"]]
     lower = ordered["mean_return"] - ordered["studentized_ci_lower"]
@@ -155,8 +190,8 @@ def _save_effect_figure(scorecard: pd.DataFrame, path: Path) -> None:
             Patch(color=palette["robust_historical_association"], label="Robust historical"),
             Patch(color=palette["familywise_primary_association"], label="Primary FWER"),
             Patch(color=palette["primary_association_not_robust"], label="Primary BH only"),
-            Patch(color=palette["underpowered"], label="Underpowered"),
-            Patch(color=palette["no_detected_association"], label="No detected association"),
+            Patch(color=palette["inconclusive_underpowered"], label="Inconclusive: underpowered"),
+            Patch(color=palette["inconclusive"], label="Inconclusive"),
         ],
         loc="lower right",
         frameon=False,

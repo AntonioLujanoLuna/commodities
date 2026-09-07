@@ -28,6 +28,9 @@
 #   make exposure-weights build outcome-independent physical exposure weights
 #   make panel      run the exposure-weighted two-way fixed-effects panel
 #   make specification-curve run the whole-year circular-shift joint timing null
+#   make forecast     run the locked expanding-window forecast benchmark
+#   make program-timing-null run the v2 event-study family timing null
+#   make mechanism-v2 WEATHER=... YIELDS=... SUPPLY_REVISIONS=... OUTPUT=... run new-input validation
 #   make report     regenerate the current-results note from the run receipts
 #   make report-check verify the note still matches the receipts
 #   make publication build the compact receipt bundle, scorecard and figures
@@ -41,7 +44,7 @@
 UV ?= uv
 PY ?= $(UV) run python
 
-.PHONY: setup data dataset raw-events adjustments universe inference placebo power dose-response macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis exposure-data exposure-weights panel specification-curve report report-check publication publication-check figures real-data test lint format typecheck check help
+.PHONY: setup data dataset raw-events adjustments universe inference placebo power dose-response macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis exposure-data exposure-weights panel specification-curve forecast program-timing-null mechanism-v2 report report-check publication publication-check figures real-data test lint format typecheck check help
 
 help:
 	@grep -E '^#   ' Makefile | sed 's/^#   //'
@@ -128,6 +131,15 @@ panel:
 specification-curve:
 	$(PY) scripts/run_specification_curve.py
 
+forecast:
+	$(PY) scripts/run_forecast_analysis.py
+
+program-timing-null:
+	$(PY) scripts/run_program_timing_null.py
+
+mechanism-v2:
+	$(PY) scripts/run_mechanism_validation.py --weather "$(WEATHER)" --yields "$(YIELDS)" --supply-revisions "$(SUPPLY_REVISIONS)" --output "$(OUTPUT)"
+
 report:
 	$(PY) scripts/build_report.py
 
@@ -142,7 +154,7 @@ publication-check:
 
 figures: publication
 
-real-data: data dataset raw-events adjustments universe inference placebo power dose-response macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis exposure-data exposure-weights panel specification-curve report publication
+real-data: data dataset raw-events adjustments universe inference placebo power dose-response macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis exposure-data exposure-weights panel specification-curve forecast program-timing-null report publication
 
 test:
 	$(PY) -m pytest

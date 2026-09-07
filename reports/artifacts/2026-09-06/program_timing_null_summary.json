@@ -1,0 +1,49 @@
+{
+  "contract": {
+    "anchors": [
+      "retrospective",
+      "observable"
+    ],
+    "cells_per_alignment": 96,
+    "commodities": [
+      "Coconut oil",
+      "Palm oil",
+      "Rubber, RSS3"
+    ],
+    "horizons_months": [
+      6,
+      12,
+      18,
+      24
+    ],
+    "indexes": [
+      "roni",
+      "oni"
+    ],
+    "null_alignments": 60,
+    "outcomes": [
+      "seasonal_adjusted_log_return",
+      "market_adjusted_log_return"
+    ]
+  },
+  "data_provenance": "real",
+  "input_hashes": {
+    "adjusted_event_summary.json": "5f1a8833d5a23386642d7ca66633d97d451f8eecd929c471290f7630d78cc940",
+    "commodity_returns_adjusted_monthly.parquet": "db44b474b25a355af37c863b2ad98c20bd311c4fa6ebf47386d9141ce50e1fb7",
+    "enso_monthly.csv": "ae2e227dfc392b8ba5c9c3e483a02169a7652de6ab99a672639d767a3a60cc95",
+    "research.yaml": "faf1582043e0a3b52f42539cd3850b509b364f4b2767c178dda2b809dbd9c614",
+    "validation_v2.yaml": "f002ab4d284c7e1526598a575e1b9c65278dfdd6a4e82785be12072bf751e40a"
+  },
+  "output_hashes": {
+    "program_timing_null_cells.csv": "be6143027f918af310e7ba4f8fdb1c7e10136f8aa02e193bdc6e15a3523213d7",
+    "program_timing_null_shifts.csv": "a4895486bd743a6770ed87141b44aa7699c0329e5c9dea02348813012d9b7cbe"
+  },
+  "results": {
+    "maximum_absolute_t_p_value": 0.01639344262295082,
+    "median_absolute_t_p_value": 0.01639344262295082,
+    "positive_estimate_share_p_value": 0.06557377049180328
+  },
+  "scope": "locked_v2_selected_event_study_family_retrospective_calibration",
+  "selection_is_outcome_informed": true,
+  "snapshot": "2026-09-06"
+}

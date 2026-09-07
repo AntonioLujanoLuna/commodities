@@ -86,3 +86,26 @@ def test_synthetic_snapshot_crosses_the_receipt_writing_pipeline(tmp_path: Path)
     assert summary["inference"]["bootstrap_replicates"] == 999
     assert summary["inference"]["fdr_family_size"] == 2
     verify_hashes(output, summary["output_hashes"])
+
+    deterministic_files = [
+        "raw_event_summary.json",
+        "adjusted_event_summary.json",
+        "universe_summary.json",
+        "inference_summary.json",
+        *summary["output_hashes"],
+    ]
+    first_hashes = {name: sha256_file(output / name) for name in deterministic_files}
+    build_raw_event_tables(
+        snapshot, tables_root=tables_root, research_config_path=research_path
+    )
+    build_adjusted_event_tables(
+        snapshot, tables_root=tables_root, research_config_path=research_path
+    )
+    build_inference_universe(snapshot, tables_root=tables_root, registry_path=registry_path)
+    run_primary_inference(
+        snapshot,
+        tables_root=tables_root,
+        registry_path=registry_path,
+        research_config_path=research_path,
+    )
+    assert {name: sha256_file(output / name) for name in deterministic_files} == first_hashes

@@ -1,31 +1,31 @@
 commodity,group,mean_return,studentized_ci_lower,studentized_ci_upper,reject_fdr,reject_fwer,passes_current_gates,minimum_detectable_effect_marginal,observed_effect_below_marginal_mde,passes_macro_gates,survives_all_deletions,passes_timing_index_robustness,amplitude_dose_response_fdr,any_warm_cold_contrast_fdr,evidence_status,mechanism_status,out_of_sample_status
 "Coal, Australian",energy,-0.2280748217719473,-0.2979429623886178,-0.1420430787379448,True,True,True,0.1090621948242187,False,True,True,False,False,False,familywise_primary_association,not_tested,not_tested
 "Natural gas, Europe",energy,-0.2335077399298901,-0.3243424992691465,-0.1613232696129335,True,True,True,0.1107978820800781,False,True,True,False,False,False,familywise_primary_association,not_tested,not_tested
+"Banana, US",horticulture,-0.0165734404112839,-0.1637143877577239,0.1959440081902031,False,False,False,0.2771377563476562,True,False,False,False,False,False,inconclusive_underpowered,not_tested,not_tested
+Barley,grains,0.1222886416584333,0.0063264459466548,0.2864146850254848,False,False,False,0.1939296722412109,True,False,False,False,False,False,inconclusive_underpowered,not_tested,not_tested
+Beef **,livestock,0.0631203190018186,-0.0269106581087822,0.1758187744074237,False,False,False,0.1446247100830078,True,False,False,False,False,False,inconclusive_underpowered,not_tested,not_tested
+Chicken **,livestock,-0.0103782143462074,-0.0441185300769012,0.0310549622117366,False,False,False,0.0533103942871093,True,False,False,False,False,False,inconclusive_underpowered,not_tested,not_tested
+Cocoa,beverages,0.3734267163023076,0.1982557238337618,0.8269281234347152,False,False,False,0.4056262969970703,True,False,False,False,False,False,inconclusive_underpowered,not_tested,not_tested
+"Cotton, A Index",raw_materials,0.090924420955977,-0.0316946018578585,0.3546723380234229,False,False,False,0.3030681610107422,True,False,False,False,False,False,inconclusive_underpowered,not_tested,not_tested
+DAP,fertilizers,0.2027576336913645,0.0829821382305315,0.4085351386824546,False,False,False,0.2474021911621093,True,False,False,False,False,False,inconclusive_underpowered,not_tested,not_tested
+Fish meal,marine,0.1177891192763382,0.0011430967806139,0.2977669125113602,False,False,False,0.2036952972412109,True,False,False,False,False,False,inconclusive_underpowered,not_tested,not_tested
+Groundnut oil **,oils,0.1580191230000503,0.019152381063292,0.3691218283758325,False,False,False,0.2490901947021484,True,False,False,False,False,False,inconclusive_underpowered,not_tested,not_tested
+Lamb **,livestock,0.0079544208633708,-0.0999558464661986,0.1652323949136241,False,False,False,0.1837158203125,True,False,False,False,False,False,inconclusive_underpowered,not_tested,not_tested
+Maize,grains,0.0698030524052595,-0.0428120283128435,0.1759160398216763,False,False,False,0.1521968841552734,True,False,False,False,False,False,inconclusive_underpowered,not_tested,not_tested
+Orange,horticulture,0.0207114256934289,-0.1014981214272547,0.1544452626776739,False,False,False,0.1806354522705078,True,False,False,False,False,False,inconclusive_underpowered,not_tested,not_tested
+"Shrimps, Mexican",marine,-0.0433928151003561,-0.1378251810122579,0.0349570592432125,False,False,False,0.1199245452880859,True,False,False,False,False,False,inconclusive_underpowered,not_tested,not_tested
+Sorghum,grains,0.0559003673487684,-0.0417871296775822,0.152871134508664,False,False,False,0.1357364654541015,True,False,False,False,False,False,inconclusive_underpowered,not_tested,not_tested
+Soybeans,oils,0.1078011330750206,0.0115398328220761,0.3327286741995539,False,False,False,0.2453136444091797,True,False,False,False,False,False,inconclusive_underpowered,not_tested,not_tested
+"Sugar, world",horticulture,0.1085251541610622,-0.0508686537567925,0.3448352800854991,False,False,False,0.305490493774414,True,False,False,False,False,False,inconclusive_underpowered,not_tested,not_tested
+"Tea, avg 3 auctions",beverages,0.0762583973998172,0.0007736892304096,0.2482424934038125,False,False,False,0.1941490173339843,True,False,False,False,False,False,inconclusive_underpowered,not_tested,not_tested
+"Tobacco, US import u.v.",raw_materials,0.0021569834843135,-0.0345479264601736,0.0554359009868188,False,False,False,0.0658607482910156,True,False,False,False,False,False,inconclusive_underpowered,not_tested,not_tested
+Urea,fertilizers,0.1779372133894311,0.0547144965894628,0.357713550410462,False,False,False,0.2137660980224609,True,True,True,False,False,False,inconclusive_underpowered,not_tested,not_tested
+"Wheat, US HRW",grains,0.021583869343326,-0.0983950717821906,0.1704583175661491,False,False,False,0.1895427703857422,True,False,False,False,False,False,inconclusive_underpowered,not_tested,not_tested
 "Coffee, Arabica",beverages,0.2074090928420698,0.0559255450112791,0.3457901633302677,True,False,False,0.2031326293945312,False,False,False,False,False,False,primary_association_not_robust,not_tested,not_tested
 "Coffee, Robusta",beverages,0.3244748296382484,0.1689986666033762,0.4756555504881189,True,False,True,0.2141189575195312,False,True,True,False,False,False,primary_association_not_robust,not_tested,not_tested
 "Logs, Malaysian",raw_materials,0.1887111371860357,0.0721324610969946,0.3323474657798599,True,False,True,0.187692642211914,False,True,False,False,False,False,primary_association_not_robust,not_tested,not_tested
 "Natural gas, US",energy,-0.1225517896738852,-0.1983339203517662,-0.0280232263705326,True,False,False,0.1234817504882812,True,False,False,False,False,False,primary_association_not_robust,not_tested,not_tested
 "Rice, Thai 5%",grains,0.172675775978627,0.0731233010868393,0.3242294112896507,True,False,True,0.1819515228271484,True,True,False,False,False,False,primary_association_not_robust,not_tested,not_tested
-Coconut oil,oils,0.808762973389429,0.5821437085012731,1.059269457627562,True,True,True,0.3389167785644531,False,True,True,True,False,True,robust_historical_association,not_tested,not_tested
-Palm oil,oils,0.3493516488175756,0.2366368674873986,0.4574832192132212,True,True,True,0.1559162139892578,False,True,True,True,False,True,robust_historical_association,tested_incomplete,not_tested
-"Rubber, RSS3",raw_materials,0.3786929463051429,0.2424581147834884,0.5396382587950214,True,True,True,0.2130413055419922,False,True,True,True,False,False,robust_historical_association,not_tested,not_tested
-"Banana, US",horticulture,-0.0165734404112839,-0.1637143877577239,0.1959440081902031,False,False,False,0.2771377563476562,True,False,False,False,False,False,underpowered,not_tested,not_tested
-Barley,grains,0.1222886416584333,0.0063264459466548,0.2864146850254848,False,False,False,0.1939296722412109,True,False,False,False,False,False,underpowered,not_tested,not_tested
-Beef **,livestock,0.0631203190018186,-0.0269106581087822,0.1758187744074237,False,False,False,0.1446247100830078,True,False,False,False,False,False,underpowered,not_tested,not_tested
-Chicken **,livestock,-0.0103782143462074,-0.0441185300769012,0.0310549622117366,False,False,False,0.0533103942871093,True,False,False,False,False,False,underpowered,not_tested,not_tested
-Cocoa,beverages,0.3734267163023076,0.1982557238337618,0.8269281234347152,False,False,False,0.4056262969970703,True,False,False,False,False,False,underpowered,not_tested,not_tested
-"Cotton, A Index",raw_materials,0.090924420955977,-0.0316946018578585,0.3546723380234229,False,False,False,0.3030681610107422,True,False,False,False,False,False,underpowered,not_tested,not_tested
-DAP,fertilizers,0.2027576336913645,0.0829821382305315,0.4085351386824546,False,False,False,0.2474021911621093,True,False,False,False,False,False,underpowered,not_tested,not_tested
-Fish meal,marine,0.1177891192763382,0.0011430967806139,0.2977669125113602,False,False,False,0.2036952972412109,True,False,False,False,False,False,underpowered,not_tested,not_tested
-Groundnut oil **,oils,0.1580191230000503,0.019152381063292,0.3691218283758325,False,False,False,0.2490901947021484,True,False,False,False,False,False,underpowered,not_tested,not_tested
-Lamb **,livestock,0.0079544208633708,-0.0999558464661986,0.1652323949136241,False,False,False,0.1837158203125,True,False,False,False,False,False,underpowered,not_tested,not_tested
-Maize,grains,0.0698030524052595,-0.0428120283128435,0.1759160398216763,False,False,False,0.1521968841552734,True,False,False,False,False,False,underpowered,not_tested,not_tested
-Orange,horticulture,0.0207114256934289,-0.1014981214272547,0.1544452626776739,False,False,False,0.1806354522705078,True,False,False,False,False,False,underpowered,not_tested,not_tested
-"Shrimps, Mexican",marine,-0.0433928151003561,-0.1378251810122579,0.0349570592432125,False,False,False,0.1199245452880859,True,False,False,False,False,False,underpowered,not_tested,not_tested
-Sorghum,grains,0.0559003673487684,-0.0417871296775822,0.152871134508664,False,False,False,0.1357364654541015,True,False,False,False,False,False,underpowered,not_tested,not_tested
-Soybeans,oils,0.1078011330750206,0.0115398328220761,0.3327286741995539,False,False,False,0.2453136444091797,True,False,False,False,False,False,underpowered,not_tested,not_tested
-"Sugar, world",horticulture,0.1085251541610622,-0.0508686537567925,0.3448352800854991,False,False,False,0.305490493774414,True,False,False,False,False,False,underpowered,not_tested,not_tested
-"Tea, avg 3 auctions",beverages,0.0762583973998172,0.0007736892304096,0.2482424934038125,False,False,False,0.1941490173339843,True,False,False,False,False,False,underpowered,not_tested,not_tested
-"Tobacco, US import u.v.",raw_materials,0.0021569834843135,-0.0345479264601736,0.0554359009868188,False,False,False,0.0658607482910156,True,False,False,False,False,False,underpowered,not_tested,not_tested
-Urea,fertilizers,0.1779372133894311,0.0547144965894628,0.357713550410462,False,False,False,0.2137660980224609,True,True,True,False,False,False,underpowered,not_tested,not_tested
-"Wheat, US HRW",grains,0.021583869343326,-0.0983950717821906,0.1704583175661491,False,False,False,0.1895427703857422,True,False,False,False,False,False,underpowered,not_tested,not_tested
+Coconut oil,oils,0.808762973389429,0.5821437085012731,1.059269457627562,True,True,True,0.3389167785644531,False,True,True,True,False,True,robust_historical_association,not_tested,pseudo_oos_not_established
+Palm oil,oils,0.3493516488175756,0.2366368674873986,0.4574832192132212,True,True,True,0.1559162139892578,False,True,True,True,False,True,robust_historical_association,tested_incomplete,pseudo_oos_not_established
+"Rubber, RSS3",raw_materials,0.3786929463051429,0.2424581147834884,0.5396382587950214,True,True,True,0.2130413055419922,False,True,True,True,False,False,robust_historical_association,not_tested,pseudo_oos_not_established

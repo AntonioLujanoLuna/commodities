@@ -489,6 +489,37 @@ year is long enough at all.
 control term's estimate and p-value, grid-level counts, the block-sensitivity digest, and the
 input and output hashes.
 
+## Validation v2 forecast and timing null
+
+`forecast_predictions.csv` has one row per commodity, horizon and annual forecast origin.
+`training_observations` counts only rows whose complete target window ended no later than the
+origin; `latest_training_target_end_date` makes that no-leakage rule auditable. The table records
+the target, baseline prediction and nested ENSO prediction. `forecast_results.csv` reports RMSE,
+MAE, a calendar-year paired-loss randomization p-value, signal turnover, the configured proxy
+cost, long-only return and net excess over long-only. These are revised-index, price-index
+diagnostics, not genuine real-time forecasts or tradable returns. `forecast_summary.json` states
+those restrictions and hashes every input and output.
+
+`program_timing_null_cells.csv` has one row per whole-year shift, commodity, index, anchor,
+horizon and adjusted-return outcome. Each row records its valid episode count, mean cumulative
+log return, standard error and t statistic. `program_timing_null_shifts.csv` reduces each
+96-cell alignment to median absolute t, maximum absolute t and positive-estimate share.
+`program_timing_null_summary.json` gives finite-sample joint p-values and permanently records
+that the selected commodities were chosen using the discovery outcomes.
+
+## Pending new-input mechanism and futures layers
+
+`config/mechanism_v2.yaml` defines three tables. Weather rows require commodity, region, date,
+ENSO value, weather anomaly, externally fixed active-season indicator and cluster. Yield rows
+require harvest year, yield surprise, weather shock, lagged production share and cluster. Supply
+revision rows require both information and price dates; the validator rejects a revision dated
+after its measured price. All three links use cluster-robust inference and one BH family.
+
+The licensed-futures adapter requires date, commodity, contract, settlement price, volume, open
+interest, days to expiry and information date. Duplicate keys, non-positive prices and future
+information are rejected. Contract-crossing returns remain missing until an explicit roll-yield
+method is supplied; the World Bank index cannot pass this schema.
+
 ## Generated report blocks
 
 `make report` renders the blocks between `<!-- generated:... -->` markers in

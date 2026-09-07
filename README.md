@@ -21,6 +21,10 @@
 > Neither design currently establishes an ENSO-specific price effect. This file carries no run
 > numbers; they live in
 > [`reports/current_results.md`](reports/current_results.md), generated from the run receipts.
+> A separately versioned v2 contract now freezes the three discovery survivors before new
+> validation inputs are acquired. Its current forecast run is explicitly pseudo-out-of-sample,
+> and its regional-mechanism and licensed-futures gates remain closed until their required data
+> exist; an input schema is not counted as empirical evidence.
 
 The compact, hash-grounded interpretation of the latest completed run is in
 [`reports/current_results.md`](reports/current_results.md), which is overwritten on
@@ -95,6 +99,8 @@ uv run python scripts/download_exposure_data.py
 uv run python scripts/build_external_exposure.py
 uv run python scripts/run_panel_analysis.py
 uv run python scripts/run_specification_curve.py
+uv run python scripts/run_forecast_analysis.py
+uv run python scripts/run_program_timing_null.py
 uv run python scripts/build_report.py
 uv run python scripts/build_publication.py
 ```
@@ -173,9 +179,17 @@ resampling-block sensitivity                                                  [i
         ↓
 whole-year circular-shift null over the 20-cell panel family                  [implemented]
         ↓
+locked 96-cell selected-family whole-year timing null                         [implemented]
+        ↓
+expanding-window forecast comparison on revised index and price-index data    [implemented]
+        ↓
+regional crop-calendar and timestamped supply-revision input contracts        [implemented; inputs pending]
+        ↓
+licensed futures, roll and transaction-cost input contract                    [implemented; inputs pending]
+        ↓
 generated scorecard, publication figures and auditable compact bundle         [implemented]
         ↓
-other mechanisms, forecasting and tradability                                [planned]
+new-input mechanism validation, real-time-vintage forecasts and tradability   [data pending]
 ```
 
 The current narrative report in `reports/current_results.md` is generated from auditable tables
@@ -233,8 +247,10 @@ a clone to audit the reported numbers without committing the large bootstrap rep
   splits nearly every event. Blocks shorter than the dependence understate the standard error, so
   the frozen calendar-year interval is the optimistic one; May-aligned one-, two- and three-year
   blocks are reported alongside it.
-- **Forecasting is strictly recursive** and labelled *pseudo*-out-of-sample, because the
-  published ENSO indices are retrospectively revised.
+- **The implemented forecast benchmark is strictly recursive** and labelled
+  *pseudo*-out-of-sample, because it uses final revised ENSO indices and non-investable World
+  Bank price indexes. Genuine out-of-sample and tradability labels are structurally forbidden
+  until timestamped vintages and licensed futures inputs pass their contracts.
 
 Two timing decisions are already implemented. Episodes are derived from the configured threshold
 and persistence rule rather than transcribed. Event paths are built around both retrospective
@@ -380,6 +396,38 @@ identification for immunity to unmodelled global regimes.
 This stage is exploratory. It does not promote or demote any commodity in the frozen event-study
 contract.
 
+### Validation v2
+
+`config/validation_v2.yaml` freezes coconut oil, palm oil and RSS3 rubber after the discovery
+snapshot and before any new validation inputs are inspected. It is deliberately described as a
+post-discovery validation contract, not a retrospective preregistration.
+
+Two parts can run on the existing snapshot. The recursive forecast stage compares a return-lag
+and calendar-month baseline with a nested ENSO model at 3, 6 and 12 months. A training target is
+admitted only after its endpoint is observable at the forecast origin, preventing overlapping
+horizons from leaking future returns into the fit. Paired loss inference resamples calendar-year
+blocks. The strategy calculation is only a price-index diagnostic and reports its excess over a
+long-only benchmark; it cannot satisfy the tradability gate.
+
+The selected-family timing null reconstructs a 96-cell family: three commodities, RONI and ONI,
+retrospective and observable anchors, four horizons and two adjusted-return endpoints. Sixty
+whole-year circular shifts provide one joint reference distribution. Because the three
+commodities were selected using the discovery results, this is retrospective calibration of the
+locked family, not independent confirmation.
+
+`mechanism_v2.yaml` and the mechanism validator require three timestamp-safe links: ENSO to local
+weather during an externally sourced active crop season, production-weighted weather to yield
+surprise, and supply-forecast revision to the subsequent price response. The futures adapter
+requires contract-level settlements, volume, open interest, expiry and information dates, and
+leaves roll-crossing returns undefined until roll yield is supplied explicitly. Neither layer
+will manufacture substitutes from the World Bank price indexes.
+
+`config/validation_sources.yaml` records the authoritative acquisition targets without treating
+links as data. The current CPC RONI series and outlook do not supply the archived issue-by-issue
+history required by the genuine real-time gate. USDA FAS PSD exposes forecast records and release
+dates but still requires an authenticated acquisition and commodity-coverage audit. Palm-oil and
+rubber contract histories are exchange data and are not present in this repository.
+
 ---
 
 ## Current repository layout
@@ -429,6 +477,13 @@ src/enso_commodities/
   palm_oil_mechanism.py weather, yield, production and price link tests
   panel.py         exposure weights, two-way within estimator, year-block bootstrap
   panel_analysis.py exposure-weighted panel grid and hash-linked receipt
+  validation.py    frozen v2 contract and conservative evidence labels
+  forecasting.py   leakage-safe expanding-window forecasts and proxy cost accounting
+  forecast_analysis.py real-data pseudo-out-of-sample forecast receipt
+  program_timing_null.py selected event-study family timing null
+  program_timing_analysis.py real-data timing-null receipt
+  mechanism_validation.py crop-calendar mechanism validation and clustered links
+  tradability.py   strict licensed-futures adapter and explicit roll handling
   synthetic.py     fixture generators for recovery and calibration tests only
   provenance.py    file hashing and atomic JSON receipts
 scripts/           command-line entry scripts for downloading and building
@@ -472,11 +527,11 @@ placebo draw and placebo replicate, with a hash-linked run receipt.
 | Palm weather | NASA POWER MERRA-2 monthly precipitation and temperature | implemented pilot |
 | Palm production | FAOSTAT oil-palm fruit and palm-oil annual series | implemented pilot |
 | Global crop exposure | FAO ASIS El Niño drought hotspots + IFPRI/FAO SPAM 2020 crop area | implemented |
-| Other weather | ERA5, CHIRPS, or a pre-aggregated regional CSV | planned |
-| Other production | FAOSTAT, USDA PSD | planned |
-| Futures | vendor-licensed contract data (not redistributed) | planned |
+| Other weather | ERA5, CHIRPS, or a pre-aggregated regional CSV | contract implemented; data pending |
+| Other production/forecast revisions | FAOSTAT, USDA PSD | contract implemented; timestamped inputs pending |
+| Futures | vendor-licensed contract data (not redistributed) | adapter implemented; data pending |
 
-Optional-source handling and licensed futures-data interfaces will be implemented in later stages.
+Optional-source acquisition and licensed futures data remain later-stage inputs.
 Licensed data will not be redistributed.
 
 ## Development

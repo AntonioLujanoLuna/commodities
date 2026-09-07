@@ -1,0 +1,20 @@
+# Input contract for the v2 regional mechanism study. No values are imputed.
+scope: prospective_validation_inputs_not_yet_acquired
+commodities: [Coconut oil, Palm oil, "Rubber, RSS3"]
+tables:
+  weather:
+    required_columns: [commodity, region, date, enso, weather_anomaly, active_season, cluster]
+  yield:
+    required_columns: [commodity, region, harvest_year, yield_surprise, weather_shock, production_share, cluster]
+  supply_revision:
+    required_columns: [commodity, information_date, price_date, supply_revision, price_return, cluster]
+requirements:
+  crop_calendar_source_must_be_external: true
+  production_weights_must_be_lagged: true
+  supply_revisions_must_be_timestamped: true
+  no_outcome_derived_exposure_weights: true
+  minimum_clusters_per_link: 10
+inference:
+  covariance: cluster_robust
+  family: three_links_x_three_commodities
+  fdr_alpha: 0.05

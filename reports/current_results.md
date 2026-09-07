@@ -20,7 +20,7 @@ interpretation.
 <!-- generated:run-identity start -->
 
 - Data snapshot: `2026-09-06`
-- Stage receipts: `inference`, `placebo`, `power`, `dose_response`, `macro`, `fragility`, `robustness`, `specificity`, `endpoint`, `financial`, `palm`, `external_exposure`, `panel`, `specification_curve`
+- Stage receipts: `inference`, `placebo`, `power`, `dose_response`, `macro`, `fragility`, `robustness`, `specificity`, `endpoint`, `financial`, `palm`, `external_exposure`, `panel`, `specification_curve`, `forecast`, `program_timing_null`
 - `commodities.yaml` SHA-256: `9a46280084782b9cf1b09b217a964a0774d725e6e4a46669911a60cd89f1a046`
 - `dose_response.yaml` SHA-256: `6650ed543f2483b5c1dc35e885df8b82f1a6121f00feaa5d1328ddae39f14b30`
 - `endpoint_diagnostics.yaml` SHA-256: `3faf58d68cb94ac3899f3fc0aee577173f8331fe5a8011914314b5fcfe543866`
@@ -31,13 +31,14 @@ interpretation.
 - `research.yaml` SHA-256: `faf1582043e0a3b52f42539cd3850b509b364f4b2767c178dda2b809dbd9c614`
 - `specification_curve.yaml` SHA-256: `1aeab89ab10fb3c2235396550cd8f8f8478d007e6a00c5c32d86c11e46f0f72a`
 - `specificity.yaml` SHA-256: `aba273464931378a9c1056513c9c536c6438e72f2694bb23f1f05cee738848ed`
+- `validation_v2.yaml` SHA-256: `f002ab4d284c7e1526598a575e1b9c65278dfdd6a4e82785be12072bf751e40a`
 
 <!-- generated:run-identity end -->
 
 <!-- generated:run-context start -->
 
 - Generated for snapshot: `2026-09-06`
-- Analysis source-tree SHA-256: `5867b76a20ea41767a414ac4cc29dd5f0fb924a8222557093360deeb1deb6bec`
+- Analysis source-tree SHA-256: `f5ef55e97b13958f31aaf2206189afb6980b193c9c65cc925dc106cf6d9c3829`
 - Primary bootstrap: 10000 whole-episode draws
 - Panel bootstrap: 2000 block draws per specification
 
@@ -63,6 +64,8 @@ interpretation.
 | External physical exposure | Included crop candidates 21; Explicitly excluded candidates 11; Minimum crop area in hotspot support 0.2110 |
 | Exposure-weighted panel | Primary exposure estimate 0.04245; Primary studentized p 0.20840; Control interaction p 0.48776; Weight-mapping permutation p 0.52674; Exposure cells passing grid FDR 0 |
 | Whole-year timing null | Specification cells 20; Shifted alignments 60; Joint timing p 0.4098; Maximum-t timing p 0.7377 |
+| Recursive forecast benchmark | Forecast cells 9; Cells improving RMSE 8; Loss tests rejecting raw 1; Proxy cells beating long-only 5; Best cell commodity Rubber, RSS3; Best cell horizon 12; Best cell p 0.0137; Best cell RMSE improvement 0.0384; Best cell excess over long-only -1.1752; Genuine out of sample no; Tradability claim permitted no |
+| Selected-family timing null | Specification cells 96; Shifted alignments 60; Median-|t| timing p 0.0164; Maximum-|t| timing p 0.0164; Outcome-informed selection yes |
 
 <!-- generated:evidence-summary end -->
 
@@ -85,6 +88,9 @@ Generated one line per stage from the same receipts as the evidence table above.
 | External physical exposure | 21 crop candidates have outcome-independent weights; 11 unsupported candidates are excluded rather than coded as zero. |
 | Exposure panel | The primary interval is not robust under every block sensitivity, but 0 exposure cells survive grid FDR. |
 | Whole-year timing null | The observed specification family has joint timing p=0.4098 against circular whole-year shifts. |
+| Recursive forecast benchmark | ENSO improves RMSE in 8 of 9 cells, with paired-loss p<0.05 in 1 cell; final RONI and non-investable indexes make this pseudo-OOS. |
+| Best forecast cell | Rubber, RSS3 at 12 months has paired-loss p=0.0137 and RMSE improvement 0.0384, but its price-index strategy excess over long-only is -1.1752. |
+| Selected-family timing null | The locked 96-cell selected family has median-|t| timing p=0.0164, but selection used the discovery outcomes and this is retrospective calibration, not independent validation. |
 
 <!-- generated:interpretations end -->
 
@@ -108,6 +114,8 @@ Generated one line per stage from the same receipts as the evidence table above.
 | External physical exposure | `external_exposure_summary.json` | `8f5192c97e9a8cb44844bb094dfff273db06404570a53c335defe0feecd69ec5` |
 | Exposure-weighted panel | `panel_summary.json` | `d3419f09c0960a793353af35f7426dfd0d9cdafc05031ea753e0cbe3b5fa2d5e` |
 | Whole-year timing null | `specification_curve_summary.json` | `f9c09f557ef0ab4923580fd91aa7b34bdbbd7b47953d4dbb573dc62448581126` |
+| Recursive forecast benchmark | `forecast_summary.json` | `0db6291a1e48a9b8808997944a3380a8c0611ba8aa786bd72add5acaeddf13f2` |
+| Selected-family timing null | `program_timing_null_summary.json` | `aac58a9495181466fbddefdcd4eb0e27e3477b053047da0325003fd2d4b6391a` |
 
 <!-- generated:receipts end -->
 
@@ -138,6 +146,6 @@ The panel-family timing null compares the observed curve with 60 circular whole-
 
 <!-- generated:bottom-line start -->
 
-The pipeline leaves 3 timing/index-robust historical associations, while 22 candidates remain below their own marginal detection threshold. The phase and negative-control diagnostics still prevent an ENSO-specific causal interpretation, and 0 panel exposure cells survive correction across the specification grid.
+The pipeline leaves 3 timing/index-robust historical associations, while 22 candidates remain below their own marginal detection threshold. The phase and negative-control diagnostics still prevent an ENSO-specific causal interpretation, and 0 panel exposure cells survive correction across the specification grid. The retrospective forecast benchmark has paired-loss p<0.05 in 1 cell and does not yet satisfy the genuine out-of-sample gate.
 
 <!-- generated:bottom-line end -->

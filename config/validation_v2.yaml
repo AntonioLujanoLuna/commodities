@@ -1,0 +1,57 @@
+# Frozen after the 2026-09-06 discovery run and before any v2 validation inputs are inspected.
+# This is a prospective validation contract for new inputs, not a retrospective preregistration.
+contract_version: 2
+frozen_after_discovery_snapshot: 2026-09-06
+scope: prospective_validation_of_selected_historical_associations
+
+commodities:
+  - Coconut oil
+  - Palm oil
+  - Rubber, RSS3
+
+mechanism:
+  design: regional_crop_calendar_shift_share
+  required_links:
+    - enso_to_local_weather
+    - local_weather_to_yield_surprise
+    - supply_revision_to_price
+  exposure_rule: lagged_production_share_x_active_crop_calendar
+  weather_variables: [precipitation_anomaly, temperature_anomaly]
+  require_external_crop_calendar: true
+  require_information_dates_for_supply_revisions: true
+  covariance: cluster_by_enso_episode_or_calendar_year
+
+forecast:
+  design: expanding_window
+  horizons_months: [3, 6, 12]
+  origin_frequency_months: 12
+  minimum_training_months: 120
+  baseline_predictors: [return_lag_1, return_lag_12, calendar_month]
+  enso_predictors: [roni, roni_lag_3, roni_lag_6]
+  primary_loss: squared_error
+  secondary_loss: absolute_error
+  require_vintage_information_for_genuine_oos: true
+  proxy_transaction_cost_bps: 10
+  price_input_scope: non_investable_price_index_proxy
+
+program_timing_null:
+  indexes: [roni, oni]
+  anchors: [retrospective, observable]
+  horizons_months: [6, 12, 18, 24]
+  outcomes: [seasonal_adjusted_log_return, market_adjusted_log_return]
+  minimum_shift_years: 1
+  maximum_shift_years: 60
+  primary_statistic: median_absolute_t
+  secondary_statistic: maximum_absolute_t
+
+interpretation:
+  equivalence_bounds_absolute_return:
+    Coconut oil: 0.10
+    Palm oil: 0.10
+    Rubber, RSS3: 0.10
+  labels:
+    robust_association: robust_historical_association
+    equivalently_small: evidence_against_material_effect
+    underpowered: inconclusive_underpowered
+    otherwise: inconclusive
+
