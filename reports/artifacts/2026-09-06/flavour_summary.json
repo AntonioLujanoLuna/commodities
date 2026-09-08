@@ -1,0 +1,58 @@
+{
+  "data_provenance": "real",
+  "design": {
+    "central_index": "nino4",
+    "confidence_level": 0.95,
+    "eastern_index": "nino3",
+    "estimand": "eastern_mean_minus_central_mean",
+    "fdr_alpha": 0.05,
+    "fdr_family": "mechanism_candidates_only",
+    "inference_scope": "prespecified_underpowered_diagnostic",
+    "minimum_episodes_per_flavour": 4,
+    "minimum_margin": 0.0,
+    "outcome": "seasonal_adjusted_log_return",
+    "random_seed": 20260908,
+    "reference_month": "episode_peak_month",
+    "replicates": 10000,
+    "resampling": "stratified_shared_draw_episode_bootstrap",
+    "rule": "larger_standardized_peak_region",
+    "sensitivity_reference_month": "episode_mean",
+    "standardization": "z_score_over_shared_window",
+    "workstream": "W5_flavour"
+  },
+  "flavour_index_snapshot": "2026-09-08",
+  "input_hashes": {
+    "enso_episodes.csv": "1965f1eae2181312e0233f7ba21856d5704a0f9add389d18bd49db2bfaf7bf97",
+    "enso_region_indices_monthly.csv": "0bd60bed212093704427fecd71b6245d1054624ea5555109008bf079d4d317fa",
+    "findings_v3.yaml": "43dcf21ef1cae3d57b022c8467cf0470ec50ffdc823e2512f61a34606e2c9419",
+    "flavour.yaml": "4c37cf22877b16b1be7f25ef593fed8ca19c7c38f47df7fb62561976bbdbc40e",
+    "negative_control_sample.parquet": "0954aea60e77295e3f8db312e80e7fd0c163d21760a24b8429108732aeafe512",
+    "primary_inference_family.parquet": "6f66710c4710363bd6cf8a55d5f46f9c358dfa77378368d41f0a2e7828bde060",
+    "raw_event_summary.json": "cdaa1cf645d3b466dcd01553cd99ff3fe06e963fd1f45f564219c04f8cf8f585",
+    "universe_summary.json": "7504fa323cb7c8233c802060712fed797147cda350758a73ea101352cbcc5cf6"
+  },
+  "output_hashes": {
+    "flavour_contrast_results.csv": "dfc13ad6862f89eeaae1d2d595e3e1554161e1f1143d4178dfa860b72bc0d913",
+    "flavour_episode_labels.csv": "4a3506671ca30c25c67e8707830bc35f2f4bc74afb515ed1441ad9b891779f9e",
+    "flavour_episode_labels_sensitivity.csv": "061665bcbf39d74cc9344baad7a0e6f60b348ed73a65a8e2b77a0ef1adcaa628"
+  },
+  "random_seed": 20260908,
+  "results": {
+    "candidate_fdr_rejections": 0,
+    "candidates_below_their_own_mde": 30,
+    "central_episodes": 13,
+    "classification_agreement_share": 0.6818181818181818,
+    "clears_program_threshold": false,
+    "eastern_episodes": 6,
+    "family_bootstrap_p_value": 0.605039496050395,
+    "family_maximum_absolute_contrast_t": 2.5831122475384807,
+    "family_size": 30,
+    "median_minimum_detectable_contrast": 0.08874893188476562,
+    "minimum_episodes_per_flavour": 4,
+    "program_primary_tests": 4,
+    "program_threshold": 0.0125,
+    "split_resolvable": true,
+    "status": "exploratory_within_stage_only"
+  },
+  "snapshot": "2026-09-06"
+}

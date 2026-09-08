@@ -1,0 +1,54 @@
+{
+  "data_provenance": "real",
+  "design": {
+    "alternative": "greater",
+    "continuity_correction": "haldane_anscombe",
+    "exceedance_quantile": 0.9,
+    "exceedance_threshold_scope": "unconditional_absolute_return",
+    "inference_scope": "prespecified_secondary_endpoint",
+    "minimum_inside_months": 60,
+    "minimum_outside_months": 120,
+    "outcome": "seasonal_adjusted_log_return",
+    "primary_statistic": "log_variance_ratio",
+    "reference_distribution": "circular_whole_year_shift",
+    "secondary_statistic": "log_exceedance_ratio",
+    "warm_episodes": 22,
+    "window_first_relative_month": -12,
+    "window_last_relative_month": 24,
+    "workstream": "W1_dispersion"
+  },
+  "input_hashes": {
+    "adjusted_event_summary.json": "5f1a8833d5a23386642d7ca66633d97d451f8eecd929c471290f7630d78cc940",
+    "commodity_returns_adjusted_monthly.parquet": "db44b474b25a355af37c863b2ad98c20bd311c4fa6ebf47386d9141ce50e1fb7",
+    "dispersion.yaml": "07ce8cab368950150c7ca2aeb54d4c6d4738b83f34f5a9417a925aa1c02cfc80",
+    "enso_episodes.csv": "1965f1eae2181312e0233f7ba21856d5704a0f9add389d18bd49db2bfaf7bf97",
+    "findings_v3.yaml": "43dcf21ef1cae3d57b022c8467cf0470ec50ffdc823e2512f61a34606e2c9419",
+    "negative_control_sample.parquet": "0954aea60e77295e3f8db312e80e7fd0c163d21760a24b8429108732aeafe512",
+    "primary_inference_family.parquet": "6f66710c4710363bd6cf8a55d5f46f9c358dfa77378368d41f0a2e7828bde060",
+    "raw_event_summary.json": "cdaa1cf645d3b466dcd01553cd99ff3fe06e963fd1f45f564219c04f8cf8f585",
+    "universe_summary.json": "7504fa323cb7c8233c802060712fed797147cda350758a73ea101352cbcc5cf6"
+  },
+  "output_hashes": {
+    "dispersion_results.csv": "4190e8bdbfecddb78984ae0a7bcfcf71c3f0606fecfa2c59a054a90327d333d6",
+    "dispersion_shift_null.parquet": "212415e0fb0430657a83082c0b222b82bbd44b6b47c741647ece7b932ac01d5b"
+  },
+  "results": {
+    "candidate_fdr_rejections": 0,
+    "candidates_with_agreeing_statistics": 20,
+    "clears_program_threshold": false,
+    "control_family_size": 3,
+    "control_raw_rejections": 0,
+    "family_maximum_standardized_log_variance_ratio": 2.187043027362838,
+    "family_shift_p_value": 0.2153846153846154,
+    "family_size": 30,
+    "negative_controls_rejected": false,
+    "program_primary_tests": 4,
+    "program_threshold": 0.0125,
+    "resolution_floor": 0.015384615384615385,
+    "resolution_limited": true,
+    "shift_count": 64,
+    "standardization_note": "Shift-null moments are computed from the same shift set the family maximum is compared against, which is mildly optimistic.",
+    "status": "exploratory_within_stage_only"
+  },
+  "snapshot": "2026-09-06"
+}

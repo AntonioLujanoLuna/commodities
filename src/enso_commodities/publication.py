@@ -59,6 +59,15 @@ RESULT_FILES = (
     "forecast_results.csv",
     "program_timing_null_shifts.csv",
     "program_timing_null_cells.csv",
+    "dispersion_results.csv",
+    "cold_phase_results.csv",
+    "cold_phase_episodes.csv",
+    "flavour_contrast_results.csv",
+    "flavour_episode_labels.csv",
+    "flavour_episode_labels_sensitivity.csv",
+    "forecast_news_results.csv",
+    "forecast_news_revisions.csv",
+    "forecast_news_lead_sensitivity.csv",
 )
 
 

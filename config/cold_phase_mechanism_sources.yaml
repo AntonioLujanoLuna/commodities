@@ -1,0 +1,78 @@
+# Live source audit for the W2 rainfall-throughput-price chain.
+#
+# This register records what was verified on 2026-09-08. It is deliberately not
+# an acquisition contract: no candidate is allowed into the estimator until it
+# satisfies the link-specific gates below. A current historical table is not a
+# vintage archive, and a short monthly panel does not satisfy the frozen
+# calendar-year cluster minimum.
+scope: verified_public_source_readiness_audit
+verified_on: 2026-09-08
+cluster_unit: calendar_year
+
+sources:
+  silo_monthly_rainfall:
+    role: rainfall
+    provider: Queensland Government SILO
+    landing_page: https://longpaddock.qld.gov.au/silo/gridded-data/
+    download_template: https://s3-ap-southeast-2.amazonaws.com/silo-open-data/Official/annual/monthly_rain/{year}.monthly_rain.nc
+    frequency: monthly
+    external: true
+    machine_readable: true
+    acquisition_reproducible: true
+    first_observation: 1889-01
+    last_observation: 2026-08
+    region_definition_frozen: false
+    note: The source is usable, but the outcome-independent Hunter coal-chain extraction region is not yet frozen.
+
+  transport_nsw_port_of_newcastle:
+    role: throughput
+    provider: Transport for NSW Open Data
+    landing_page: https://data.nsw.gov.au/data/en/dataset/2-freight-data/resource/b719716c-6783-4c97-ab17-2d0ffd0982e2
+    download_url: https://opendata.transport.nsw.gov.au/data/dataset/5da0e3b9-e46a-4aa3-96c9-2574d83fe6fb/resource/3c5c9d89-ce54-4f72-9550-4077b7540612/download/port-of-newcastle.xlsx
+    frequency: monthly
+    external: true
+    machine_readable: true
+    acquisition_reproducible: true
+    first_observation: 2018-01
+    last_observation: 2026-07
+    observed_rows: 103
+    observed_sha256: 1c7178923a83a37a465d6c82820795642dce118f04af864fae3c979544994158
+    historical_publication_dates: false
+    note: The current workbook has nine calendar years and does not preserve a release date for each observation.
+
+  nqbp_hay_point_terminals:
+    role: throughput
+    provider: North Queensland Bulk Ports
+    landing_page: https://nqbp.com.au/trade/throughputs
+    frequency: monthly
+    external: true
+    machine_readable: true
+    acquisition_reproducible: false
+    first_observation: 2020-07
+    last_observation: 2026-07
+    historical_publication_dates: false
+    note: The live page exposes seven financial years; the audit runtime received a Cloudflare challenge.
+
+  gladstone_ports_monthly_cargo:
+    role: throughput
+    provider: Gladstone Ports Corporation
+    landing_page: https://content3.gpcl.com.au/viewcontent/CargoComparisonsSelection/CargoOriginDestination.aspx?Durat=M&Key=202408&View=C
+    frequency: monthly
+    external: true
+    machine_readable: true
+    acquisition_reproducible: false
+    first_observation: 2015-01
+    last_observation: 2026-07
+    historical_publication_dates: false
+    note: Month-keyed pages exist, but the runtime endpoint timed out and the pages expose no observation-level release vintages.
+
+  world_bank_pink_sheet:
+    role: price
+    provider: World Bank
+    landing_page: https://www.worldbank.org/en/research/commodity-markets
+    frequency: monthly
+    external: true
+    machine_readable: true
+    acquisition_reproducible: true
+    first_observation: 1960-01
+    last_observation: 2026-07

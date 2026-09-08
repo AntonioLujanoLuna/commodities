@@ -1,7 +1,5 @@
 # Archived probabilistic ENSO forecasts, used as the treatment in W3.
 #
-# IMPORTANT, and the reason this file carries no `sources:` block yet.
-#
 # The stage needs an archive of forecasts AS THEY WERE ISSUED -- a monthly series
 # of probabilities attached to the date they were published. A current forecast
 # file is not that, and a reconstructed one is worse than useless here: the whole
@@ -9,18 +7,31 @@
 # its stated date. Using a revised or back-filled probability would make every
 # coefficient in this stage a look-ahead artifact.
 #
-# The exact retrieval URL, file layout and first available issuance of the
-# CPC/IRI probabilistic archive MUST be verified against the live source before
-# anything is downloaded, and the verified entry added here in the same form as
-# config/climate_sources.yaml. Until then the stage refuses to run: the parser in
-# forecast_news.py validates against `required_columns` below and there is no
-# path that fabricates an issuance date.
+# The public IRI monthly Quick Look archive was verified live on 2026-09-08. Its
+# HTML pages carry an explicit publication date and the official early-month
+# CPC/IRI consensus probability table. January 2014 through April 2025 is the
+# longest consecutive range in the current site layout with machine-readable
+# tables. From May 2025 onward the official forecast is image-only, and the IRI
+# now states that it no longer distributes forecast data. The acquisition stops
+# at the last HTML table rather than transcribing pixels or reconstructing values.
 #
 # Landing pages to verify against, recorded so the check is reproducible:
 #   https://iri.columbia.edu/our-expertise/climate/forecasts/enso/current/
 #   https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso_advisory/
-scope: archive_not_yet_acquired
+scope: verified_public_monthly_html_archive
 data_provenance_required: real
+
+source:
+  name: iri_cpc_consensus_archive
+  label: IRI monthly Quick Look, official CPC/IRI early-month consensus ENSO probabilities
+  landing_page: https://iri.columbia.edu/our-expertise/climate/forecasts/enso/current/
+  archive_navigation: https://iri.columbia.edu/our-expertise/climate/forecasts/enso/current/
+  url_template: https://iri.columbia.edu/our-expertise/climate/forecasts/enso/{year}-{month_name}-quick-look/
+  first_issue_month: 2014-01
+  last_issue_month: 2025-04
+  expected_issue_count: 136
+  table_identity: official_cpc_iri_early_month_consensus
+  licence: CC-BY-4.0
 
 archive:
   # One row per (issuance, target season). Probabilities are those published on
@@ -38,3 +49,5 @@ archive:
     tolerance: 0.01
     target_must_not_precede_issuance: true
     no_duplicate_issuance_target_pairs: true
+    issue_months_must_be_consecutive: true
+    publication_date_must_be_explicit_in_source_html: true

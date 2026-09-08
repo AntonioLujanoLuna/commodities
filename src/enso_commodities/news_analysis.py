@@ -12,10 +12,9 @@ from .config import project_root
 from .dispersion import load_program_register
 from .dispersion_analysis import commodity_roles
 from .forecast_news import build_revision_series, load_news_config, run_news_inference
+from .forecast_news_data import ARCHIVE_FILE
 from .provenance import sha256_file, verify_hashes, write_json_atomic
 from .raw_events import latest_processed_snapshot
-
-ARCHIVE_FILE = "forecast_probabilities.csv"
 
 
 def latest_forecast_archive(root: Path | None = None) -> Path:
@@ -35,10 +34,8 @@ def latest_forecast_archive(root: Path | None = None) -> Path:
     if not candidates:
         raise FileNotFoundError(
             f"No archived ENSO forecast issuances under {source}. "
-            "config/forecast_news_sources.yaml carries no verified source entry yet: the "
-            "retrieval URL, layout and first available issuance of the CPC/IRI probabilistic "
-            "archive must be checked against the live source first. W3 will not run on a "
-            "reconstructed or revised probability series."
+            "run the verified forecast-news download and build stages first. W3 will not run "
+            "on a reconstructed or revised probability series."
         )
     return candidates[-1]
 
@@ -117,12 +114,16 @@ def run_news_analysis(
     )
 
     sensitivity_rows: list[pd.DataFrame] = []
+    sensitivity_revision_counts: dict[str, int] = {}
+    sensitivity_leads_run: list[int] = []
     for lead in spec.sensitivity_lead_months:
         alternative = build_revision_series(
             archive, lead_months=lead, probability_column=spec.source_probability
         )
+        sensitivity_revision_counts[str(lead)] = len(alternative)
         if len(alternative) < spec.minimum_issuances:
             continue
+        sensitivity_leads_run.append(lead)
         _, lead_primary, _ = run_news_inference(
             alternative, returns, roles, spec=spec, program_threshold=program.threshold
         )
@@ -130,6 +131,11 @@ def run_news_analysis(
     sensitivity = (
         pd.concat(sensitivity_rows, ignore_index=True) if sensitivity_rows else pd.DataFrame()
     )
+    statistics["sensitivity_revision_counts"] = sensitivity_revision_counts
+    statistics["sensitivity_leads_run"] = sensitivity_leads_run
+    statistics["sensitivity_leads_unavailable"] = [
+        lead for lead in spec.sensitivity_lead_months if lead not in sensitivity_leads_run
+    ]
 
     results_path = output / "forecast_news_results.csv"
     revisions_path = output / "forecast_news_revisions.csv"
@@ -140,6 +146,7 @@ def run_news_analysis(
 
     config_file = config_path or project_root() / "config" / "forecast_news.yaml"
     program_file = program_config_path or project_root() / "config" / "findings_v3.yaml"
+    source_config_file = project_root() / "config" / "forecast_news_sources.yaml"
     summary = {
         "data_provenance": "real",
         "snapshot": snapshot.name,
@@ -156,7 +163,9 @@ def run_news_analysis(
         "input_hashes": {
             **{name: sha256_file(output / name) for name in inputs},
             ARCHIVE_FILE: sha256_file(archive_dir / ARCHIVE_FILE),
+            "forecast_archive_summary.json": sha256_file(archive_summary_path),
             "forecast_news.yaml": sha256_file(config_file),
+            "forecast_news_sources.yaml": sha256_file(source_config_file),
             "findings_v3.yaml": sha256_file(program_file),
             **{name: sha256_file(output / name) for name in summaries},
         },

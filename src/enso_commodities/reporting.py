@@ -417,6 +417,76 @@ STAGES: tuple[StageReport, ...] = (
             _metric("Outcome-informed selection", "selection_is_outcome_informed"),
         ),
     ),
+    StageReport(
+        key="dispersion",
+        title="W1 dispersion",
+        summary_file="dispersion_summary.json",
+        metrics=(
+            _metric("Warm episodes", "design", "warm_episodes"),
+            _metric("Family shift p", "results", "family_shift_p_value", digits=4),
+            _metric("Candidate BH rejections", "results", "candidate_fdr_rejections"),
+            _metric("Control raw rejections", "results", "control_raw_rejections"),
+            _metric("Clears program threshold", "results", "clears_program_threshold"),
+        ),
+    ),
+    StageReport(
+        key="cold_phase",
+        title="W2 cold-phase disruption",
+        summary_file="cold_phase_summary.json",
+        metrics=(
+            _metric("Cold episodes", "results", "cold_episodes"),
+            _metric("Signed family size", "results", "signed_family_size"),
+            _metric("Family shift p", "results", "family_shift_p_value", digits=4),
+            _metric("Candidate BH rejections", "results", "family_fdr_rejections"),
+            _metric(
+                "Control worst-case rejections",
+                "results",
+                "control_worst_case_rejections",
+            ),
+            _metric("Clears program threshold", "results", "clears_program_threshold"),
+        ),
+    ),
+    StageReport(
+        key="flavour",
+        title="W5 episode flavour",
+        summary_file="flavour_summary.json",
+        metrics=(
+            _metric("Eastern episodes", "results", "eastern_episodes"),
+            _metric("Central episodes", "results", "central_episodes"),
+            _metric("Family bootstrap p", "results", "family_bootstrap_p_value", digits=4),
+            _metric("Candidate BH rejections", "results", "candidate_fdr_rejections"),
+            _metric(
+                "Candidates below own MDE",
+                "results",
+                "candidates_below_their_own_mde",
+            ),
+            _metric(
+                "Classification agreement",
+                "results",
+                "classification_agreement_share",
+                digits=4,
+            ),
+        ),
+    ),
+    StageReport(
+        key="forecast_news",
+        title="W3 forecast news",
+        summary_file="forecast_news_summary.json",
+        metrics=(
+            _metric("Revisions", "results", "revisions"),
+            _metric(
+                "Family wild-bootstrap p",
+                "results",
+                "family_wild_bootstrap_p_value",
+                digits=4,
+            ),
+            _metric("Candidate BH rejections", "results", "candidate_fdr_rejections"),
+            _metric("Lead-placebo rejections", "results", "lead_placebo_rejections"),
+            _metric("Lag-placebo rejections", "results", "lag_placebo_rejections"),
+            _metric("Control rejections", "results", "control_rejections"),
+            _metric("Status", "results", "status"),
+        ),
+    ),
 )
 
 
@@ -730,6 +800,48 @@ def render_interpretation_table(summaries: dict[str, dict[str, Any] | None]) -> 
             f"timing p={values['median_absolute_t_p_value']:.4f}, but selection used the discovery "
             "outcomes and this is retrospective calibration, not independent validation. |"
         )
+    dispersion = summaries.get("dispersion")
+    if dispersion:
+        values = dispersion["results"]
+        rows.append(
+            "| W1 dispersion | The warm-window dispersion family has shift-null "
+            f"p={values['family_shift_p_value']:.4f}; "
+            f"{values['candidate_fdr_rejections']} candidates survive BH and "
+            f"{values['control_raw_rejections']} controls reject at raw 5%. |"
+        )
+    cold_phase = summaries.get("cold_phase")
+    if cold_phase:
+        values = cold_phase["results"]
+        rows.append(
+            "| W2 cold-phase disruption | The prespecified signed family has shift-null "
+            f"p={values['family_shift_p_value']:.4f}; "
+            f"{values['family_fdr_rejections']} candidates survive BH and "
+            f"{values['control_worst_case_rejections']} controls reject under the corrected "
+            "worst-case rule. The shift result does not clear the program threshold. |"
+        )
+    flavour = summaries.get("flavour")
+    if flavour:
+        values = flavour["results"]
+        rows.append(
+            "| W5 episode flavour | The Eastern-minus-Central-Pacific family has bootstrap "
+            f"p={values['family_bootstrap_p_value']:.4f}, with "
+            f"{values['candidate_fdr_rejections']} BH rejections. All "
+            f"{values['candidates_below_their_own_mde']} candidates are below their own "
+            "minimum detectable contrast, so the split is unresolved rather than null. |"
+        )
+    forecast_news = summaries.get("forecast_news")
+    if forecast_news:
+        values = forecast_news["results"]
+        control_count = int(values["control_rejections"])
+        control_word = "control rejects" if control_count == 1 else "controls reject"
+        rows.append(
+            "| W3 forecast news | The six-month revision family has wild-bootstrap "
+            f"p={values['family_wild_bootstrap_p_value']:.4f}, but "
+            f"{values['lead_placebo_rejections']} lead-placebo cells and "
+            f"{control_count} {control_word}. Status is "
+            f"`{values['status']}`: contemporaneous coefficients cannot be read as news "
+            "responses. |"
+        )
     return "\n".join(rows)
 
 
@@ -747,6 +859,27 @@ def render_bottom_line(summaries: dict[str, dict[str, Any] | None]) -> str:
         "cells_with_loss_difference_p_below_0_05", "n/a"
     )
     forecast_cell_word = "cell" if forecast_rejections == 1 else "cells"
+    dispersion = summaries.get("dispersion") or {}
+    dispersion_p = (dispersion.get("results") or {}).get("family_shift_p_value")
+    cold_phase = summaries.get("cold_phase") or {}
+    cold_phase_p = (cold_phase.get("results") or {}).get("family_shift_p_value")
+    flavour = summaries.get("flavour") or {}
+    flavour_p = (flavour.get("results") or {}).get("family_bootstrap_p_value")
+    forecast_news = summaries.get("forecast_news") or {}
+    forecast_news_status = (forecast_news.get("results") or {}).get("status")
+    v3_sentence = ""
+    if dispersion_p is not None and cold_phase_p is not None and flavour_p is not None:
+        v3_sentence = (
+            f" In the v3 endpoints, dispersion has family shift p={dispersion_p:.4f} and the "
+            f"signed cold-phase family has p={cold_phase_p:.4f}; neither clears the frozen "
+            f"program threshold. The flavour split has family bootstrap p={flavour_p:.4f} "
+            "and is underpowered for every candidate."
+        )
+    if forecast_news_status is not None:
+        v3_sentence += (
+            f" The forecast-news stage is `{forecast_news_status}` and therefore supplies no "
+            "interpretable news-response finding."
+        )
     return (
         f"The pipeline leaves {survivors} timing/index-robust historical associations, while "
         f"{underpowered} candidates remain below their own marginal detection threshold. "
@@ -754,7 +887,7 @@ def render_bottom_line(summaries: dict[str, dict[str, Any] | None]) -> str:
         f"interpretation, and {panel_fdr} panel exposure cells survive correction across the "
         f"specification grid. The retrospective forecast benchmark has paired-loss p<0.05 in "
         f"{forecast_rejections} {forecast_cell_word} and does not yet satisfy the genuine "
-        "out-of-sample gate."
+        f"out-of-sample gate.{v3_sentence}"
     )
 
 

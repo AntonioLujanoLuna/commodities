@@ -4,9 +4,9 @@ The palm-oil chain failed at the supply-to-price link, and it failed there partl
 because that link had a handful of annual observations behind it. The chain this
 module estimates is the same shape and a far better-measured one: La Nina raises
 eastern Australian rainfall, rainfall cuts pit output and rail and port loading,
-and a throughput shortfall raises the price. Every intermediate is monthly and
-publicly recorded, so each link has hundreds of observations rather than
-seventeen.
+and a throughput shortfall raises the price. The intended intermediates are
+monthly and publicly recorded, but source coverage and release vintages still
+have to pass the separate readiness audit.
 
 Those inputs are not in this repository. This module therefore validates and
 estimates; it never imputes, and it refuses to report a link with no data behind
