@@ -41,9 +41,12 @@
 > markets respond to ENSO *news* rather than to onsets they could already see coming (W3); a
 > frozen forward-curve estimand gated on licensed futures data (W4); and an
 > Eastern/Central-Pacific split that reports its own minimum detectable effect before any
-> estimate (W5). **No v3 stage has been run against a real-data snapshot**, W3's issuance archive
-> is not yet acquired, and W4 produces no number by construction. See
-> [the 2026-09-08 program entry](reports/log/2026-09-08-v3-findings-program.md).
+> estimate (W5). W1, the W2 price endpoint, W3 and W5 have now run against the
+> `2026-09-06` real-data snapshot. W1 is null, W2 is exploratory within-stage only,
+> W5 is unresolved at its measured power, and W3 is void because its lead placebo and a
+> negative control reject. W4 produces no number by construction. See
+> [the first v3 run](reports/log/2026-09-08-v3-first-real-data-run.md) and
+> [the W3 run](reports/log/2026-09-08-v3-forecast-news-run.md).
 
 The compact, hash-grounded interpretation of the latest completed run is in
 [`reports/current_results.md`](reports/current_results.md), which is overwritten on
@@ -526,6 +529,8 @@ data/macro/        separate immutable raw and processed external-control snapsho
 data/financial/    immutable real-rate, credit-spread and NFCI snapshots
 data/mechanisms/   immutable weather and production snapshots for physical pilots
 data/climate/      immutable alternative climate indices, substitute treatments only
+data/flavour/      immutable Niño 3/Niño 4 classification inputs
+data/forecast_news/ immutable issue-dated CPC/IRI probability pages and processed archive
 src/enso_commodities/
   download.py      streamed downloads, format checks and immutable snapshots
   parsers.py       NOAA ASCII and Pink Sheet workbook parsers
@@ -570,6 +575,9 @@ src/enso_commodities/
   validation.py    frozen v2 contract and conservative evidence labels
   forecasting.py   leakage-safe expanding-window forecasts and proxy cost accounting
   forecast_analysis.py real-data pseudo-out-of-sample forecast receipt
+  forecast_news_data.py immutable CPC/IRI issuance archive acquisition and parsing
+  forecast_news.py revision construction, clustered inference and timing placebos
+  news_analysis.py real-data forecast-news outputs and hash-linked receipt
   program_timing_null.py selected event-study family timing null
   program_timing_analysis.py real-data timing-null receipt
   mechanism_validation.py crop-calendar mechanism validation and clustered links
@@ -618,11 +626,12 @@ placebo draw and placebo replicate, with a hash-linked run receipt.
 | Palm production | FAOSTAT oil-palm fruit and palm-oil annual series | implemented pilot |
 | Global crop exposure | FAO ASIS El Niño drought hotspots + IFPRI/FAO SPAM 2020 crop area | implemented |
 | Substitute treatments | NOAA PSL DMI (IOD), PDO, NAO and AMO monthly indices | implemented |
+| ENSO forecast news | IRI archive of official CPC/IRI early-month probabilities, Jan 2014-Apr 2025 | implemented; W3 void on falsification |
 | Other weather | ERA5, CHIRPS, or a pre-aggregated regional CSV | contract implemented; data pending |
 | Other production/forecast revisions | FAOSTAT, USDA PSD | contract implemented; timestamped inputs pending |
 | Futures | vendor-licensed contract data (not redistributed) | adapter implemented; data pending |
 
-Optional-source acquisition and licensed futures data remain later-stage inputs.
+Other optional-source acquisition and licensed futures data remain later-stage inputs.
 Licensed data will not be redistributed.
 
 ## Development

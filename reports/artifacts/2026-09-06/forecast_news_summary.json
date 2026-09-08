@@ -1,0 +1,83 @@
+{
+  "data_provenance": "real",
+  "design": {
+    "alternative": "two_sided",
+    "controls": [
+      "calendar_month"
+    ],
+    "covariance": "cluster_by_calendar_year",
+    "estimator": "ordinary_least_squares",
+    "inference_scope": "prespecified_primary_endpoint",
+    "minimum_issuances": 120,
+    "minimum_observations": 100,
+    "outcome": "seasonal_adjusted_log_return",
+    "placebos": {
+      "lag_relative_months": [
+        2,
+        3
+      ],
+      "lead_placebo_must_not_reject": true,
+      "lead_relative_months": [
+        -1
+      ],
+      "void_stage_if_lead_placebo_rejects": true
+    },
+    "primary_lead_months": 6,
+    "primary_relative_month": 0,
+    "reference_distribution": "cluster_robust_wild_bootstrap",
+    "require_consecutive_monthly_issuances": true,
+    "revision_basis": "same_target_successive_issuances",
+    "secondary_relative_month": 1,
+    "sensitivity_lead_months": [
+      3,
+      9
+    ],
+    "source_probability": "probability_el_nino",
+    "workstream": "W3_forecast_news"
+  },
+  "forecast_archive_snapshot": "2026-09-08",
+  "input_hashes": {
+    "adjusted_event_summary.json": "5f1a8833d5a23386642d7ca66633d97d451f8eecd929c471290f7630d78cc940",
+    "commodity_returns_adjusted_monthly.parquet": "db44b474b25a355af37c863b2ad98c20bd311c4fa6ebf47386d9141ce50e1fb7",
+    "findings_v3.yaml": "43dcf21ef1cae3d57b022c8467cf0470ec50ffdc823e2512f61a34606e2c9419",
+    "forecast_archive_summary.json": "fee0f1acb981353c40e6c032abac66bedcc5900915d8381d013521d81fc6eacc",
+    "forecast_news.yaml": "cf34e297285421daf0ea84b6f0bad88b8858219102d2c72bbc6c8ed5f62cdea0",
+    "forecast_news_sources.yaml": "2cbbb6f3ee5120e3a0a026cee153411e42c0c3102393843bf7827cbe2e411b51",
+    "forecast_probabilities.csv": "358e4252e17a24283f0f0fcc34df82f76bb41235c301ba8e8e1a3c2a9d65bbd8",
+    "negative_control_sample.parquet": "0954aea60e77295e3f8db312e80e7fd0c163d21760a24b8429108732aeafe512",
+    "primary_inference_family.parquet": "6f66710c4710363bd6cf8a55d5f46f9c358dfa77378368d41f0a2e7828bde060",
+    "universe_summary.json": "7504fa323cb7c8233c802060712fed797147cda350758a73ea101352cbcc5cf6"
+  },
+  "output_hashes": {
+    "forecast_news_lead_sensitivity.csv": "2e97c161554469654719158d854cfd8123a1580875edbd0a68ce80519040f120",
+    "forecast_news_results.csv": "23fa866cf3e9d6b33abd0d40abd5e4eedbf163f1e6f77e15481c8baecbc18756",
+    "forecast_news_revisions.csv": "9c982211d0a4e2067127474a78ca169b3085d684ba35094cd64caba171a38c81"
+  },
+  "random_seed": 20260908,
+  "results": {
+    "candidate_fdr_rejections": 1,
+    "clears_program_threshold": false,
+    "control_rejections": 1,
+    "family_maximum_absolute_t": 3.8966403535869945,
+    "family_size": 30,
+    "family_wild_bootstrap_p_value": 0.0575,
+    "interpretation": "A response to revisions with none to realizations is a market-efficiency finding; no response to either is evidence against a material effect that the anticipation defence cannot explain away.",
+    "lag_placebo_rejections": 7,
+    "lead_placebo_rejections": 4,
+    "primary_lead_months": 6,
+    "program_threshold": 0.0125,
+    "revisions": 135,
+    "sensitivity_leads_run": [
+      3
+    ],
+    "sensitivity_leads_unavailable": [
+      9
+    ],
+    "sensitivity_revision_counts": {
+      "3": 135,
+      "9": 0
+    },
+    "status": "void_lead_placebo_rejected"
+  },
+  "snapshot": "2026-09-06"
+}

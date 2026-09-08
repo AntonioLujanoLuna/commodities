@@ -468,6 +468,25 @@ STAGES: tuple[StageReport, ...] = (
             ),
         ),
     ),
+    StageReport(
+        key="forecast_news",
+        title="W3 forecast news",
+        summary_file="forecast_news_summary.json",
+        metrics=(
+            _metric("Revisions", "results", "revisions"),
+            _metric(
+                "Family wild-bootstrap p",
+                "results",
+                "family_wild_bootstrap_p_value",
+                digits=4,
+            ),
+            _metric("Candidate BH rejections", "results", "candidate_fdr_rejections"),
+            _metric("Lead-placebo rejections", "results", "lead_placebo_rejections"),
+            _metric("Lag-placebo rejections", "results", "lag_placebo_rejections"),
+            _metric("Control rejections", "results", "control_rejections"),
+            _metric("Status", "results", "status"),
+        ),
+    ),
 )
 
 
@@ -810,6 +829,19 @@ def render_interpretation_table(summaries: dict[str, dict[str, Any] | None]) -> 
             f"{values['candidates_below_their_own_mde']} candidates are below their own "
             "minimum detectable contrast, so the split is unresolved rather than null. |"
         )
+    forecast_news = summaries.get("forecast_news")
+    if forecast_news:
+        values = forecast_news["results"]
+        control_count = int(values["control_rejections"])
+        control_word = "control rejects" if control_count == 1 else "controls reject"
+        rows.append(
+            "| W3 forecast news | The six-month revision family has wild-bootstrap "
+            f"p={values['family_wild_bootstrap_p_value']:.4f}, but "
+            f"{values['lead_placebo_rejections']} lead-placebo cells and "
+            f"{control_count} {control_word}. Status is "
+            f"`{values['status']}`: contemporaneous coefficients cannot be read as news "
+            "responses. |"
+        )
     return "\n".join(rows)
 
 
@@ -833,6 +865,8 @@ def render_bottom_line(summaries: dict[str, dict[str, Any] | None]) -> str:
     cold_phase_p = (cold_phase.get("results") or {}).get("family_shift_p_value")
     flavour = summaries.get("flavour") or {}
     flavour_p = (flavour.get("results") or {}).get("family_bootstrap_p_value")
+    forecast_news = summaries.get("forecast_news") or {}
+    forecast_news_status = (forecast_news.get("results") or {}).get("status")
     v3_sentence = ""
     if dispersion_p is not None and cold_phase_p is not None and flavour_p is not None:
         v3_sentence = (
@@ -840,6 +874,11 @@ def render_bottom_line(summaries: dict[str, dict[str, Any] | None]) -> str:
             f"signed cold-phase family has p={cold_phase_p:.4f}; neither clears the frozen "
             f"program threshold. The flavour split has family bootstrap p={flavour_p:.4f} "
             "and is underpowered for every candidate."
+        )
+    if forecast_news_status is not None:
+        v3_sentence += (
+            f" The forecast-news stage is `{forecast_news_status}` and therefore supplies no "
+            "interpretable news-response finding."
         )
     return (
         f"The pipeline leaves {survivors} timing/index-robust historical associations, while "

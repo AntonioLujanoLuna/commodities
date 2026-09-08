@@ -17,6 +17,7 @@ from .financial_data import build_financial_dataset
 from .flavour_analysis import run_flavour_analysis
 from .flavour_data import build_flavour_dataset, download_flavour_snapshot
 from .forecast_analysis import run_forecast_analysis
+from .forecast_news_data import build_forecast_archive, download_forecast_archive
 from .fragility_analysis import run_leave_one_episode_out
 from .inference import run_primary_inference
 from .macro_analysis import run_macro_control_analysis
@@ -508,6 +509,33 @@ def forecast_news() -> None:
             tables_root=args.tables_root,
             config_path=args.config,
             program_config_path=args.program_config,
+        )
+    )
+
+
+def forecast_news_download() -> None:
+    parser = argparse.ArgumentParser(
+        description="Download the verified issue-dated CPC/IRI ENSO probability archive."
+    )
+    parser.add_argument("--raw-root", type=Path)
+    parser.add_argument("--source-config", type=Path)
+    args = parser.parse_args()
+    print(download_forecast_archive(raw_root=args.raw_root, config_path=args.source_config))
+
+
+def forecast_news_build() -> None:
+    parser = argparse.ArgumentParser(
+        description="Build the strict row-level CPC/IRI forecast-probability archive."
+    )
+    parser.add_argument("--snapshot", type=Path)
+    parser.add_argument("--processed-root", type=Path)
+    parser.add_argument("--source-config", type=Path)
+    args = parser.parse_args()
+    print(
+        build_forecast_archive(
+            args.snapshot,
+            processed_root=args.processed_root,
+            config_path=args.source_config,
         )
     )
 

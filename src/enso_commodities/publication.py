@@ -65,6 +65,9 @@ RESULT_FILES = (
     "flavour_contrast_results.csv",
     "flavour_episode_labels.csv",
     "flavour_episode_labels_sensitivity.csv",
+    "forecast_news_results.csv",
+    "forecast_news_revisions.csv",
+    "forecast_news_lead_sensitivity.csv",
 )
 
 

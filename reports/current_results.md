@@ -20,7 +20,7 @@ interpretation.
 <!-- generated:run-identity start -->
 
 - Data snapshot: `2026-09-06`
-- Stage receipts: `inference`, `placebo`, `power`, `dose_response`, `macro`, `fragility`, `robustness`, `specificity`, `surrogate_treatment`, `endpoint`, `financial`, `palm`, `external_exposure`, `panel`, `specification_curve`, `forecast`, `program_timing_null`, `dispersion`, `cold_phase`, `flavour`
+- Stage receipts: `inference`, `placebo`, `power`, `dose_response`, `macro`, `fragility`, `robustness`, `specificity`, `surrogate_treatment`, `endpoint`, `financial`, `palm`, `external_exposure`, `panel`, `specification_curve`, `forecast`, `program_timing_null`, `dispersion`, `cold_phase`, `flavour`, `forecast_news`
 - `cold_phase.yaml` SHA-256: `241db636b49e80e4bd52c2315fb7f7d3aa00c86a5047ddd1115a6f47b2bc72f0`
 - `commodities.yaml` SHA-256: `9a46280084782b9cf1b09b217a964a0774d725e6e4a46669911a60cd89f1a046`
 - `dispersion.yaml` SHA-256: `07ce8cab368950150c7ca2aeb54d4c6d4738b83f34f5a9417a925aa1c02cfc80`
@@ -30,6 +30,8 @@ interpretation.
 - `financial_robustness.yaml` SHA-256: `3bc06010b146d7bb1b7a4e3fed811012a284a84a6b7fd662fbee8b33c46275a1`
 - `findings_v3.yaml` SHA-256: `43dcf21ef1cae3d57b022c8467cf0470ec50ffdc823e2512f61a34606e2c9419`
 - `flavour.yaml` SHA-256: `4c37cf22877b16b1be7f25ef593fed8ca19c7c38f47df7fb62561976bbdbc40e`
+- `forecast_news.yaml` SHA-256: `cf34e297285421daf0ea84b6f0bad88b8858219102d2c72bbc6c8ed5f62cdea0`
+- `forecast_news_sources.yaml` SHA-256: `2cbbb6f3ee5120e3a0a026cee153411e42c0c3102393843bf7827cbe2e411b51`
 - `palm_oil_mechanism.yaml` SHA-256: `32c0308feb2e255f76903b39311b5ad46ff8e536e035968158a10354c9a2c867`
 - `panel.yaml` SHA-256: `a42f4702d88bb338770fc4e80353b1964a052dfae4643ba7289acbdbb41349bd`
 - `research.yaml` SHA-256: `faf1582043e0a3b52f42539cd3850b509b364f4b2767c178dda2b809dbd9c614`
@@ -43,7 +45,7 @@ interpretation.
 <!-- generated:run-context start -->
 
 - Generated for snapshot: `2026-09-06`
-- Analysis source-tree SHA-256: `55deedba73eb0beda5c52159e49ef55629062cfac7d7ad79453c9bc4c4bff5e1`
+- Analysis source-tree SHA-256: `88fcd0ab1bad3d9667f0c69cec7b0dcac32246e530ebde5e133719264cea9127`
 - Primary bootstrap: 10000 whole-episode draws
 - Panel bootstrap: 2000 block draws per specification
 
@@ -75,6 +77,7 @@ interpretation.
 | W1 dispersion | Warm episodes 22; Family shift p 0.2154; Candidate BH rejections 0; Control raw rejections 0; Clears program threshold no |
 | W2 cold-phase disruption | Cold episodes 22; Signed family size 9; Family shift p 0.0308; Candidate BH rejections 0; Control worst-case rejections 0; Clears program threshold no |
 | W5 episode flavour | Eastern episodes 6; Central episodes 13; Family bootstrap p 0.6050; Candidate BH rejections 0; Candidates below own MDE 30; Classification agreement 0.6818 |
+| W3 forecast news | Revisions 135; Family wild-bootstrap p 0.0575; Candidate BH rejections 1; Lead-placebo rejections 4; Lag-placebo rejections 7; Control rejections 1; Status void_lead_placebo_rejected |
 
 <!-- generated:evidence-summary end -->
 
@@ -104,6 +107,7 @@ Generated one line per stage from the same receipts as the evidence table above.
 | W1 dispersion | The warm-window dispersion family has shift-null p=0.2154; 0 candidates survive BH and 0 controls reject at raw 5%. |
 | W2 cold-phase disruption | The prespecified signed family has shift-null p=0.0308; 0 candidates survive BH and 0 controls reject under the corrected worst-case rule. The shift result does not clear the program threshold. |
 | W5 episode flavour | The Eastern-minus-Central-Pacific family has bootstrap p=0.6050, with 0 BH rejections. All 30 candidates are below their own minimum detectable contrast, so the split is unresolved rather than null. |
+| W3 forecast news | The six-month revision family has wild-bootstrap p=0.0575, but 4 lead-placebo cells and 1 control rejects. Status is `void_lead_placebo_rejected`: contemporaneous coefficients cannot be read as news responses. |
 
 <!-- generated:interpretations end -->
 
@@ -133,6 +137,7 @@ Generated one line per stage from the same receipts as the evidence table above.
 | W1 dispersion | `dispersion_summary.json` | `9411743fcb63aca32cbd3cc66d9a8573d0d772d2364a8248d3731afc32c52591` |
 | W2 cold-phase disruption | `cold_phase_summary.json` | `58160db2ec891b6a7a2007924dd68578cb3470a9c7f5bfd812a959c2a583755b` |
 | W5 episode flavour | `flavour_summary.json` | `d17b21e219c97e8844c722a6fdcfa8d7846249ba3b8d7468872e916a29279243` |
+| W3 forecast news | `forecast_news_summary.json` | `098b4aa47dc89c42178b3fffa052394f5096030a7f9ac423ca80f3dd996848d1` |
 
 <!-- generated:receipts end -->
 
@@ -163,6 +168,6 @@ The panel-family timing null compares the observed curve with 60 circular whole-
 
 <!-- generated:bottom-line start -->
 
-The pipeline leaves 3 timing/index-robust historical associations, while 22 candidates remain below their own marginal detection threshold. The phase and negative-control diagnostics still prevent an ENSO-specific causal interpretation, and 0 panel exposure cells survive correction across the specification grid. The retrospective forecast benchmark has paired-loss p<0.05 in 1 cell and does not yet satisfy the genuine out-of-sample gate. In the v3 endpoints, dispersion has family shift p=0.2154 and the signed cold-phase family has p=0.0308; neither clears the frozen program threshold. The flavour split has family bootstrap p=0.6050 and is underpowered for every candidate.
+The pipeline leaves 3 timing/index-robust historical associations, while 22 candidates remain below their own marginal detection threshold. The phase and negative-control diagnostics still prevent an ENSO-specific causal interpretation, and 0 panel exposure cells survive correction across the specification grid. The retrospective forecast benchmark has paired-loss p<0.05 in 1 cell and does not yet satisfy the genuine out-of-sample gate. In the v3 endpoints, dispersion has family shift p=0.2154 and the signed cold-phase family has p=0.0308; neither clears the frozen program threshold. The flavour split has family bootstrap p=0.6050 and is underpowered for every candidate. The forecast-news stage is `void_lead_placebo_rejected` and therefore supplies no interpretable news-response finding.
 
 <!-- generated:bottom-line end -->

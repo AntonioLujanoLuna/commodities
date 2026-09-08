@@ -106,6 +106,12 @@ def test_archive_validation_rejects_probabilities_that_do_not_sum_to_one() -> No
         validate_forecast_archive(archive)
 
 
+def test_archive_validation_accepts_the_declared_one_point_rounding_tolerance() -> None:
+    archive = _archive()
+    archive.loc[0, "probability_neutral"] += 0.01
+    validate_forecast_archive(archive)
+
+
 def test_archive_validation_rejects_a_lead_that_contradicts_the_dates() -> None:
     archive = _archive()
     archive.loc[0, "lead_months"] = archive.loc[0, "lead_months"] + 3

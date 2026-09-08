@@ -38,6 +38,8 @@
 #   make flavour-data download Nino 3 and Nino 4 region indices
 #   make flavour-dataset build the monthly Nino 3/Nino 4 panel
 #   make flavour     run the v3 W5 Eastern/Central Pacific diagnostic
+#   make forecast-news-data download the issue-dated CPC/IRI probability archive
+#   make forecast-news-dataset build the strict row-level probability archive
 #   make forecast-news run the v3 W3 forecast-revision news study
 #   make mechanism-v2 WEATHER=... YIELDS=... SUPPLY_REVISIONS=... OUTPUT=... run new-input validation
 #   make report     regenerate the current-results note from the run receipts
@@ -53,7 +55,7 @@
 UV ?= uv
 PY ?= $(UV) run python
 
-.PHONY: dispersion cold-phase flavour-data flavour-dataset flavour forecast-news setup data dataset raw-events adjustments universe inference placebo power dose-response macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis exposure-data exposure-weights panel climate-data climate-dataset surrogate-treatment specification-curve forecast program-timing-null mechanism-v2 report report-check publication publication-check figures real-data test lint format typecheck check help
+.PHONY: dispersion cold-phase flavour-data flavour-dataset flavour forecast-news-data forecast-news-dataset forecast-news setup data dataset raw-events adjustments universe inference placebo power dose-response macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis exposure-data exposure-weights panel climate-data climate-dataset surrogate-treatment specification-curve forecast program-timing-null mechanism-v2 report report-check publication publication-check figures real-data test lint format typecheck check help
 
 help:
 	@grep -E '^#   ' Makefile | sed 's/^#   //'
@@ -173,8 +175,12 @@ flavour-dataset:
 flavour:
 	$(PY) scripts/run_flavour_analysis.py
 
-# W3 refuses to run until config/forecast_news_sources.yaml carries a verified
-# archive entry, so it is deliberately outside the real-data chain below.
+forecast-news-data:
+	$(PY) scripts/download_forecast_news_data.py
+
+forecast-news-dataset:
+	$(PY) scripts/build_forecast_news_dataset.py
+
 forecast-news:
 	$(PY) scripts/run_forecast_news.py
 
@@ -192,7 +198,7 @@ publication-check:
 
 figures: publication
 
-real-data: data dataset raw-events adjustments universe inference placebo power dose-response macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis exposure-data exposure-weights panel climate-data climate-dataset surrogate-treatment specification-curve forecast program-timing-null dispersion cold-phase flavour-data flavour-dataset flavour report publication
+real-data: data dataset raw-events adjustments universe inference placebo power dose-response macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis exposure-data exposure-weights panel climate-data climate-dataset surrogate-treatment specification-curve forecast program-timing-null dispersion cold-phase flavour-data flavour-dataset flavour forecast-news-data forecast-news-dataset forecast-news report publication
 
 test:
 	$(PY) -m pytest

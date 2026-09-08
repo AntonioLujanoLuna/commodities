@@ -135,7 +135,9 @@ def validate_forecast_archive(archive: pd.DataFrame, *, tolerance: float = 0.01)
     frame = archive.copy()
     frame["issue_date"] = pd.to_datetime(frame["issue_date"])
     frame["target_center_date"] = pd.to_datetime(frame["target_center_date"])
-    if frame["target_center_date"].lt(frame["issue_date"]).any():
+    issue_months = frame["issue_date"].dt.to_period("M")
+    target_months = frame["target_center_date"].dt.to_period("M")
+    if target_months.lt(issue_months).any():
         raise ValueError("Forecast archive targets a season before its own issuance")
     if frame.duplicated(["issue_date", "target_center_date"]).any():
         raise ValueError("Forecast archive has duplicate issuance/target pairs")
@@ -146,7 +148,9 @@ def validate_forecast_archive(archive: pd.DataFrame, *, tolerance: float = 0.01)
         raise ValueError("Forecast probabilities must be complete and numeric")
     if probabilities.lt(0).any().any() or probabilities.gt(1).any().any():
         raise ValueError("Forecast probabilities must fall in [0, 1]")
-    if probabilities.sum(axis=1).sub(1.0).abs().gt(tolerance).any():
+    probability_sums = probabilities.sum(axis=1).to_numpy(dtype="float64")
+    rounding_tolerance = tolerance + 10 * np.finfo(float).eps
+    if (~np.isclose(probability_sums, 1.0, rtol=0.0, atol=rounding_tolerance)).any():
         raise ValueError("Forecast probabilities must sum to one")
     implied = (
         (frame["target_center_date"].dt.year - frame["issue_date"].dt.year) * 12

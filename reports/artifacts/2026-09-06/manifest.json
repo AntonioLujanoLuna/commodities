@@ -1,5 +1,5 @@
 {
-  "analysis_source_tree_sha256": "55deedba73eb0beda5c52159e49ef55629062cfac7d7ad79453c9bc4c4bff5e1",
+  "analysis_source_tree_sha256": "88fcd0ab1bad3d9667f0c69cec7b0dcac32246e530ebde5e133719264cea9127",
   "data_provenance": "real",
   "published_files": {
     "README.md": "17d3ce97d38f4b8f39c38004751b1004615e3f6f0e138a803eab902acb6cb77a",
@@ -23,6 +23,10 @@
     "flavour_episode_labels.csv": "4a3506671ca30c25c67e8707830bc35f2f4bc74afb515ed1441ad9b891779f9e",
     "flavour_episode_labels_sensitivity.csv": "061665bcbf39d74cc9344baad7a0e6f60b348ed73a65a8e2b77a0ef1adcaa628",
     "flavour_summary.json": "d17b21e219c97e8844c722a6fdcfa8d7846249ba3b8d7468872e916a29279243",
+    "forecast_news_lead_sensitivity.csv": "2e97c161554469654719158d854cfd8123a1580875edbd0a68ce80519040f120",
+    "forecast_news_results.csv": "23fa866cf3e9d6b33abd0d40abd5e4eedbf163f1e6f77e15481c8baecbc18756",
+    "forecast_news_revisions.csv": "9c982211d0a4e2067127474a78ca169b3085d684ba35094cd64caba171a38c81",
+    "forecast_news_summary.json": "098b4aa47dc89c42178b3fffa052394f5096030a7f9ac423ca80f3dd996848d1",
     "forecast_predictions.csv": "b85eddae1e2b34394bd653ae90bfa12bdb59280aae6cfd53db3af19459e36238",
     "forecast_results.csv": "5f374de848c90b7abb52d2bf92fc80291e5d7b78cdc989e7d0f27bc6faedc833",
     "forecast_summary.json": "0db6291a1e48a9b8808997944a3380a8c0611ba8aa786bd72add5acaeddf13f2",
@@ -73,6 +77,7 @@
     "external_exposure_summary.json": "8f5192c97e9a8cb44844bb094dfff273db06404570a53c335defe0feecd69ec5",
     "financial_control_summary.json": "57932049a8c82a5f76b0f868fcfa2d1a05cd8e63d494b7f9ef662ccb42f3cf49",
     "flavour_summary.json": "d17b21e219c97e8844c722a6fdcfa8d7846249ba3b8d7468872e916a29279243",
+    "forecast_news_summary.json": "098b4aa47dc89c42178b3fffa052394f5096030a7f9ac423ca80f3dd996848d1",
     "forecast_summary.json": "0db6291a1e48a9b8808997944a3380a8c0611ba8aa786bd72add5acaeddf13f2",
     "inference_summary.json": "eb87020ddff7b28c22ce29d14ca7cc0873275b7427a25f2a31189e0f53bdcef7",
     "macro_analysis_summary.json": "ffc23350b02ee104767c668703728da7438d0d3d7bea3214e49fc25ee2bd9ad7",

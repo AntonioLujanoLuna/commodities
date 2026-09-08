@@ -15,6 +15,7 @@ data/mechanisms/
 data/exposure/
 data/climate/
 data/flavour/
+data/forecast_news/
 
 # Generated outputs. Rebuild the implemented pipeline with `make real-data`.
 figures/
