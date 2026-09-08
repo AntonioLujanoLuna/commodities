@@ -63,6 +63,12 @@ enso-program-timing-null = "enso_commodities.cli:program_timing_null"
 enso-exposure-download = "enso_commodities.cli:exposure_download"
 enso-exposure-build = "enso_commodities.cli:exposure_build"
 enso-figures = "enso_commodities.cli:figures"
+enso-dispersion = "enso_commodities.cli:dispersion"
+enso-cold-phase = "enso_commodities.cli:cold_phase"
+enso-forecast-news = "enso_commodities.cli:forecast_news"
+enso-flavour-download = "enso_commodities.cli:flavour_download"
+enso-flavour-build = "enso_commodities.cli:flavour_build"
+enso-flavour = "enso_commodities.cli:flavour"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/enso_commodities"]

@@ -33,6 +33,12 @@
 #   make specification-curve run the whole-year circular-shift joint timing null
 #   make forecast     run the locked expanding-window forecast benchmark
 #   make program-timing-null run the v2 event-study family timing null
+#   make dispersion  run the v3 W1 variance/tail endpoint under the shift null
+#   make cold-phase  run the v3 W2 signed cold-phase disruption endpoint
+#   make flavour-data download Nino 3 and Nino 4 region indices
+#   make flavour-dataset build the monthly Nino 3/Nino 4 panel
+#   make flavour     run the v3 W5 Eastern/Central Pacific diagnostic
+#   make forecast-news run the v3 W3 forecast-revision news study
 #   make mechanism-v2 WEATHER=... YIELDS=... SUPPLY_REVISIONS=... OUTPUT=... run new-input validation
 #   make report     regenerate the current-results note from the run receipts
 #   make report-check verify the note still matches the receipts
@@ -47,7 +53,7 @@
 UV ?= uv
 PY ?= $(UV) run python
 
-.PHONY: setup data dataset raw-events adjustments universe inference placebo power dose-response macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis exposure-data exposure-weights panel climate-data climate-dataset surrogate-treatment specification-curve forecast program-timing-null mechanism-v2 report report-check publication publication-check figures real-data test lint format typecheck check help
+.PHONY: dispersion cold-phase flavour-data flavour-dataset flavour forecast-news setup data dataset raw-events adjustments universe inference placebo power dose-response macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis exposure-data exposure-weights panel climate-data climate-dataset surrogate-treatment specification-curve forecast program-timing-null mechanism-v2 report report-check publication publication-check figures real-data test lint format typecheck check help
 
 help:
 	@grep -E '^#   ' Makefile | sed 's/^#   //'
@@ -152,6 +158,26 @@ program-timing-null:
 mechanism-v2:
 	$(PY) scripts/run_mechanism_validation.py --weather "$(WEATHER)" --yields "$(YIELDS)" --supply-revisions "$(SUPPLY_REVISIONS)" --output "$(OUTPUT)"
 
+dispersion:
+	$(PY) scripts/run_dispersion.py
+
+cold-phase:
+	$(PY) scripts/run_cold_phase.py
+
+flavour-data:
+	$(PY) scripts/download_flavour_data.py
+
+flavour-dataset:
+	$(PY) scripts/build_flavour_dataset.py
+
+flavour:
+	$(PY) scripts/run_flavour_analysis.py
+
+# W3 refuses to run until config/forecast_news_sources.yaml carries a verified
+# archive entry, so it is deliberately outside the real-data chain below.
+forecast-news:
+	$(PY) scripts/run_forecast_news.py
+
 report:
 	$(PY) scripts/build_report.py
 
@@ -166,7 +192,7 @@ publication-check:
 
 figures: publication
 
-real-data: data dataset raw-events adjustments universe inference placebo power dose-response macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis exposure-data exposure-weights panel climate-data climate-dataset surrogate-treatment specification-curve forecast program-timing-null report publication
+real-data: data dataset raw-events adjustments universe inference placebo power dose-response macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis exposure-data exposure-weights panel climate-data climate-dataset surrogate-treatment specification-curve forecast program-timing-null dispersion cold-phase flavour-data flavour-dataset flavour report publication
 
 test:
 	$(PY) -m pytest

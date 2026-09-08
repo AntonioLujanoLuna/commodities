@@ -1,0 +1,52 @@
+# W5: Eastern-Pacific versus Central-Pacific episode flavour. Frozen 2026-09-08,
+# before the stage was run.
+#
+# Design review F4 noted that pooling EP and CP ("Modoki") events averages two
+# treatments whose teleconnections differ over precisely the production regions
+# in this registry, and that this is a plausible reason the phase-specificity
+# contrast comes out null. The classification is cheap. The split is not: it
+# divides seventeen episodes into two groups of roughly eight.
+#
+# This contract therefore requires the stage to report its own minimum
+# detectable effect for the contrast BEFORE any contrast estimate, and forbids
+# quoting an estimate without it. The likely honest output is "the flavour split
+# cannot be resolved at this sample size", which is worth recording once with a
+# number attached so it stops being raised as an open possibility.
+provenance:
+  version: 1
+  authored_on: 2026-09-08
+  inference_scope: prespecified_underpowered_diagnostic
+  program_register: config/findings_v3.yaml
+  workstream: W5_flavour
+
+classification:
+  eastern_index: nino3
+  central_index: nino4
+  # Both regions are standardized over their shared history before comparison,
+  # because Niño 4 is the less variable of the two and an unstandardized
+  # magnitude comparison would label almost every episode Eastern Pacific.
+  standardization: z_score_over_shared_window
+  rule: larger_standardized_peak_region
+  reference_month: episode_peak_month
+  sensitivity_reference_month: episode_mean
+  minimum_margin: 0.0
+  minimum_episodes_per_flavour: 4
+
+contrast:
+  outcome: seasonal_adjusted_log_return
+  estimand: eastern_mean_minus_central_mean
+  # One draw resamples within each flavour and is shared across every commodity,
+  # so a replicate remains a single coherent alternative history.
+  resampling: stratified_shared_draw_episode_bootstrap
+  replicates: 10000
+  random_seed: 20260908
+  confidence_level: 0.95
+  fdr_alpha: 0.05
+  fdr_family: mechanism_candidates_only
+
+power:
+  target_power: 0.8
+  maximum_effect: 5.0
+  # Reporting rule, enforced by the stage rather than left to the writer.
+  require_mde_before_estimate: true
+  underpowered_label: inconclusive_underpowered_subgroup

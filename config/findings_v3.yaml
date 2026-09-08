@@ -1,0 +1,64 @@
+# Program-level register for the v3 findings program.
+#
+# Design review F5 observed that every stage defines its own FDR family and that
+# nothing counts tests across stages. This file is the fix: it fixes, before any
+# v3 stage runs, how many primary tests the program contributes and what the
+# program-level threshold therefore is. Editing it after a stage has run makes
+# the correction meaningless, so it is frozen in the same commit as the first
+# stage and its SHA-256 is recorded in every v3 receipt.
+#
+# See reports/log/2026-09-08-v3-findings-program.md.
+program_version: 3
+authored_on: 2026-09-08
+frozen_after_discovery_snapshot: 2026-09-06
+scope: retrospective_program_with_prespecified_endpoints
+
+# Family-wise alpha for the whole v3 program, and the number of primary tests it
+# is spread across. Each workstream contributes exactly one primary test: the
+# family-level statistic named in its own contract. Placebo, secondary and
+# diagnostic statistics are not primary tests and are never described as findings.
+program_alpha: 0.05
+
+workstreams:
+  W1_dispersion:
+    contract: config/dispersion.yaml
+    primary_tests: 1
+    primary_statistic: family_maximum_standardized_log_variance_ratio
+    reference_distribution: circular_whole_year_shift
+    produces_empirical_result: true
+  W2_cold_phase:
+    contract: config/cold_phase.yaml
+    primary_tests: 1
+    primary_statistic: family_maximum_standardized_signed_disruption_ratio
+    reference_distribution: circular_whole_year_shift
+    produces_empirical_result: true
+  W3_forecast_news:
+    contract: config/forecast_news.yaml
+    primary_tests: 1
+    primary_statistic: family_maximum_absolute_t_contemporaneous_revision
+    reference_distribution: cluster_robust_wild_bootstrap
+    produces_empirical_result: true
+  W4_term_structure:
+    contract: config/term_structure.yaml
+    primary_tests: 0
+    primary_statistic: none_licensed_inputs_absent
+    reference_distribution: none
+    produces_empirical_result: false
+  W5_flavour:
+    contract: config/flavour.yaml
+    primary_tests: 1
+    primary_statistic: family_maximum_absolute_eastern_minus_central_contrast
+    reference_distribution: shared_draw_episode_bootstrap
+    produces_empirical_result: true
+
+# A shift-based reference distribution with S shifts cannot produce a p-value
+# below 1/(S+1). Whole-year shifts are bounded by the length of the sample in
+# years, so that floor is a property of the design and not of the data. Where the
+# floor exceeds the program threshold, the stage sets resolution_limited and its
+# result is reported as "at the resolution floor of the design". Such a result is
+# never described as a program-level finding, however extreme it looks.
+reporting:
+  require_resolution_floor_in_receipt: true
+  program_finding_requires_program_threshold: true
+  exploratory_label: exploratory_within_stage_only
+  finding_label: program_level_finding

@@ -1,0 +1,52 @@
+# W4: the ENSO response of the forward curve's shape. Frozen 2026-09-08.
+#
+# A supply shock shows up in the shape of the curve before it shows up in the
+# level: the front contract moves relative to the deferred and the curve tips
+# toward backwardation. The World Bank series this project runs on are spot price
+# indexes, structurally blind to that, and a plus-twelve-month cumulative return
+# is close to the worst available way to look for a transient supply squeeze.
+#
+# This contract exists to fix the estimand BEFORE anyone looks at contract data,
+# which is the only moment at which freezing it is worth anything. It is gated on
+# licensed futures inputs this project does not have, so it produces no empirical
+# result and contributes zero primary tests to config/findings_v3.yaml.
+scope: prospective_estimand_licensed_inputs_absent
+workstream: W4_term_structure
+provenance:
+  version: 1
+  authored_on: 2026-09-08
+  program_register: config/findings_v3.yaml
+
+design:
+  # The slope is a log ratio of two settlements observed on the SAME day, so it
+  # contains no roll and needs no splicing. That is the reason to prefer it to a
+  # continuous return series here: tradability.py already refuses to splice
+  # across a roll without an explicit roll-yield method, and the slope sidesteps
+  # the question entirely.
+  estimand: front_minus_deferred_log_spread
+  front_rank: 1
+  deferred_rank: 4
+  minimum_days_to_expiry: 10
+  # A curve is only comparable across days if both legs come from the same
+  # session; a stale deferred settlement would show up as a spurious slope move.
+  require_same_session_legs: true
+  outcome: monthly_mean_log_spread
+  window_first_relative_month: -6
+  window_last_relative_month: 18
+  # Backwardation is a positive front-minus-deferred spread, so a supply squeeze
+  # raises this. The direction is registered here rather than discovered later.
+  alternative: greater
+
+inference:
+  reference_distribution: circular_whole_year_shift
+  minimum_shift_years: 1
+  maximum_shift_years: 64
+  minimum_inside_months: 24
+  minimum_outside_months: 60
+  fdr_alpha: 0.05
+
+requirements:
+  futures_inputs_must_be_licensed_contract_level: true
+  price_indexes_are_not_admissible: true
+  information_dates_required: true
+  no_result_without_inputs: true

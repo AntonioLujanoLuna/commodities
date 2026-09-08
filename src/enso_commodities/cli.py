@@ -4,19 +4,24 @@ import argparse
 from pathlib import Path
 
 from .adjusted_events import build_adjusted_event_tables
+from .cold_phase_analysis import run_cold_phase_analysis
 from .config import project_root
 from .dataset import build_real_dataset
+from .dispersion_analysis import run_dispersion_analysis
 from .dose_response_analysis import run_dose_response_analysis
 from .download import download_all
 from .endpoint_analysis import run_endpoint_diagnostics
 from .external_exposure import build_external_exposure_weights, download_exposure_data
 from .financial_analysis import run_financial_control_analysis
 from .financial_data import build_financial_dataset
+from .flavour_analysis import run_flavour_analysis
+from .flavour_data import build_flavour_dataset, download_flavour_snapshot
 from .forecast_analysis import run_forecast_analysis
 from .fragility_analysis import run_leave_one_episode_out
 from .inference import run_primary_inference
 from .macro_analysis import run_macro_control_analysis
 from .macro_data import build_macro_dataset
+from .news_analysis import run_news_analysis
 from .palm_oil_data import build_palm_oil_dataset
 from .palm_oil_mechanism import run_palm_oil_mechanism
 from .panel_analysis import run_panel_analysis
@@ -444,5 +449,99 @@ def exposure_build() -> None:
             tables_root=args.tables_root,
             config_path=args.config,
             registry_path=args.registry,
+        )
+    )
+
+
+def dispersion() -> None:
+    parser = argparse.ArgumentParser(
+        description="Run the W1 dispersion endpoint against the circular whole-year shift null."
+    )
+    parser.add_argument("--processed-snapshot", type=Path)
+    parser.add_argument("--tables-root", type=Path)
+    parser.add_argument("--config", type=Path)
+    parser.add_argument("--program-config", type=Path)
+    args = parser.parse_args()
+    print(
+        run_dispersion_analysis(
+            args.processed_snapshot,
+            tables_root=args.tables_root,
+            config_path=args.config,
+            program_config_path=args.program_config,
+        )
+    )
+
+
+def cold_phase() -> None:
+    parser = argparse.ArgumentParser(
+        description="Run the W2 cold-phase disruption endpoint with signed hypotheses."
+    )
+    parser.add_argument("--processed-snapshot", type=Path)
+    parser.add_argument("--tables-root", type=Path)
+    parser.add_argument("--config", type=Path)
+    parser.add_argument("--program-config", type=Path)
+    args = parser.parse_args()
+    print(
+        run_cold_phase_analysis(
+            args.processed_snapshot,
+            tables_root=args.tables_root,
+            config_path=args.config,
+            program_config_path=args.program_config,
+        )
+    )
+
+
+def forecast_news() -> None:
+    parser = argparse.ArgumentParser(
+        description="Run the W3 forecast-revision news study and its lead and lag placebos."
+    )
+    parser.add_argument("--processed-snapshot", type=Path)
+    parser.add_argument("--archive-snapshot", type=Path)
+    parser.add_argument("--tables-root", type=Path)
+    parser.add_argument("--config", type=Path)
+    parser.add_argument("--program-config", type=Path)
+    args = parser.parse_args()
+    print(
+        run_news_analysis(
+            args.processed_snapshot,
+            archive_snapshot=args.archive_snapshot,
+            tables_root=args.tables_root,
+            config_path=args.config,
+            program_config_path=args.program_config,
+        )
+    )
+
+
+def flavour_download() -> None:
+    parser = argparse.ArgumentParser(description="Download Nino 3 and Nino 4 region indices.")
+    parser.parse_args()
+    print(download_flavour_snapshot())
+
+
+def flavour_build() -> None:
+    parser = argparse.ArgumentParser(description="Build the monthly Nino 3/Nino 4 panel.")
+    parser.add_argument("--snapshot", type=Path)
+    parser.add_argument("--processed-root", type=Path)
+    args = parser.parse_args()
+    print(build_flavour_dataset(args.snapshot, processed_root=args.processed_root))
+
+
+def flavour() -> None:
+    parser = argparse.ArgumentParser(
+        description="Run the W5 Eastern/Central Pacific flavour diagnostic."
+    )
+    parser.add_argument("--processed-snapshot", type=Path)
+    parser.add_argument("--flavour-snapshot", type=Path)
+    parser.add_argument("--tables-root", type=Path)
+    parser.add_argument("--config", type=Path)
+    parser.add_argument("--program-config", type=Path)
+    args = parser.parse_args()
+    print(
+        run_flavour_analysis(
+            args.processed_snapshot,
+            flavour_snapshot=args.flavour_snapshot,
+            tables_root=args.tables_root,
+            config_path=args.config,
+            program_config_path=args.program_config,
         )
     )

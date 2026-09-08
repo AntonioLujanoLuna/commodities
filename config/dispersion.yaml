@@ -1,0 +1,58 @@
+# W1: dispersion at the event window. Frozen 2026-09-08, before the stage was run.
+#
+# This does not change the frozen mean-return endpoint or any gate in
+# commodities.yaml. It adds a different estimand on the same data, chosen because
+# a variance uses every month inside the event windows where a mean uses one
+# number per episode. See reports/log/2026-09-08-v3-findings-program.md.
+provenance:
+  version: 1
+  authored_on: 2026-09-08
+  inference_scope: prespecified_secondary_endpoint
+  program_register: config/findings_v3.yaml
+  workstream: W1_dispersion
+
+design:
+  outcome: seasonal_adjusted_log_return
+  window_first_relative_month: -12
+  window_last_relative_month: 24
+  # Both statistics are log ratios of an inside-window quantity to its
+  # outside-window counterpart. The second exists because a variance ratio can be
+  # produced by a single month; if the two disagree, the result is one outlier.
+  primary_statistic: log_variance_ratio
+  secondary_statistic: log_exceedance_ratio
+  exceedance_quantile: 0.9
+  # The exceedance threshold is a property of the commodity, not of the treatment.
+  # It is computed once from the unconditional distribution and held fixed across
+  # every shift, so the null cannot move it.
+  exceedance_threshold_scope: unconditional_absolute_return
+  # Prespecified direction: if ENSO matters, it widens the distribution of
+  # outcomes inside the window. A one-sided test against the registered direction
+  # is more powerful, and committing to it in a hashed file before the run is what
+  # makes it defensible.
+  alternative: greater
+  minimum_inside_months: 60
+  minimum_outside_months: 120
+  continuity_correction: haldane_anscombe
+
+inference:
+  # Commodity returns cluster in volatility, so any null that treats months as
+  # exchangeable will manufacture variance differences everywhere. Circular
+  # whole-year shifts of the episode mask leave every return series untouched --
+  # preserving each commodity's seasonality and its volatility clustering exactly
+  # -- and vary only the timing of ENSO, which is the thing under test.
+  reference_distribution: circular_whole_year_shift
+  minimum_shift_years: 1
+  maximum_shift_years: 64
+  # Statistics are standardized by their own shift-null moments before the family
+  # maximum is taken, because commodities differ in how variable the ratio is.
+  family_statistic: maximum_standardized
+  fdr_alpha: 0.05
+  fdr_family: mechanism_candidates_only
+
+falsification:
+  # Negative controls run the identical path. Precious metals have strongly
+  # regime-dependent volatility, so if the shift null preserves what it claims to
+  # they should not reject. If they do, the null is not doing its job and every
+  # number this stage produces is void.
+  negative_controls_must_not_reject: true
+  void_stage_if_controls_reject: true

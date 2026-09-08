@@ -1,0 +1,53 @@
+# Input contract for the W2 cold-phase disruption chain. No values are imputed,
+# and no link is reported without data behind it.
+#
+# The reason to prefer this chain to the palm-oil one is sample size at the
+# intermediates. The palm chain failed at the supply-to-price link with a handful
+# of annual observations. Every link here is monthly and publicly measured:
+# regional rainfall, port and rail throughput, and dated export volumes. That is
+# hundreds of observations per link rather than seventeen.
+#
+# These inputs are NOT in this repository. Acquiring them is separate work, and
+# until then this file freezes what they must look like. An input schema is not
+# evidence.
+scope: prospective_disruption_inputs_not_yet_acquired
+mechanism: cold_phase_supply_disruption
+commodities: ["Coal, Australian"]
+
+tables:
+  rainfall:
+    required_columns: [commodity, region, date, enso, rainfall_anomaly, cluster]
+    source_must_be_external: true
+  throughput:
+    required_columns:
+      [commodity, region, date, log_throughput, rainfall_shock, capacity_share, cluster]
+    source_must_be_external: true
+  shipments:
+    required_columns:
+      [commodity, information_date, price_date, throughput_surprise, price_return, cluster]
+    source_must_be_external: true
+
+links:
+  - name: cold_phase_to_regional_rainfall
+    expected_direction: positive
+    reason: La Nina raises eastern Australian rainfall
+  - name: rainfall_to_throughput
+    expected_direction: negative
+    reason: flooding cuts pit output and rail and port loading
+  - name: throughput_shortfall_to_price
+    expected_direction: negative
+    reason: a positive throughput surprise is more supply and a lower price
+
+requirements:
+  rainfall_source_must_be_external: true
+  throughput_must_precede_measured_price: true
+  no_outcome_derived_capacity_weights: true
+  minimum_clusters_per_link: 10
+
+inference:
+  covariance: cluster_robust
+  family: three_links
+  fdr_alpha: 0.05
+  # A chain is only complete when every link passes in its registered direction.
+  # A partial chain is reported as incomplete, never as partial support.
+  require_all_links_for_complete_chain: true

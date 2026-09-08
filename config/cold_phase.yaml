@@ -1,0 +1,107 @@
+# W2: cold-phase disruption endpoint. Frozen 2026-09-08, before the stage was run.
+#
+# The registry in commodities.yaml records the Australian coal pathway as
+# "rainfall affects mining and export logistics". That is a La Nina story --
+# flooded pits and washed-out rail, which raises prices -- and the frozen design
+# tests it as a warm-phase mean return. This contract tests the mechanism the
+# registry actually wrote down.
+#
+# Three changes from the primary design, all fixed here before the run:
+#   1. Cold episodes rather than warm.
+#   2. A signed hypothesis per commodity, tested one-sided. A direction committed
+#      to in a hashed file in advance is worth far more evidentially than a
+#      two-sided test, and costs nothing. A commodity with no defensible signed
+#      prediction is excluded rather than given a two-sided pass.
+#   3. A disruption endpoint. A flood does not move an annual mean; it produces a
+#      spike. The endpoint is the frequency of signed-tail months.
+provenance:
+  version: 1
+  authored_on: 2026-09-08
+  inference_scope: prespecified_secondary_endpoint
+  program_register: config/findings_v3.yaml
+  workstream: W2_cold_phase
+
+episodes:
+  index: roni
+  cold_threshold: -0.5
+  minimum_duration_months: 5
+  observable_delay_after_center_months: 2
+
+design:
+  outcome: seasonal_adjusted_log_return
+  window_first_relative_month: -6
+  window_last_relative_month: 18
+  primary_statistic: log_signed_tail_ratio
+  secondary_statistic: signed_mean_difference
+  tail_quantile: 0.9
+  tail_threshold_scope: unconditional_signed_return
+  alternative: greater
+  minimum_inside_months: 40
+  minimum_outside_months: 120
+  continuity_correction: haldane_anscombe
+
+inference:
+  reference_distribution: circular_whole_year_shift
+  minimum_shift_years: 1
+  maximum_shift_years: 64
+  family_statistic: maximum_standardized
+  fdr_alpha: 0.05
+  fdr_family: signed_hypothesis_commodities_only
+
+# The signed registry. Each entry states the direction La Nina is expected to
+# push the price and why. "positive" means a supply disruption or a demand
+# increase that raises the price; "negative" means the cold phase is favourable
+# to supply and lowers it. These are the consensus directions in the physical
+# literature, recorded before the endpoint was computed.
+hypotheses:
+  - commodity: Coal, Australian
+    direction: positive
+    reason: eastern Australian rainfall floods pits and cuts rail and port throughput
+  - commodity: Natural gas, US
+    direction: positive
+    reason: colder northern United States winters raise heating demand
+  - commodity: Soybeans
+    direction: positive
+    reason: dry southern-cone growing seasons cut Argentine and southern Brazilian supply
+  - commodity: Maize
+    direction: positive
+    reason: the same southern-cone rainfall deficit cuts maize supply
+  - commodity: Logs, Malaysian
+    direction: positive
+    reason: excess rainfall restricts harvest access and haulage
+  - commodity: Rubber, RSS3
+    direction: positive
+    reason: heavy rainfall reduces usable tapping days
+  - commodity: Palm oil
+    direction: negative
+    reason: wetter Southeast Asian conditions are favourable to palm yields
+  - commodity: Coconut oil
+    direction: negative
+    reason: the same rainfall surplus is favourable to coconut supply
+  - commodity: Fish meal
+    direction: negative
+    reason: cold-phase upwelling supports the Peruvian anchovy biomass and raises catch
+
+# Commodities excluded from the signed family, with the reason. An excluded
+# commodity is not tested here at all; it is not quietly given a two-sided pass.
+excluded:
+  - commodity: Natural gas, Europe
+    reason: the ENSO-to-European-winter-temperature link is too weak to sign
+  - commodity: Wheat, US HRW
+    reason: opposing plains-drought and export-competition channels cannot be signed
+  - commodity: Coffee, Arabica
+    reason: Brazilian frost and rainfall channels have opposite signs
+  - commodity: Sugar, world
+    reason: Indian and Brazilian rainfall channels have opposite signs
+
+falsification:
+  negative_controls_must_not_reject: true
+  # Controls carry no registered direction, so they are evaluated in whichever
+  # direction is more favourable to rejection. That is deliberately the hardest
+  # version of the check for this stage to pass. Because it is the minimum of two
+  # one-sided tests, the resulting p-value is Bonferroni-doubled across the two
+  # tails; without that correction a pure-noise control would reject at roughly
+  # twice the nominal rate and void the stage for no reason.
+  control_direction: worst_case_of_both_tails
+  control_tail_correction: bonferroni_two_tails
+  void_stage_if_controls_reject: true

@@ -1,0 +1,40 @@
+# Archived probabilistic ENSO forecasts, used as the treatment in W3.
+#
+# IMPORTANT, and the reason this file carries no `sources:` block yet.
+#
+# The stage needs an archive of forecasts AS THEY WERE ISSUED -- a monthly series
+# of probabilities attached to the date they were published. A current forecast
+# file is not that, and a reconstructed one is worse than useless here: the whole
+# design rests on the treatment being information that was actually available on
+# its stated date. Using a revised or back-filled probability would make every
+# coefficient in this stage a look-ahead artifact.
+#
+# The exact retrieval URL, file layout and first available issuance of the
+# CPC/IRI probabilistic archive MUST be verified against the live source before
+# anything is downloaded, and the verified entry added here in the same form as
+# config/climate_sources.yaml. Until then the stage refuses to run: the parser in
+# forecast_news.py validates against `required_columns` below and there is no
+# path that fabricates an issuance date.
+#
+# Landing pages to verify against, recorded so the check is reproducible:
+#   https://iri.columbia.edu/our-expertise/climate/forecasts/enso/current/
+#   https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso_advisory/
+scope: archive_not_yet_acquired
+data_provenance_required: real
+
+archive:
+  # One row per (issuance, target season). Probabilities are those published on
+  # `issue_date`, never a later revision of them.
+  required_columns:
+    - issue_date
+    - target_center_date
+    - lead_months
+    - probability_el_nino
+    - probability_neutral
+    - probability_la_nina
+  requirements:
+    issuance_dates_must_be_as_published: true
+    probabilities_must_sum_to_one: true
+    tolerance: 0.01
+    target_must_not_precede_issuance: true
+    no_duplicate_issuance_target_pairs: true
