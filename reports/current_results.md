@@ -20,12 +20,16 @@ interpretation.
 <!-- generated:run-identity start -->
 
 - Data snapshot: `2026-09-06`
-- Stage receipts: `inference`, `placebo`, `power`, `dose_response`, `macro`, `fragility`, `robustness`, `specificity`, `surrogate_treatment`, `endpoint`, `financial`, `palm`, `external_exposure`, `panel`, `specification_curve`, `forecast`, `program_timing_null`
+- Stage receipts: `inference`, `placebo`, `power`, `dose_response`, `macro`, `fragility`, `robustness`, `specificity`, `surrogate_treatment`, `endpoint`, `financial`, `palm`, `external_exposure`, `panel`, `specification_curve`, `forecast`, `program_timing_null`, `dispersion`, `cold_phase`, `flavour`
+- `cold_phase.yaml` SHA-256: `241db636b49e80e4bd52c2315fb7f7d3aa00c86a5047ddd1115a6f47b2bc72f0`
 - `commodities.yaml` SHA-256: `9a46280084782b9cf1b09b217a964a0774d725e6e4a46669911a60cd89f1a046`
+- `dispersion.yaml` SHA-256: `07ce8cab368950150c7ca2aeb54d4c6d4738b83f34f5a9417a925aa1c02cfc80`
 - `dose_response.yaml` SHA-256: `6650ed543f2483b5c1dc35e885df8b82f1a6121f00feaa5d1328ddae39f14b30`
 - `endpoint_diagnostics.yaml` SHA-256: `3faf58d68cb94ac3899f3fc0aee577173f8331fe5a8011914314b5fcfe543866`
 - `exposure_v2.yaml` SHA-256: `f6e01cc6c56cec042a4ddf61b8e6de639a2244c6efbe4ef19effcfe112543e98`
 - `financial_robustness.yaml` SHA-256: `3bc06010b146d7bb1b7a4e3fed811012a284a84a6b7fd662fbee8b33c46275a1`
+- `findings_v3.yaml` SHA-256: `43dcf21ef1cae3d57b022c8467cf0470ec50ffdc823e2512f61a34606e2c9419`
+- `flavour.yaml` SHA-256: `4c37cf22877b16b1be7f25ef593fed8ca19c7c38f47df7fb62561976bbdbc40e`
 - `palm_oil_mechanism.yaml` SHA-256: `32c0308feb2e255f76903b39311b5ad46ff8e536e035968158a10354c9a2c867`
 - `panel.yaml` SHA-256: `a42f4702d88bb338770fc4e80353b1964a052dfae4643ba7289acbdbb41349bd`
 - `research.yaml` SHA-256: `faf1582043e0a3b52f42539cd3850b509b364f4b2767c178dda2b809dbd9c614`
@@ -39,7 +43,7 @@ interpretation.
 <!-- generated:run-context start -->
 
 - Generated for snapshot: `2026-09-06`
-- Analysis source-tree SHA-256: `586ddb04cd226853e23c946ea82ec6e14a3896176d24ce77a35d10f1ecff8d84`
+- Analysis source-tree SHA-256: `55deedba73eb0beda5c52159e49ef55629062cfac7d7ad79453c9bc4c4bff5e1`
 - Primary bootstrap: 10000 whole-episode draws
 - Panel bootstrap: 2000 block draws per specification
 
@@ -68,6 +72,9 @@ interpretation.
 | Whole-year timing null | Specification cells 20; Shifted alignments 60; Joint timing p 0.4098; Maximum-t timing p 0.7377 |
 | Recursive forecast benchmark | Forecast cells 9; Cells improving RMSE 8; Loss tests rejecting raw 1; Proxy cells beating long-only 5; Best cell commodity Rubber, RSS3; Best cell horizon 12; Best cell p 0.0137; Best cell RMSE improvement 0.0384; Best cell excess over long-only -1.1752; Genuine out of sample no; Tradability claim permitted no |
 | Selected-family timing null | Specification cells 96; Shifted alignments 60; Median-|t| timing p 0.0164; Maximum-|t| timing p 0.0164; Outcome-informed selection yes |
+| W1 dispersion | Warm episodes 22; Family shift p 0.2154; Candidate BH rejections 0; Control raw rejections 0; Clears program threshold no |
+| W2 cold-phase disruption | Cold episodes 22; Signed family size 9; Family shift p 0.0308; Candidate BH rejections 0; Control worst-case rejections 0; Clears program threshold no |
+| W5 episode flavour | Eastern episodes 6; Central episodes 13; Family bootstrap p 0.6050; Candidate BH rejections 0; Candidates below own MDE 30; Classification agreement 0.6818 |
 
 <!-- generated:evidence-summary end -->
 
@@ -94,6 +101,9 @@ Generated one line per stage from the same receipts as the evidence table above.
 | Recursive forecast benchmark | ENSO improves RMSE in 8 of 9 cells, with paired-loss p<0.05 in 1 cell; final RONI and non-investable indexes make this pseudo-OOS. |
 | Best forecast cell | Rubber, RSS3 at 12 months has paired-loss p=0.0137 and RMSE improvement 0.0384, but its price-index strategy excess over long-only is -1.1752. |
 | Selected-family timing null | The locked 96-cell selected family has median-|t| timing p=0.0164, but selection used the discovery outcomes and this is retrospective calibration, not independent validation. |
+| W1 dispersion | The warm-window dispersion family has shift-null p=0.2154; 0 candidates survive BH and 0 controls reject at raw 5%. |
+| W2 cold-phase disruption | The prespecified signed family has shift-null p=0.0308; 0 candidates survive BH and 0 controls reject under the corrected worst-case rule. The shift result does not clear the program threshold. |
+| W5 episode flavour | The Eastern-minus-Central-Pacific family has bootstrap p=0.6050, with 0 BH rejections. All 30 candidates are below their own minimum detectable contrast, so the split is unresolved rather than null. |
 
 <!-- generated:interpretations end -->
 
@@ -120,6 +130,9 @@ Generated one line per stage from the same receipts as the evidence table above.
 | Whole-year timing null | `specification_curve_summary.json` | `f9c09f557ef0ab4923580fd91aa7b34bdbbd7b47953d4dbb573dc62448581126` |
 | Recursive forecast benchmark | `forecast_summary.json` | `0db6291a1e48a9b8808997944a3380a8c0611ba8aa786bd72add5acaeddf13f2` |
 | Selected-family timing null | `program_timing_null_summary.json` | `aac58a9495181466fbddefdcd4eb0e27e3477b053047da0325003fd2d4b6391a` |
+| W1 dispersion | `dispersion_summary.json` | `9411743fcb63aca32cbd3cc66d9a8573d0d772d2364a8248d3731afc32c52591` |
+| W2 cold-phase disruption | `cold_phase_summary.json` | `58160db2ec891b6a7a2007924dd68578cb3470a9c7f5bfd812a959c2a583755b` |
+| W5 episode flavour | `flavour_summary.json` | `d17b21e219c97e8844c722a6fdcfa8d7846249ba3b8d7468872e916a29279243` |
 
 <!-- generated:receipts end -->
 
@@ -150,6 +163,6 @@ The panel-family timing null compares the observed curve with 60 circular whole-
 
 <!-- generated:bottom-line start -->
 
-The pipeline leaves 3 timing/index-robust historical associations, while 22 candidates remain below their own marginal detection threshold. The phase and negative-control diagnostics still prevent an ENSO-specific causal interpretation, and 0 panel exposure cells survive correction across the specification grid. The retrospective forecast benchmark has paired-loss p<0.05 in 1 cell and does not yet satisfy the genuine out-of-sample gate.
+The pipeline leaves 3 timing/index-robust historical associations, while 22 candidates remain below their own marginal detection threshold. The phase and negative-control diagnostics still prevent an ENSO-specific causal interpretation, and 0 panel exposure cells survive correction across the specification grid. The retrospective forecast benchmark has paired-loss p<0.05 in 1 cell and does not yet satisfy the genuine out-of-sample gate. In the v3 endpoints, dispersion has family shift p=0.2154 and the signed cold-phase family has p=0.0308; neither clears the frozen program threshold. The flavour split has family bootstrap p=0.6050 and is underpowered for every candidate.
 
 <!-- generated:bottom-line end -->

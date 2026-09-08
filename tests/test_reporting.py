@@ -136,6 +136,21 @@ def test_a_stage_that_did_not_run_is_named_rather_than_guessed(tmp_path: Path) -
     assert "`panel`" in text
 
 
+def test_v3_real_data_receipts_are_interpreted_at_the_program_threshold(tmp_path: Path) -> None:
+    snapshot, tables_root = _write_receipts(tmp_path)
+    report = _report(tmp_path)
+
+    build_current_results(snapshot, tables_root=tables_root, report_path=report)
+    text = report.read_text(encoding="utf-8")
+
+    assert "| W1 dispersion |" in text
+    assert "| W2 cold-phase disruption |" in text
+    assert "| W5 episode flavour |" in text
+    assert "The shift result does not clear the program threshold." in text
+    assert "neither clears the frozen program threshold" in text
+    assert "is underpowered for every candidate" in text
+
+
 def test_the_generator_refuses_a_receipt_whose_artifacts_changed(tmp_path: Path) -> None:
     """A receipt describing artifacts that have since moved is fiction."""
     snapshot, tables_root = _write_receipts(tmp_path)
