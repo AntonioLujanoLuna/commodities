@@ -1,4 +1,4 @@
-"""Real-data orchestration for the W1 dispersion endpoint."""
+"""Real-data orchestration for the W2 cold-phase disruption endpoint."""
 
 from __future__ import annotations
 
@@ -8,29 +8,16 @@ from typing import Any
 
 import pandas as pd
 
+from .cold_phase import cold_phase_inference, load_cold_phase_config
 from .config import project_root
-from .dispersion import (
-    dispersion_shift_inference,
-    load_dispersion_config,
-    load_program_register,
-)
+from .dispersion import load_program_register
+from .dispersion_analysis import commodity_roles
+from .enso import construct_cold_episodes
 from .provenance import sha256_file, verify_hashes, write_json_atomic
 from .raw_events import latest_processed_snapshot
 
 
-def commodity_roles(output: Path) -> pd.Series:
-    """Map each frozen commodity to its role, from the universe stage's own output."""
-    candidates = pd.read_parquet(output / "primary_inference_family.parquet")
-    controls = pd.read_parquet(output / "negative_control_sample.parquet")
-    if "control_eligible" in controls.columns:
-        controls = controls.loc[controls["control_eligible"]]
-    roles = {str(name): "mechanism_candidate" for name in candidates["commodity"].unique()}
-    for name in controls["commodity"].unique():
-        roles.setdefault(str(name), "negative_control")
-    return pd.Series(roles, name="role")
-
-
-def run_dispersion_analysis(
+def run_cold_phase_analysis(
     processed_snapshot: Path | None = None,
     *,
     tables_root: Path | None = None,
@@ -41,21 +28,17 @@ def run_dispersion_analysis(
     output = (tables_root or project_root() / "tables") / snapshot.name
     universe_summary_path = output / "universe_summary.json"
     adjusted_summary_path = output / "adjusted_event_summary.json"
-    raw_summary_path = output / "raw_event_summary.json"
     summaries: dict[str, dict[str, Any]] = {}
-    for path in (universe_summary_path, adjusted_summary_path, raw_summary_path):
+    for path in (universe_summary_path, adjusted_summary_path):
         with path.open(encoding="utf-8") as handle:
             summaries[path.name] = json.load(handle)
     if any(item.get("data_provenance") != "real" for item in summaries.values()):
-        raise ValueError("Dispersion analysis requires real-data receipts")
+        raise ValueError("Cold-phase analysis requires real-data receipts")
 
     inputs = {
         "commodity_returns_adjusted_monthly.parquet": summaries["adjusted_event_summary.json"][
             "output_hashes"
         ]["commodity_returns_adjusted_monthly.parquet"],
-        "enso_episodes.csv": summaries["raw_event_summary.json"]["output_hashes"][
-            "enso_episodes.csv"
-        ],
         "primary_inference_family.parquet": summaries["universe_summary.json"]["output_hashes"][
             "primary_inference_family.parquet"
         ],
@@ -65,52 +48,68 @@ def run_dispersion_analysis(
     }
     verify_hashes(output, inputs)
 
-    spec = load_dispersion_config(config_path)
+    spec = load_cold_phase_config(config_path)
     program = load_program_register(program_config_path)
+
+    # Cold episodes are constructed here rather than read from the raw-event
+    # stage, which freezes warm episodes only. The construction rule is the same
+    # one, with the sign of the threshold reversed.
+    enso_path = snapshot / "enso_monthly.csv"
+    enso = pd.read_csv(enso_path, parse_dates=["date"])
+    cold_episodes = construct_cold_episodes(
+        enso,
+        index_name=spec.index,
+        threshold=spec.cold_threshold,
+        minimum_duration_months=spec.minimum_duration_months,
+        observable_delay_after_center_months=spec.observable_delay_after_center_months,
+    )
+    if cold_episodes.empty:
+        raise ValueError("Cold-phase analysis found no cold episodes")
+
     returns = pd.read_parquet(output / "commodity_returns_adjusted_monthly.parquet")
-    episodes = pd.read_csv(output / "enso_episodes.csv", parse_dates=["onset_date"])
-    episodes = episodes.loc[
-        episodes["index_name"].eq("roni") & episodes["direction"].eq("warm")
-    ].copy()
-    if episodes.empty:
-        raise ValueError("Dispersion analysis found no warm RONI episodes")
     roles = commodity_roles(output)
-    results, null_frame, statistics = dispersion_shift_inference(
+    results, null_frame, statistics = cold_phase_inference(
         returns.loc[returns["commodity"].isin(roles.index)],
-        episodes,
+        cold_episodes,
         roles,
         spec=spec,
         program=program,
     )
 
-    results_path = output / "dispersion_results.csv"
-    null_path = output / "dispersion_shift_null.parquet"
+    results_path = output / "cold_phase_results.csv"
+    null_path = output / "cold_phase_shift_null.parquet"
+    episodes_path = output / "cold_phase_episodes.csv"
     results.to_csv(results_path, index=False)
     null_frame.to_parquet(null_path, index=False)
+    cold_episodes.to_csv(episodes_path, index=False, date_format="%Y-%m-%d")
 
-    config_file = config_path or project_root() / "config" / "dispersion.yaml"
+    config_file = config_path or project_root() / "config" / "cold_phase.yaml"
     program_file = program_config_path or project_root() / "config" / "findings_v3.yaml"
     summary = {
         "data_provenance": "real",
         "snapshot": snapshot.name,
         "design": {
+            **spec.config["episodes"],
             **spec.config["design"],
             "inference_scope": spec.config["provenance"]["inference_scope"],
             "workstream": spec.config["provenance"]["workstream"],
             "reference_distribution": spec.config["inference"]["reference_distribution"],
-            "warm_episodes": len(episodes),
+            "signed_hypotheses": spec.hypotheses,
+            "excluded_with_reason": spec.excluded,
         },
         "results": statistics,
         "input_hashes": {
             **{name: sha256_file(output / name) for name in inputs},
-            "dispersion.yaml": sha256_file(config_file),
+            "enso_monthly.csv": sha256_file(enso_path),
+            "cold_phase.yaml": sha256_file(config_file),
             "findings_v3.yaml": sha256_file(program_file),
             **{name: sha256_file(output / name) for name in summaries},
         },
         "output_hashes": {
             results_path.name: sha256_file(results_path),
             null_path.name: sha256_file(null_path),
+            episodes_path.name: sha256_file(episodes_path),
         },
     }
-    write_json_atomic(output / "dispersion_summary.json", summary)
+    write_json_atomic(output / "cold_phase_summary.json", summary)
     return output

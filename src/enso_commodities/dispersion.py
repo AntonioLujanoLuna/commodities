@@ -205,6 +205,14 @@ def available_year_shifts(
     A shift of a whole number of years preserves ENSO's phase-locking to the
     annual cycle; a shift equal to the sample length is the identity and is
     excluded, as is anything that would wrap past it.
+
+    One assumption is worth naming because nothing here enforces it. If episodes
+    recurred at a fixed period of ``p`` years, every shift that is a multiple of
+    ``p`` would map the mask onto itself, those draws would tie with the observed
+    statistic, and the null would lose that fraction of its resolution. Real ENSO
+    recurrence is irregular -- two to seven years -- so this does not bite in
+    practice, but a treatment that were near-periodic would need a different
+    reference distribution rather than this one.
     """
     if month_count < 2 * MONTHS_PER_YEAR:
         raise ValueError("A whole-year shift null needs at least two years of months")

@@ -24,8 +24,21 @@ def _dates(years: int) -> pd.DatetimeIndex:
     return pd.date_range("1960-01-01", periods=years * 12, freq="MS")
 
 
-def _episodes(dates: pd.DatetimeIndex, *, every_years: int = 4) -> pd.DataFrame:
-    onsets = [dates[index] for index in range(6, len(dates) - 30, every_years * 12)]
+# ENSO recurs irregularly, at two to seven years. Exactly periodic onsets would
+# alias onto themselves under whole-year shifts and rob the null of resolution,
+# so the fixtures use irregular gaps as the real index does.
+_GAPS_YEARS = (4, 3, 6, 2, 5, 3, 7, 4, 2, 5, 3, 6, 4, 3, 5)
+
+
+def _episodes(dates: pd.DatetimeIndex) -> pd.DataFrame:
+    positions: list[int] = []
+    cursor = 6
+    for gap in _GAPS_YEARS:
+        if cursor >= len(dates) - 30:
+            break
+        positions.append(cursor)
+        cursor += gap * 12
+    onsets = [dates[index] for index in positions]
     return pd.DataFrame({"episode_id": [f"e{i}" for i in range(len(onsets))], "onset_date": onsets})
 
 
