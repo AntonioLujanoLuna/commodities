@@ -45,7 +45,7 @@ interpretation.
 <!-- generated:run-context start -->
 
 - Generated for snapshot: `2026-09-06`
-- Analysis source-tree SHA-256: `88fcd0ab1bad3d9667f0c69cec7b0dcac32246e530ebde5e133719264cea9127`
+- Analysis source-tree SHA-256: `d77e545931c7ec1b641cfead8bbf8bac259dc2695182d3e527e915b0fef35f34`
 - Primary bootstrap: 10000 whole-episode draws
 - Panel bootstrap: 2000 block draws per specification
 

@@ -35,6 +35,7 @@
 #   make program-timing-null run the v2 event-study family timing null
 #   make dispersion  run the v3 W1 variance/tail endpoint under the shift null
 #   make cold-phase  run the v3 W2 signed cold-phase disruption endpoint
+#   make disruption-readiness audit public-source gates for the W2 physical chain
 #   make flavour-data download Nino 3 and Nino 4 region indices
 #   make flavour-dataset build the monthly Nino 3/Nino 4 panel
 #   make flavour     run the v3 W5 Eastern/Central Pacific diagnostic
@@ -55,7 +56,7 @@
 UV ?= uv
 PY ?= $(UV) run python
 
-.PHONY: dispersion cold-phase flavour-data flavour-dataset flavour forecast-news-data forecast-news-dataset forecast-news setup data dataset raw-events adjustments universe inference placebo power dose-response macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis exposure-data exposure-weights panel climate-data climate-dataset surrogate-treatment specification-curve forecast program-timing-null mechanism-v2 report report-check publication publication-check figures real-data test lint format typecheck check help
+.PHONY: dispersion cold-phase disruption-readiness flavour-data flavour-dataset flavour forecast-news-data forecast-news-dataset forecast-news setup data dataset raw-events adjustments universe inference placebo power dose-response macro-data macro-dataset macro-analysis fragility robustness specificity endpoint-diagnostics financial-data financial-dataset financial-analysis palm-data palm-dataset palm-analysis exposure-data exposure-weights panel climate-data climate-dataset surrogate-treatment specification-curve forecast program-timing-null mechanism-v2 report report-check publication publication-check figures real-data test lint format typecheck check help
 
 help:
 	@grep -E '^#   ' Makefile | sed 's/^#   //'
@@ -165,6 +166,9 @@ dispersion:
 
 cold-phase:
 	$(PY) scripts/run_cold_phase.py
+
+disruption-readiness:
+	$(PY) scripts/audit_disruption_sources.py
 
 flavour-data:
 	$(PY) scripts/download_flavour_data.py

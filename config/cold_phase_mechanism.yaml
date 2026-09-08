@@ -3,9 +3,10 @@
 #
 # The reason to prefer this chain to the palm-oil one is sample size at the
 # intermediates. The palm chain failed at the supply-to-price link with a handful
-# of annual observations. Every link here is monthly and publicly measured:
-# regional rainfall, port and rail throughput, and dated export volumes. That is
-# hundreds of observations per link rather than seventeen.
+# of annual observations. Every intended link here is monthly and publicly
+# measured: regional rainfall, port throughput and prices. The source audit is
+# separate because public history is not automatically long enough, reproducibly
+# downloadable or vintage dated.
 #
 # These inputs are NOT in this repository. Acquiring them is separate work, and
 # until then this file freezes what they must look like. An input schema is not

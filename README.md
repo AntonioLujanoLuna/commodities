@@ -128,6 +128,7 @@ uv run python scripts/run_forecast_analysis.py
 uv run python scripts/run_program_timing_null.py
 uv run python scripts/run_dispersion.py
 uv run python scripts/run_cold_phase.py
+uv run python scripts/audit_disruption_sources.py
 uv run python scripts/download_flavour_data.py
 uv run python scripts/build_flavour_dataset.py
 uv run python scripts/run_flavour_analysis.py

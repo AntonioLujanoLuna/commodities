@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 
 from .adjusted_events import build_adjusted_event_tables
@@ -8,6 +9,7 @@ from .cold_phase_analysis import run_cold_phase_analysis
 from .config import project_root
 from .dataset import build_real_dataset
 from .dispersion_analysis import run_dispersion_analysis
+from .disruption_sources import audit_disruption_source_readiness
 from .dose_response_analysis import run_dose_response_analysis
 from .download import download_all
 from .endpoint_analysis import run_endpoint_diagnostics
@@ -511,6 +513,15 @@ def forecast_news() -> None:
             program_config_path=args.program_config,
         )
     )
+
+
+def disruption_readiness() -> None:
+    parser = argparse.ArgumentParser(
+        description="Audit public-source readiness for the W2 physical disruption chain."
+    )
+    parser.add_argument("--source-config", type=Path)
+    args = parser.parse_args()
+    print(json.dumps(audit_disruption_source_readiness(args.source_config), indent=2))
 
 
 def forecast_news_download() -> None:
