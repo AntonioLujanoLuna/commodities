@@ -1,0 +1,79 @@
+# W3: ENSO forecast revisions. Frozen 2026-09-08, before the stage was run.
+#
+# Every study in this literature, this one included, event-studies a realization:
+# it dates an onset and measures what happened afterwards. But ENSO is forecast
+# six to nine months ahead and those forecasts are public. If commodity markets
+# are even weakly efficient, an onset declaration is not news -- it is the
+# confirmation of something already priced -- and finding no abnormal return
+# after it is exactly what an efficient market with a real ENSO effect produces.
+#
+# That is a sufficient alternative explanation for most of this project's null
+# results, and nothing else in the repository distinguishes it from "there is no
+# effect". This contract tests the news instead of the weather.
+#
+# Both outcomes are publishable, which is the property this program has otherwise
+# lacked. A response to revisions but not to realizations is a market-efficiency
+# finding that explains the whole preceding null program. No response to either
+# is far stronger evidence against a material ENSO price effect than anything
+# currently in the repository, because it removes the "it was anticipated"
+# defence.
+provenance:
+  version: 1
+  authored_on: 2026-09-08
+  inference_scope: prespecified_primary_endpoint
+  program_register: config/findings_v3.yaml
+  workstream: W3_forecast_news
+
+treatment:
+  # The revision is the change between consecutive monthly issuances in the
+  # forecast probability of El Nino conditions FOR THE SAME TARGET SEASON. A
+  # difference across leads would confound the news with the passage of time.
+  source_probability: probability_el_nino
+  revision_basis: same_target_successive_issuances
+  primary_lead_months: 6
+  sensitivity_lead_months: [3, 9]
+  require_consecutive_monthly_issuances: true
+  minimum_issuances: 120
+
+design:
+  outcome: seasonal_adjusted_log_return
+  # Relative month zero is the month the forecast was issued. Monthly average
+  # prices mean part of that month is already determined when the forecast
+  # lands, so the following month is reported alongside rather than instead.
+  primary_relative_month: 0
+  secondary_relative_month: 1
+  controls: [calendar_month]
+  estimator: ordinary_least_squares
+  covariance: cluster_by_calendar_year
+  alternative: two_sided
+  minimum_observations: 100
+
+placebos:
+  # Under efficiency the news is already in the price, so a response to a
+  # revision the market saw one to three months ago should be zero. A non-zero
+  # lag coefficient means either the market is slow or the design has a
+  # mechanical artifact, and either way the contemporaneous estimate cannot be
+  # read as a news response.
+  lag_relative_months: [2, 3]
+  # This one must be zero. A response to NEXT month's revision is a pre-trend:
+  # it would mean the revision series is picking up something already in prices.
+  # It is the falsification that makes the contemporaneous estimate readable.
+  lead_relative_months: [-1]
+  lead_placebo_must_not_reject: true
+  void_stage_if_lead_placebo_rejects: true
+
+inference:
+  # Rademacher weights drawn once per replicate at the cluster level and shared
+  # across every commodity, so a replicate stays a single coherent alternative
+  # history, as everywhere else in this project.
+  reference_distribution: cluster_robust_wild_bootstrap
+  impose_null_on_residuals: true
+  replicates: 9999
+  random_seed: 20260908
+  fdr_alpha: 0.05
+  fdr_family: mechanism_candidates_only
+  family_statistic: maximum_absolute_t
+
+falsification:
+  negative_controls_must_not_reject: true
+  void_stage_if_controls_reject: true
