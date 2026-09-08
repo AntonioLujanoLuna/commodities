@@ -28,6 +28,22 @@
 > validation inputs are acquired. Its current forecast run is explicitly pseudo-out-of-sample,
 > and its regional-mechanism and licensed-futures gates remain closed until their required data
 > exist; an input schema is not counted as empirical evidence.
+>
+> A **v3 findings program** is now specified and partly implemented. Its premise is that what
+> remains after the placebo-treatment correction is not a control problem but a power problem
+> with a specific shape: the frozen design reduces each commodity to one number per episode, and
+> there are seventeen episodes in sixty-five years. `config/findings_v3.yaml` registers how many
+> primary tests the program contributes before any of them runs, which is the program-level
+> multiplicity accounting the design review asked for. Five workstreams: a dispersion endpoint
+> that uses every commodity-month rather than one number per episode (W1); a cold-phase
+> disruption endpoint with per-commodity directions committed to in advance, plus a strict
+> interface for its physical chain (W2); a forecast-revision news study, which tests whether
+> markets respond to ENSO *news* rather than to onsets they could already see coming (W3); a
+> frozen forward-curve estimand gated on licensed futures data (W4); and an
+> Eastern/Central-Pacific split that reports its own minimum detectable effect before any
+> estimate (W5). **No v3 stage has been run against a real-data snapshot**, W3's issuance archive
+> is not yet acquired, and W4 produces no number by construction. See
+> [the 2026-09-08 program entry](reports/log/2026-09-08-v3-findings-program.md).
 
 The compact, hash-grounded interpretation of the latest completed run is in
 [`reports/current_results.md`](reports/current_results.md), which is overwritten on
@@ -107,6 +123,11 @@ uv run python scripts/run_panel_analysis.py
 uv run python scripts/run_specification_curve.py
 uv run python scripts/run_forecast_analysis.py
 uv run python scripts/run_program_timing_null.py
+uv run python scripts/run_dispersion.py
+uv run python scripts/run_cold_phase.py
+uv run python scripts/download_flavour_data.py
+uv run python scripts/build_flavour_dataset.py
+uv run python scripts/run_flavour_analysis.py
 uv run python scripts/build_report.py
 uv run python scripts/build_publication.py
 ```
