@@ -1,0 +1,19 @@
+# Niño 3 and Niño 4 region SST indices, used only to classify existing warm
+# episodes into Eastern-Pacific and Central-Pacific flavours. They are never
+# treatments, never controls and never regressors, and they do not enter the
+# frozen primary contract. See config/flavour.yaml.
+sources:
+  nino3:
+    label: NOAA PSL Niño 3 region (5N-5S, 150W-90W) SST anomaly, monthly
+    url: https://psl.noaa.gov/data/correlation/nina3.data
+    landing_page: https://psl.noaa.gov/data/climateindices/list/
+    filename: psl_nino3.data
+    format: psl_index
+    minimum_bytes: 4000
+  nino4:
+    label: NOAA PSL Niño 4 region (5N-5S, 160E-150W) SST anomaly, monthly
+    url: https://psl.noaa.gov/data/correlation/nina4.data
+    landing_page: https://psl.noaa.gov/data/climateindices/list/
+    filename: psl_nino4.data
+    format: psl_index
+    minimum_bytes: 4000
